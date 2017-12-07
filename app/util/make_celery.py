@@ -1,4 +1,15 @@
 from celery import Celery
+from kombu.serialization import register
+from .json_encoder import my_loads, my_dumps
+
+# Set the JSON encoder for Celery
+register(
+    'myjson',
+    my_dumps,
+    my_loads,
+    content_type='application/x-myjson',
+    content_encoding='utf-8'
+)
 
 
 def make_celery(app):
