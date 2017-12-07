@@ -9,7 +9,7 @@ __pycache__/
 # pycharm configurations
 .idea/
 
-# Distribution / packaggit puing
+# Distribution / packaging
 .Python
 env/
 build/
