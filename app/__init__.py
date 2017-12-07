@@ -1,8 +1,8 @@
 from __future__ import absolute_import
+
 from app.util import Flask, make_celery, AlchemyEncoder
 
 
-# store private information in instance
 app = Flask(
     __name__,
     instance_relative_config=True,
@@ -11,6 +11,9 @@ app = Flask(
     static_folder='static',
     static_url_path='/static'
 )
+
+# Settings
+app.config.from_object('app.celeryconfig.Config')
 
 
 # Set the json encoder

@@ -2,7 +2,6 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from datetime import datetime
 from dateutil import parser
 from flask import json
-from kombu.serialization import register
 
 
 CONVERTERS = {
@@ -52,12 +51,3 @@ def my_dumps(obj):
 def my_loads(obj):
     return json.loads(obj, object_hook=object_hook)
 
-
-# Set the JSON encoder for Celery
-register(
-    'myjson',
-    my_dumps,
-    my_loads,
-    content_type='application/x-myjson',
-    content_encoding='utf-8'
-)
