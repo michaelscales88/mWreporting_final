@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from app.util import Flask, make_celery, AlchemyEncoder
 
 
@@ -16,11 +14,15 @@ app = Flask(
 app.config.from_object('app.celeryconfig.Config')
 app.config.from_object('app.default_config.DevelopmentConfig')
 
+
 # Set the json encoder
 app.json_encoder = AlchemyEncoder
 
 
 # Init task queue
 celery = make_celery(app)
+from app.tasks import test
 
+
+# Import views
 from .view import *
