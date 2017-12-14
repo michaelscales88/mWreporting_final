@@ -33,8 +33,8 @@ class Config(object):
     CELERY_RESULT_SERIALIZER = 'myjson'
 
     """
-    Scheduler
-    """
+        Scheduler
+        """
     CELERYBEAT_SCHEDULE = {
         'test': {
             'task': 'app.tasks.test',
