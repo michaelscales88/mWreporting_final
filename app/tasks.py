@@ -10,4 +10,4 @@ def test(arg):
 @celery.task
 def send_async_email(msg):
     """Background task to send an email with Flask-Mail."""
-    # mail.send(msg)
+    mail.send(msg)

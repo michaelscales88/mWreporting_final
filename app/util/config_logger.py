@@ -1,5 +1,14 @@
 import logging
-from logging.handlers import RotatingFileHandler, SMTPHandler
+from logging.handlers import RotatingFileHandler
+
+
+def init_logging(app, mail):
+    mail_handler = get_mail_handler(mail)
+    file_handler = get_handler('tmp/app.log')
+    server_logger = get_logger('werkzeug')
+    server_logger.addHandler(file_handler)
+    app.logger.addHandler(mail_handler)
+    app.logger.addHandler(file_handler)
 
 
 def get_handler(log_filename):
