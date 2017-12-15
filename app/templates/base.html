@@ -1,73 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
+{# Use bootstrap page scaffolding
+#}
+{%- extends "bootstrap/base.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    {% if title %}
-        <title>{{ title }} - mW Reporting</title>
-    {% else %}
-        <title>mW Reporting</title>
-    {% endif %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{% block head_description %}{% endblock %}">
-    <meta name="author" content="{% block head_author %}{% endblock %}">
+{% block title %}
+{% if title %}
+   {{ title }} - mW Reporting
+{% else %}
+    mW Reporting
+{% endif %}
+{% endblock %}
 
-    <link rel="shortcut icon"
-          href="{{ url_for('static', filename='img/favicon.ico') }}">
+{# IE compatibility
+#}
+{% import "bootstrap/fixes.html" as fixes %}
 
-    <!-- Le Style
-    ================================================== -->
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+<link rel="shortcut icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}">
+{%- endblock %}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+{% block styles -%}
+{{super()}}
+<link rel="stylesheet" type="text/css"
+      href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+{% block navbar %}
+{{nav.main_nav.render()}}
+{% endblock %}
 
-    <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
-    <!-- Allows page specific CSS -->
-    {% block extracss %}{% endblock %}
-</head>
-
-<body>
-
-    <!-- Navigation bar for all base pages -->
-{#    {% include 'navigation/navigation.html' %}#}
-
-    <!-- Page specific content -->
-    {% block content %}{% endblock %}
-
-    <!-- Le Javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-
-    <!-- Need jquery for Bootstrap JS-->
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-            crossorigin="anonymous"></script>
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-            crossorigin="anonymous"></script>
-
-    {% block extrajs %}{% endblock %}
-
-</body>
-
-
-<footer class="navbar transparent navbar-inverse navbar-fixed-bottom">
-    <div class="container-fluid">
-        <!-- Page specific footer -->
-        {% block footer %}{% endblock %}
-
-        <!-- Alerts should popup from the bottom -->
-        {% include 'message.html' %}
-    </div>
-</footer>
-
-</html>
+{#{% block footer %}{% include 'message.html' %}{% endblock %}#}

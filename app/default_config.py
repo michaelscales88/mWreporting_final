@@ -8,7 +8,7 @@ class Config(object):
     PACKAGEDIR = os.path.dirname(BASEDIR)
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
-    _BASE_URL = '/'
+    BOOTSTRAP_SERVE_LOCAL = True
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'

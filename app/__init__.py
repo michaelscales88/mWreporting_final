@@ -1,6 +1,7 @@
 from flask import render_template, url_for, redirect
 from flask_mail import Mail
-from app.util import Flask, make_celery, AlchemyEncoder
+from flask_bootstrap import Bootstrap
+from app.util import Flask, make_celery, AlchemyEncoder, get_nav
 
 
 app = Flask(
@@ -21,6 +22,8 @@ app.config.from_object('app.default_config.DevelopmentConfig')
 # Services
 mail = Mail(app)
 celery = make_celery(app)
+Bootstrap(app)
+nav = get_nav(app)
 
 
 @app.before_first_request
