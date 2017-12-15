@@ -13,8 +13,8 @@ class Config(object):
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'mindwirelessreporting@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '7b!2gX4bD3')
 
     # administrator list
     ADMINS = ['mindwirelessreporting@gmail.com', 'michael.scales@g.austincc.edu']

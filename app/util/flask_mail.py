@@ -1,5 +1,6 @@
 # Credit to Doekman https://gist.github.com/doekman/d24e233035c0a193d4890eaf9703e220
 import logging
+from app.tasks import send_async_email
 
 
 def _has_newline(line):
