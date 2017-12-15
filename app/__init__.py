@@ -13,7 +13,8 @@ app = Flask(
 
 # Settings
 app.config.from_object('app.celery_config.Config')
-app.config.from_object('app.default_config.DevelopmentConfig')
+# app.config.from_object('app.default_config.DevelopmentConfig')
+app.config.from_object('app.default_config.ProductionConfig')
 
 
 # Services
