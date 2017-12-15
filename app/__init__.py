@@ -37,9 +37,10 @@ app.json_encoder = AlchemyEncoder
 from app.tasks import test
 
 
+# Modules
+from .home import home_blueprint
+app.register_blueprint(home_blueprint)
+
+
 # Main views
 from .view import *
-
-
-# Modules
-

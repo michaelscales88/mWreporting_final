@@ -2,13 +2,12 @@ from flask import render_template, g, current_app, url_for, redirect
 from app import app
 
 
-@app.route('/')
-def index():
-    # User module is accessed through the navigation bar
-    # return redirect(
-    #     url_for('index')
-    # )
-    return "Hello World"
+# @app.route('/')
+# def index():
+#     # User module is accessed through the navigation bar
+#     return redirect(
+#         url_for(landing_page)
+#     )
 
 
 @app.errorhandler(404)

@@ -8,6 +8,8 @@ class Config(object):
     PACKAGEDIR = os.path.dirname(BASEDIR)
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
+    _BASE_URL = '/'
+
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 465
