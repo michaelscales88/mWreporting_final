@@ -23,15 +23,10 @@ celery = make_celery(app)
 
 
 @app.before_first_request
-def setup_logging():
+def startup_setup():
     if not app.debug:
-        from app.util import get_mail_handler, get_logger, get_handler
-        mail_handler = get_mail_handler(mail)
-        file_handler = get_handler('tmp/app.log')
-        server_logger = get_logger('werkzeug')
-        server_logger.addHandler(file_handler)
-        app.logger.addHandler(mail_handler)
-        app.logger.addHandler(file_handler)
+        from app.util import init_logging
+        init_logging(app, mail)
 
 
 # Set the json encoder
