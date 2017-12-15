@@ -32,9 +32,13 @@ class Config(object):
     CELERY_TASK_SERIALIZER = 'myjson'
     CELERY_RESULT_SERIALIZER = 'myjson'
 
+    CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
+        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule.db'
+    )
+
     """
-        Scheduler
-        """
+    Scheduler
+    """
     CELERYBEAT_SCHEDULE = {
         'test': {
             'task': 'app.tasks.test',
