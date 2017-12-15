@@ -3,9 +3,7 @@ from flask import Blueprint, abort, render_template
 
 home_blueprint = Blueprint(
     'home', __name__,
-    template_folder='templates',
-    static_folder='static',
-    static_url_path='/home/static'
+    template_folder='templates'
 )
 _BASE_URL = '/home'
 

@@ -31,4 +31,8 @@
 {{nav.main_nav.render()}}
 {% endblock %}
 
-{#{% block footer %}{% include 'message.html' %}{% endblock %}#}
+{% block footer %}
+    <div class="container">
+    {% include 'message.html' %}
+    </div>
+{% endblock %}
