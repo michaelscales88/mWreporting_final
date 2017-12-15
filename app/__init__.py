@@ -1,3 +1,4 @@
+from flask import render_template, url_for, redirect
 from flask_mail import Mail
 from app.util import Flask, make_celery, AlchemyEncoder
 
@@ -42,5 +43,19 @@ from .home import home_blueprint
 app.register_blueprint(home_blueprint)
 
 
-# Main views
-from .view import *
+# Routes
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """Render homepage"""
+    return redirect(url_for('home.serve_pages'))
+
+
+# Error pages
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html', title='Page Not Found'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html', title='Resource Error'), 500
