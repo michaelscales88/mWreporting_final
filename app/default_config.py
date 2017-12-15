@@ -27,5 +27,4 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     USE_DEBUGGER = True
-    USE_RELOADER = True
 
