@@ -13,11 +13,11 @@ class Config(object):
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
     # administrator list
-    ADMINS = ['your-gmail-username@gmail.com']
+    ADMINS = ['mindwirelessreporting@gmail.com', 'michael.scales@g.austincc.edu']
 
 
 class ProductionConfig(Config):
