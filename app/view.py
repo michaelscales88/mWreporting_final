@@ -5,4 +5,5 @@ from app import app
 @app.route('/', methods=['GET', 'POST'])
 def index():
     # User module is accessed through the navigation bar
+    raise TypeError()
     return "Hello World"

@@ -1,5 +1,5 @@
 from flask_mail import Mail
-from app.util import Flask, make_celery, AlchemyEncoder, get_logger, get_handler
+from app.util import Flask, make_celery, AlchemyEncoder
 
 
 app = Flask(
@@ -13,21 +13,24 @@ app = Flask(
 
 # Settings
 app.config.from_object('app.celery_config.Config')
-app.config.from_object('app.default_config.DevelopmentConfig')
-
-
-# Logger
-@app.before_first_request
-def setup_logging():
-    if not app.debug:
-        file_handler = get_handler('tmp/app.log')
-        server_logger = get_logger('werkzeug')
-        server_logger.addHandler(file_handler)
-        app.logger.addHandler(file_handler)
+# app.config.from_object('app.default_config.DevelopmentConfig')
+app.config.from_object('app.default_config.ProductionConfig')
 
 
 # Services
 mail = Mail(app)
+
+
+@app.before_first_request
+def setup_logging():
+    if not app.debug:
+        from app.util import get_mail_handler, get_logger, get_handler
+        mail_handler = get_mail_handler(mail)
+        file_handler = get_handler('tmp/app.log')
+        server_logger = get_logger('werkzeug')
+        server_logger.addHandler(file_handler)
+        app.logger.addHandler(mail_handler)
+        app.logger.addHandler(file_handler)
 
 
 # Set the json encoder
