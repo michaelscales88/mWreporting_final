@@ -19,6 +19,7 @@ app.config.from_object('app.default_config.DevelopmentConfig')
 
 # Services
 mail = Mail(app)
+celery = make_celery(app)
 
 
 @app.before_first_request
@@ -37,10 +38,13 @@ def setup_logging():
 app.json_encoder = AlchemyEncoder
 
 
-# Init tasks
-celery = make_celery(app)
+# Celery tasks
 from app.tasks import test
 
 
-# Import views
+# Main views
 from .view import *
+
+
+# Modules
+
