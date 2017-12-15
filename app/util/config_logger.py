@@ -1,5 +1,5 @@
 import logging
-from logging.handlers import RotatingFileHandler, SMTPHandler
+from logging.handlers import RotatingFileHandler
 
 
 def get_handler(log_filename):
