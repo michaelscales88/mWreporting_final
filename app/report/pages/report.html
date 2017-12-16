@@ -1,11 +1,56 @@
 <!-- Index to blueprint index pages -->
 {% extends 'base.html' %}
-
+{%- block styles %}
+{{ super() }}
+<link href="{{bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp')}}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="jumbotron">
-      <h1>Reports</h1>
+            <h1>Reports</h1>
         </div>
     </div>  <!-- /.container -->
+    <div class="container">
+        <div class='col-md-5'>
+            <div class="form-group">
+                <div class="input-group input-group-lg date" id="datetime-start">
+                    <input type="text" class="form-control" placeholder="Start from..." aria-describedby="sizing-addon1">
+                    <span class="input-group-addon" id="sizing-addon1">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class='col-md-5'>
+            <div class="form-group">
+                <div class="input-group input-group-lg date" id="datetime-end">
+                    <input type="text" class="form-control" placeholder="Go to..." aria-describedby="sizing-addon1">
+                    <span class="input-group-addon" id="sizing-addon1">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+<script src="{{bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true)}}" rel="stylesheet"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#datetime-start').datetimepicker();
+        $('#datetime-end').datetimepicker({
+            useCurrent: false //Important! See issue #1075
+        });
+        $("#datetime-start").on("dp.change", function (e) {
+            $('#datetime-end').data("DateTimePicker").minDate(e.date);
+        });
+        $("#datetime-end").on("dp.change", function (e) {
+            $('#datetime-start').data("DateTimePicker").maxDate(e.date);
+        });
+    });
+</script>
 {% endblock %}

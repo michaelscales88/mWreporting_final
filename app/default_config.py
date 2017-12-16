@@ -9,6 +9,7 @@ class Config(object):
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
     BOOTSTRAP_SERVE_LOCAL = True
+    BOOTSTRAP_USE_MINIFIED = False
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'

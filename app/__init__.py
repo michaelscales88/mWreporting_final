@@ -1,5 +1,6 @@
 from flask import render_template, url_for, redirect
 from flask_mail import Mail
+from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from app.util import Flask, make_celery, AlchemyEncoder, get_nav
 
@@ -24,10 +25,13 @@ mail = Mail(app)
 celery = make_celery(app)
 Bootstrap(app)
 nav = get_nav(app)
+moment = Moment(app)
 
 
 @app.before_first_request
 def startup_setup():
+    from app.util import add_cdns
+    add_cdns(app)
     if not app.debug:
         from app.util import init_logging
         init_logging(app, mail)
