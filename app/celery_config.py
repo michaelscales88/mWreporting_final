@@ -41,7 +41,7 @@ class Config(object):
     """
     CELERYBEAT_SCHEDULE = {
         'test': {
-            'task': 'app.tasks.test',
+            'task': 'app.util.tasks.test',
             'schedule': crontab(minute='*/1'),
             'args': ('test',)
         },

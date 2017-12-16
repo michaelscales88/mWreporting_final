@@ -1,7 +1,7 @@
 # Credit to Doekman https://gist.github.com/doekman/d24e233035c0a193d4890eaf9703e220
 # Added async email integration with celery
 import logging
-from app.tasks import send_async_email
+from .tasks import send_async_email
 
 
 def _has_newline(line):

@@ -38,7 +38,7 @@ app.json_encoder = AlchemyEncoder
 
 
 # Celery tasks
-from app.tasks import test
+from app.util.tasks import test
 
 
 # Modules
