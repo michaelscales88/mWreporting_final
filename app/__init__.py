@@ -43,7 +43,10 @@ from app.tasks import test
 
 # Modules
 from .home import home_blueprint
+from .report import report_blueprint
+
 app.register_blueprint(home_blueprint)
+app.register_blueprint(report_blueprint)
 
 
 # Routes
