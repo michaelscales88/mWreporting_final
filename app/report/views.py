@@ -1,4 +1,5 @@
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, abort, render_template, jsonify
+from flask_restful import Resource
 
 
 report_blueprint = Blueprint(
@@ -16,3 +17,9 @@ def serve_pages(page):
         return render_template('report.html', title='Reports')
     else:
         return abort(404)
+
+
+class ReportApi(Resource):
+
+    def get(self):
+        return {'test': 'Test Successful'}

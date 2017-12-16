@@ -6,7 +6,8 @@ def get_nav(app):
     nav = Nav(app)
     nav.register_element(
         'main_nav', Navbar(
-            View('Home', 'index')
+            View('Home', 'index'),
+            View('Report', 'report.serve_pages')
         )
     )
     return nav

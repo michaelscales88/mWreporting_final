@@ -1,1 +1,1 @@
-from .views import report_blueprint
+from .views import report_blueprint, ReportApi
