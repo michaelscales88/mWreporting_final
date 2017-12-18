@@ -1,11 +1,16 @@
 from flask import Blueprint, abort, render_template, jsonify
 from flask_restful import Resource
+from flask_restful.reqparse import RequestParser
+
+
 from app.util.tasks import fetch_report
 
 
 report_blueprint = Blueprint(
     'report', __name__,
-    template_folder='pages'
+    template_folder='pages',
+    static_folder='static',
+    static_url_path='/report/static'
 )
 _BASE_URL = '/report'
 
@@ -15,7 +20,13 @@ _BASE_URL = '/report'
 @report_blueprint.route(_BASE_URL + '/<page>')
 def serve_pages(page):
     if page == "report.html":
-        return render_template('report.html', title='Reports')
+        return render_template(
+            'report.html',
+            title='Reports',
+            iDisplayLength=50,
+            api='reportapi',
+            columns=('report_id', 'end_date', 'start_date', 'test')
+        )
     else:
         return abort(404)
 
@@ -23,6 +34,13 @@ def serve_pages(page):
 class ReportApi(Resource):
 
     def get(self):
+        print('Hit API')
+        parser = RequestParser()
+        parser.add_argument('start', type=int, location='args')
+        parser.add_argument('draw', type=int, location='args')
+        parser.add_argument('length', type=int, location='args')
+        args = parser.parse_args()
+
         async_result = fetch_report.delay('Today', 'Yesterday', 1)
         try:
             result = async_result.get(timeout=5, propagate=False)
@@ -30,6 +48,7 @@ class ReportApi(Resource):
             result = None
         status = async_result.status
         traceback = async_result.traceback
+        print(result)
         if isinstance(result, Exception):
             return jsonify(
                 {
@@ -40,8 +59,10 @@ class ReportApi(Resource):
             )
         else:
             return jsonify(
-                {
-                    'status': status,
-                    'result': result,
-                }
+                status=status,
+                result=result,
+                draw=args['draw'],
+                recordsTotal=1,
+                recordsFiltered=1,
+                data=result
             )

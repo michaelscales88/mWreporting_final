@@ -4,6 +4,7 @@ from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from flask_restful import Api
 
+
 from app.util import Flask, make_celery, AlchemyEncoder, get_nav
 
 
@@ -57,7 +58,7 @@ from .report import report_blueprint, ReportApi
 app.register_blueprint(home_blueprint)
 app.register_blueprint(report_blueprint)
 
-api.add_resource(ReportApi, '/report_api')
+api.add_resource(ReportApi, '/reportapi')
 
 
 # Routes
