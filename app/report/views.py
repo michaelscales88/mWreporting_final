@@ -3,7 +3,7 @@ from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
-from app.util.tasks import fetch_report
+from .tasks import fetch_report
 
 
 report_blueprint = Blueprint(
@@ -13,6 +13,7 @@ report_blueprint = Blueprint(
     static_url_path='/report/static'
 )
 _BASE_URL = '/report'
+TEMP_HEADER_ORDER = ('report_id', 'end_date', 'start_date', 'test')
 
 
 @report_blueprint.route(_BASE_URL, defaults={'page': 'report.html'})
@@ -25,7 +26,7 @@ def serve_pages(page):
             title='Reports',
             iDisplayLength=50,
             api='reportapi',
-            columns=('report_id', 'end_date', 'start_date', 'test')
+            columns=TEMP_HEADER_ORDER
         )
     else:
         return abort(404)
@@ -48,7 +49,10 @@ class ReportApi(Resource):
             result = None
         status = async_result.status
         traceback = async_result.traceback
-        print(result)
+        data = []
+        for r in result:
+            data.append([r.get(header, '') for header in TEMP_HEADER_ORDER])
+        print(data)
         if isinstance(result, Exception):
             return jsonify(
                 {
@@ -64,5 +68,5 @@ class ReportApi(Resource):
                 draw=args['draw'],
                 recordsTotal=1,
                 recordsFiltered=1,
-                data=result
+                data=data
             )
