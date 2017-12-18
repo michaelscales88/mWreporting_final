@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template, jsonify
+from flask import Blueprint, abort, render_template, jsonify, current_app
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
@@ -24,7 +24,7 @@ def serve_pages(page):
         return render_template(
             'report.html',
             title='Reports',
-            iDisplayLength=50,
+            iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='reportapi',
             columns=TEMP_HEADER_ORDER
         )

@@ -8,6 +8,8 @@ class Config(object):
     PACKAGEDIR = os.path.dirname(BASEDIR)
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
+    ROWS_PER_PAGE = 50
+
     BOOTSTRAP_SERVE_LOCAL = True
     BOOTSTRAP_USE_MINIFIED = False
 

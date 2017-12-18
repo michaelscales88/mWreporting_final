@@ -1,5 +1,4 @@
 import os
-from celery.schedules import crontab
 
 
 class Config(object):
@@ -34,13 +33,9 @@ class Config(object):
         'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule.db'
     )
 
+    IMPORTS = ('app.report.tasks', 'app.util.tasks')
+
     """
     Scheduler
     """
-    CELERYBEAT_SCHEDULE = {
-        'test': {
-            'task': 'app.util.tasks.test',
-            'schedule': crontab(minute='*/1'),
-            'args': ('test',)
-        },
-    }
+    CELERYBEAT_SCHEDULE = {}

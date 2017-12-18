@@ -42,14 +42,15 @@ def startup_setup():
         init_logging(app, mail)
 
 
-# Set the json encoder
-# app.json_encoder = AlchemyEncoder
-
-# Tasks sync and async
-from app.util.tasks import test, serialization_register_json
-
 # Set JSON serializer for the application
+from app.util.tasks import serialization_register_json
 serialization_register_json()
+
+
+# Init task stuff
+from app.report.tasks import add_scheduled_tasks as add_scheduled_report_tasks
+add_scheduled_report_tasks(app)
+
 
 # Modules
 from .home import home_blueprint
