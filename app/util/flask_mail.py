@@ -58,12 +58,14 @@ class FlaskMailHTMLFormatter(logging.Formatter):
 # see: https://github.com/python/cpython/blob/3.6/Lib/logging/__init__.py (class Handler)
 
 class FlaskMailHandler(logging.Handler):
-    def __init__(self, mailer, subject_template, level=logging.NOTSET):
+    def __init__(self, mailer, subject_template, level=logging.NOTSET, a_handler=send_async_email):
+        # Assumes mailer.app.conf[0] is the FROM: admin
         logging.Handler.__init__(self, level)
         self.mailer = mailer
         self.send_to = mailer.app.config['ADMINS']
         self.subject_template = subject_template
         self.html_formatter = None
+        self.a_handler = a_handler
 
     def setFormatter(self, text_fmt, html_fmt=None):
         """
@@ -102,7 +104,11 @@ class FlaskMailHandler(logging.Handler):
         if rv:
             self.acquire()
             try:
-                self.emit(record)
+                if self.a_handler:
+                    # Added async support
+                    self.a_handler(self.emit(record))
+                else:
+                    self.emit(record)
             finally:
                 self.release()
         return rv
@@ -110,13 +116,11 @@ class FlaskMailHandler(logging.Handler):
     def emit(self, record):
         try:
             from flask_mail import Message
-            for recip in self.send_to:
-                print(recip)
             msg = Message(self.get_subject(record), recipients=self.send_to, sender=self.send_to[0])
             if self.formatter:
                 msg.body = self.format(record)
             if self.html_formatter:
                 msg.html = self.html_formatter.format(record)
-            send_async_email(msg)
+            self.mailer.send(msg)
         except Exception:
             self.handleError(record)

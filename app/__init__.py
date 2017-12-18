@@ -20,8 +20,8 @@ api = Api(app)
 
 # Settings
 app.config.from_object('app.celery_config.Config')
-app.config.from_object('app.default_config.DevelopmentConfig')
-# app.config.from_object('app.default_config.ProductionConfig')
+# app.config.from_object('app.default_config.DevelopmentConfig')
+app.config.from_object('app.default_config.ProductionConfig')
 
 
 # Services
@@ -43,7 +43,6 @@ def startup_setup():
 
 # Set the json encoder
 app.json_encoder = AlchemyEncoder
-
 
 # Celery tasks
 from app.util.tasks import test
