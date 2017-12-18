@@ -23,7 +23,25 @@ def serve_pages(page):
 class ReportApi(Resource):
 
     def get(self):
-        print('i made the call')
-        results = fetch_report.delay('Today', 'Yesterday', 1)
-        print(results)
-        return results
+        async_result = fetch_report.delay('Today', 'Yesterday', 1)
+        try:
+            result = async_result.get(timeout=5, propagate=False)
+        except TimeoutError:
+            result = None
+        status = async_result.status
+        traceback = async_result.traceback
+        if isinstance(result, Exception):
+            return jsonify(
+                {
+                    'status': status,
+                    'error': str(result),
+                    'traceback': traceback,
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    'status': status,
+                    'result': result,
+                }
+            )

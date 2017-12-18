@@ -28,9 +28,7 @@ class Config(object):
     CELERY_BROKER_URL = os.getenv('BROKER_URL', DEFAULT_BROKER_URL)
     CELERY_RESULT_BACKEND = os.getenv('BACKEND_URL', DEFAULT_CELERY_BACKEND)
 
-    CELERY_ACCEPT_CONTENT = ['myjson']
-    CELERY_TASK_SERIALIZER = 'myjson'
-    CELERY_RESULT_SERIALIZER = 'myjson'
+    CELERY_RESULT_SERIALIZER = 'json'
 
     CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
         'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule.db'

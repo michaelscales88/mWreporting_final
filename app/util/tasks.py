@@ -1,3 +1,5 @@
+from kombu import serialization
+
 from app import celery, mail
 
 
@@ -26,3 +28,29 @@ def fetch_report(start_date, end_date, report_id=None):
         'end_date': end_date,
         'report_id': report_id
     }
+
+
+def serialization_register_json():
+    """Register a encoder/decoder for JSON serialization."""
+
+    from anyjson import loads as json_loads, dumps as json_dumps
+
+    def _loads(obj):
+        if isinstance(obj, serialization.bytes_t):
+            obj = obj.decode()
+        # Make this the custom loader
+        obj = json_loads(obj)
+        if hasattr(obj, 'get') and obj.get('traceback') is not None:
+            try:
+                exc_type = obj['result']['exc_type']
+                exc_message = obj['result']['exc_message']
+            except KeyError:
+                pass
+            else:
+                exc_type = getattr(obj, exc_type)
+                obj['result'] = exc_type(exc_message)
+        return obj
+
+    serialization.registry.register('json', json_dumps, _loads,
+                                    content_type='application/json',
+                                    content_encoding='utf-8')

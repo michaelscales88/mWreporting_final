@@ -42,11 +42,13 @@ def startup_setup():
 
 
 # Set the json encoder
-app.json_encoder = AlchemyEncoder
+# app.json_encoder = AlchemyEncoder
 
-# Celery tasks
-from app.util.tasks import test
+# Tasks sync and async
+from app.util.tasks import test, serialization_register_json
 
+# Set JSON serializer for the application
+serialization_register_json()
 
 # Modules
 from .home import home_blueprint
