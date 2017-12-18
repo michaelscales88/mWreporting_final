@@ -27,17 +27,18 @@ class AlchemyEncoder(json.JSONEncoder):
         # Datetime
         if isinstance(o, datetime):
             return {"val": o.isoformat(), "_spec_type": "__datetime__"}
+        print('encoder', type(o))
         return json.JSONEncoder.default(self, o)
 
 
-def object_hook(obj):
+def object_hook(o):
     """Convert json data from its serialized value"""
-    _spec_type = obj.get('_spec_type')
+    _spec_type = o.get('_spec_type')
     if not _spec_type:
-        return obj
-
+        return o
+    print('decoder', type(o))
     if _spec_type in CONVERTERS:
-        return CONVERTERS[_spec_type](obj['val'])
+        return CONVERTERS[_spec_type](o['val'])
     else:
         raise Exception('Unknown {}'.format(_spec_type))
 

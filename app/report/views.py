@@ -1,5 +1,6 @@
 from flask import Blueprint, abort, render_template, jsonify
 from flask_restful import Resource
+from app.util.tasks import fetch_report
 
 
 report_blueprint = Blueprint(
@@ -22,4 +23,7 @@ def serve_pages(page):
 class ReportApi(Resource):
 
     def get(self):
-        return {'test': 'Test Successful'}
+        print('i made the call')
+        results = fetch_report.delay('Today', 'Yesterday', 1)
+        print(results)
+        return results
