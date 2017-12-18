@@ -20,8 +20,7 @@ api = Api(app)
 
 # Settings
 app.config.from_object('app.celery_config.Config')
-# app.config.from_object('app.default_config.DevelopmentConfig')
-app.config.from_object('app.default_config.ProductionConfig')
+app.config.from_object('app.default_config.DevelopmentConfig')
 
 
 # Services
@@ -37,6 +36,7 @@ def startup_setup():
     from app.util import add_cdns
     add_cdns(app)
     if not app.debug:
+        app.config.from_object('app.default_config.ProductionConfig')
         from app.util import init_logging
         init_logging(app, mail)
 
