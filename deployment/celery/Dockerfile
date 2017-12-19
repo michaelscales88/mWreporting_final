@@ -1,6 +1,9 @@
 FROM flask_base:latest
 MAINTAINER Michael Scales "michael.scales@g.austincc.edu"
 
-ENV base_dir /var/www/app
+WORKDIR /var/www/app/
 
-WORKDIR ${base_dir}
+# Actual code is mounted as a volume
+COPY celery/run_beat.sh /var/www/app/
+COPY celery/run_flower.sh /var/www/app/
+COPY celery/run_worker.sh /var/www/app/

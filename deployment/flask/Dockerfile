@@ -1,16 +1,13 @@
 FROM flask_base:latest
 MAINTAINER Michael Scales "michael.scales@g.austincc.edu"
 
-ENV base_dir /var/www/
-ENV app_dir /var/www/app/
-
-RUN mkdir ${base_dir}
-RUN mkdir ${app_dir}
+RUN mkdir /var/www/
+RUN mkdir /var/www/app/
 
 # Actual code is mounted as a volume
-COPY flask/uwsgi.ini ${app_dir}
-COPY flask/wsgi.py ${app_dir}
-COPY flask/run.sh ${app_dir}
+COPY flask/uwsgi.ini /var/www/app/
+COPY flask/wsgi.py /var/www/app/
+COPY flask/run.sh /var/www/app/
 
 # Set entrypoint directory
-WORKDIR ${app_dir}
+WORKDIR /var/www/app

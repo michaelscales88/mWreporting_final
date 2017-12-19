@@ -11,8 +11,10 @@ services:
       - ../app:/var/www/app/app
       - ../database:/var/www/app/database
       - ../tmp:/var/www/tmp
+    ports:
+      - "5000:5000"
 #    command: uwsgi --ini uwsgi.ini
-    command: ./run
+    command: sh /var/www/app/run.sh
     restart: always
 
 #  nginx:
@@ -35,24 +37,6 @@ services:
     env_file:
       - ./flask.env
 
-#  flower:
-#    build:
-#      context: .
-#      dockerfile: ./celery/Dockerfile
-#    environment:
-#      DISCOVER_RABBITMQ: "true"
-#    depends_on:
-#      - rabbit
-#    links:
-#      - website
-#      - rabbit
-#    volumes_from:
-#      - website:ro
-#    ports:
-#      - "5555:5555"
-#    command: flower --config flower_config.py
-#    restart: always
-
   celeryworker:
     build:
       context: .
@@ -63,10 +47,7 @@ services:
       - website
     depends_on:
       - rabbit
-    links:
-      - website
-      - rabbit
-    command: ./run_worker
+    command: sh /var/www/app/run_worker.sh
 
   celerybeat:
     build:
@@ -78,7 +59,20 @@ services:
       - website
     depends_on:
       - rabbit
-    links:
-      - website
-      - rabbit
-    command: ./run_beat
+    command: sh /var/www/app/run_beat.sh
+
+  flower:
+      build:
+        context: .
+        dockerfile: ./celery/Dockerfile
+      env_file:
+        - ./flask.env
+      volumes_from:
+        - website
+      depends_on:
+        - rabbit
+        - celerybeat
+        - celeryworker
+      ports:
+      - "5555:5555"
+      command: sh /var/www/app/run_flower.sh
