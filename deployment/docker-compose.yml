@@ -8,13 +8,12 @@ services:
     env_file:
       - ./flask.env
     volumes:
-      - ../app:/var/www/app/app
-      - ../database:/var/www/app/database
+      - ../app:/var/www/app
       - ../tmp:/var/www/tmp
     ports:
       - "5000:5000"
 #    command: uwsgi --ini uwsgi.ini
-    command: sh /var/www/app/run.sh
+    command: sh /var/www/run.sh
     restart: always
 
 #  nginx:
@@ -47,7 +46,7 @@ services:
       - website
     depends_on:
       - rabbit
-    command: sh /var/www/app/run_worker.sh
+    command: sh /var/www/run_worker.sh
 
   celerybeat:
     build:
@@ -59,7 +58,7 @@ services:
       - website
     depends_on:
       - rabbit
-    command: sh /var/www/app/run_beat.sh
+    command: sh /var/www/run_beat.sh
 
   flower:
       build:
@@ -75,10 +74,10 @@ services:
         - celeryworker
       ports:
       - "5555:5555"
-      command: sh /var/www/app/run_flower.sh
+      command: sh /var/www/run_flower.sh
 
   postgres:
     image: postgres:9.4
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 

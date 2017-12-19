@@ -2,7 +2,7 @@ import os
 
 
 class Config(object):
-    SECRET_KEY = os.urandom(24)     # Generate a random session key
+    SECRET_KEY = os.urandom(24)  # Generate a random session key
 
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     PACKAGEDIR = os.path.dirname(BASEDIR)
@@ -17,11 +17,18 @@ class Config(object):
     BOOTSTRAP_USE_MINIFIED = False
 
     """
-    Determine location of the application DB
+    DB Config
     """
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(PACKAGEDIR, 'database', 'app.db')
-    SQLALCHEMY_MIGRATE_REPO = os.path.join(PACKAGEDIR, 'database', 'db_repository')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_FILENAME',
+                                                            os.path.join(PACKAGEDIR, 'tmp/local_app.db'))
+    SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
+                                             os.path.join(PACKAGEDIR, 'tmp/db_repository'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Keep this off to reduce overhead
+    # This connects to our source data
+    EXT_DATA_PG_URI = 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
+        user=os.environ.get('DBUSER', 'Chronicall'), pwd=os.environ.get('DBPASS', 'ChR0n1c@ll1337'),
+        host=os.environ.get('DBHOST', '10.1.3.17'), port=os.environ.get('DBPORT', '9086'), name=os.environ.get('DBNAME', 'chronicall')
+    )
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'
@@ -44,5 +51,3 @@ class DevelopmentConfig(Config):
     USE_DEBUGGER = True
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
-
-

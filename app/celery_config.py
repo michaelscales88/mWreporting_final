@@ -30,7 +30,7 @@ class Config(object):
     CELERY_RESULT_SERIALIZER = 'json'
 
     CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
-        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule.db'
+        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
     )
 
     IMPORTS = ('app.report.tasks', 'app.util.tasks')

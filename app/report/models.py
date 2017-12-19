@@ -1,11 +1,16 @@
 from sqlalchemy import Column, Text, DateTime, Integer, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.declarative import declared_attr
 from app.database import Base
 from app.util import json_type
 
 
 class CallTable(Base):
     __searchable__ = []
+
+    @declared_attr
+    def __tablename__(cls):
+        return 'c_call'
 
     """
     Parent table
@@ -24,13 +29,6 @@ class CallTable(Base):
     def __json__(self):
         return list(self.__mapper__.columns.keys())
 
-    @staticmethod
-    def src_statement(request_date):
-        """Get src rows by running select * from table_name"""
-        return """SELECT * FROM c_call WHERE to_char(c_call.start_time, 'YYYY-MM-DD') = '{date}'""".format(
-            date=request_date
-        )
-
     def __lt__(self, other):
         # Gives CallTable a sortable property
         return self.call_id < other.call_id
@@ -38,6 +36,10 @@ class CallTable(Base):
 
 class EventTable(Base):
     __searchable__ = []
+
+    @declared_attr
+    def __tablename__(cls):
+        return 'c_event'
 
     """
     Child table
@@ -60,13 +62,6 @@ class EventTable(Base):
     @hybrid_property
     def length(self):
         return self.end_time - self.start_time
-
-    @staticmethod
-    def src_statement(request_date):
-        """Get src rows by running select * from table_name"""
-        return """SELECT * FROM c_event WHERE to_char(c_event.start_time, 'YYYY-MM-DD') = '{date}'""".format(
-            date=request_date
-        )
 
     def __lt__(self, other):
         # Gives EventTable a sortable property
