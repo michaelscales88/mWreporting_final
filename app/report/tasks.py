@@ -8,7 +8,7 @@ def add_scheduled_tasks(app):
     app.config['CELERYBEAT_SCHEDULE']['test'] = {
         'task': 'app.report.tasks.load_data',
         'schedule': crontab(minute='*/1'),
-        'args': ('test',)
+        'args': ('date1', 'date2')
     }
 
 
@@ -37,9 +37,10 @@ def fetch_report(start_date, end_date, report_id=None):
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
-def load_data(arg):
+def load_data(start_date, end_date, event_id=None):
+    # event_id can be call_id or event_id from models.py
     try:
-        print(arg)
+        print(start_date, end_date, event_id)
     except NoResultFound as exc:
         raise load_data.retry(exc=exc)
     # do something with the user
