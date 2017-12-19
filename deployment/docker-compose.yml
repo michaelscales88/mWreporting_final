@@ -76,3 +76,9 @@ services:
       ports:
       - "5555:5555"
       command: sh /var/www/app/run_flower.sh
+
+  postgres:
+    image: postgres:9.4
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
