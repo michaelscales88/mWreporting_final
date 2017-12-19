@@ -10,8 +10,18 @@ class Config(object):
 
     ROWS_PER_PAGE = 50
 
+    """
+    Use flask-bootstrap cdns    
+    """
     BOOTSTRAP_SERVE_LOCAL = True
     BOOTSTRAP_USE_MINIFIED = False
+
+    """
+    Determine location of the application DB
+    """
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(PACKAGEDIR, 'database', 'app.db')
+    SQLALCHEMY_MIGRATE_REPO = os.path.join(PACKAGEDIR, 'database', 'db_repository')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False  # Keep this off to reduce overhead
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'
@@ -32,4 +42,7 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     USE_DEBUGGER = True
+    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
+
 
