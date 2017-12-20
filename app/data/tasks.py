@@ -10,7 +10,7 @@ from app.database import data_session
 def add_scheduled_tasks(app):
     app.config['CELERYBEAT_SCHEDULE']['test'] = {
         'task': 'app.data.tasks.load_data',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/15'),
         'args': ('date1', 'date2')
     }
 
@@ -60,8 +60,9 @@ def load_data(start_date, end_date, event_id=None):
         raise load_data.retry(exc=exc)
     # do something with the user
     print('load data in load_data')
-    for r in results:
+    for r in results.all():
         print(r)
+    print('loaded data into local db')
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
@@ -87,5 +88,5 @@ def get_data(start_date=None, end_date=None, event_id=None):
         raise load_data.retry(exc=exc)
     # do something with the user
     print('fetched data in get_data')
-    for r in results:
+    for r in results.all():
         print(r)

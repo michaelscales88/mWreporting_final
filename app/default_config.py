@@ -37,7 +37,7 @@ class Config(object):
             name=os.environ.get('DBNAME', '')
         ),
         'app_meta': 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_FILENAME',
-                                                 os.path.join(PACKAGEDIR, 'tmp/local_app.db'))
+                                                  os.path.join(PACKAGEDIR, 'tmp/local_app.db'))
     }
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
                                              os.path.join(PACKAGEDIR, 'tmp/db_repository'))

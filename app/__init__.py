@@ -3,6 +3,7 @@ from flask_mail import Mail
 from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from flask_restful import Api
+from healthcheck import HealthCheck, EnvironmentDump
 
 
 from app.util import Flask, make_celery, AlchemyEncoder, get_nav, get_sqlalchemy
@@ -30,6 +31,8 @@ Bootstrap(app)
 nav = get_nav(app)
 moment = Moment(app)
 db = get_sqlalchemy(app)
+health = HealthCheck(app, "/healthcheck")
+envdump = EnvironmentDump(app, "/environment")
 
 
 @app.before_first_request
@@ -64,6 +67,13 @@ api.add_resource(DataApi, '/dataapi')
 api.add_resource(ReportApi, '/reportapi')
 
 
+from app.util.health_tests import get_local_healthcheck, get_app_healthcheck, get_data_healthcheck
+health.add_check(get_local_healthcheck)
+health.add_check(get_app_healthcheck)
+health.add_check(get_data_healthcheck)
+# envdump.add_section("application", app)
+
+
 # Routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -80,3 +90,7 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
+
+
+if app.debug:
+    print(app.url_map)

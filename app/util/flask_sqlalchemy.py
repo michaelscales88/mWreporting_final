@@ -2,7 +2,6 @@ from flask_sqlalchemy import BaseQuery, SQLAlchemy
 from flask_sqlalchemy.model import BindMetaMixin, Model
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
-from sqlalchemy_utils import generic_repr
 
 
 # Support migrate
@@ -21,17 +20,12 @@ class GetOrQuery(BaseQuery):
         return self.get(ident) or default
 
 
-@generic_repr
-class _Base(BindMetaMixin, DeclarativeMeta):
+class NoNameMeta(BindMetaMixin, DeclarativeMeta):
     """
-    Custom model base to disable default tablename generation
+    Custom MetaData to disable default tablename generation
     Supports bind_keys to for multiple database
-    Adds a generic string representation
     """
     pass
-
-
-Base = declarative_base(cls=Model, metaclass=_Base, name='Model')
 
 
 def get_sqlalchemy(app):
@@ -39,8 +33,6 @@ def get_sqlalchemy(app):
     _db = SQLAlchemy(
         app, metadata=metadata,
         query_class=GetOrQuery,
-        model_class=Base
+        model_class=declarative_base(cls=Model, metaclass=NoNameMeta, name='Model')
     )
-    _db.make_declarative_base(Base)
-
     return _db

@@ -8,6 +8,7 @@ flask_nav
 flask_restful
 flask_sqlalchemy
 flower
+healthcheck
 kombu
 psycopg2
 pyyaml
@@ -15,6 +16,7 @@ redpanda
 sqlalchemy
 SQLAlchemy-utils
 sqlalchemy-migrate
+sqlalchemy_mixins
 
 
 

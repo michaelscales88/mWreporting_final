@@ -1,14 +1,13 @@
-from sqlalchemy import Column, Text, DateTime, Integer
-
 from app import db
 from app.util import json_type
 
 
 class SLAReport(db.Model):
 
+    __bind_key__ = ''
     __tablename__ = 'sla_report'
 
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime, nullable=False)
-    report = Column(json_type)
-    notes = Column(Text)
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    report = db.Column(json_type)
+    notes = db.Column(db.Text)

@@ -25,3 +25,11 @@ data_session = get_scoped_session(db.get_engine(app, 'ext_data'))
 def receive_begin(conn):
     print('setting read only transaction')
     conn.execute('SET TRANSACTION READ ONLY')
+
+
+print('trying to create bind for')
+# print(db.get_engine(app, None))
+print(db.get_engine(app, 'app_meta'))
+
+# Create database and tables
+db.create_all(bind=['app_meta'])
