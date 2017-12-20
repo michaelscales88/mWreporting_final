@@ -1,19 +1,13 @@
 from sqlalchemy import Column, Text, DateTime, Integer, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.declarative import declared_attr
-from app.database import Base
+from app import db
 
 
-class CallTable(Base):
-    __searchable__ = []
+class CallTable(db.Model):
 
-    @declared_attr
-    def __tablename__(cls):
-        return 'c_call'
+    __bind_key__ = 'users'
+    __tablename__ = 'c_call'
 
-    """
-    Parent table
-    """
     call_id = Column(Integer, primary_key=True)
     call_direction = Column(Integer)
     calling_party_number = Column(Text)
@@ -28,21 +22,12 @@ class CallTable(Base):
     def __json__(self):
         return list(self.__mapper__.columns.keys())
 
-    def __lt__(self, other):
-        # Gives CallTable a sortable property
-        return self.call_id < other.call_id
 
+class EventTable(db.Model):
 
-class EventTable(Base):
-    __searchable__ = []
+    __bind_key__ = 'users'
+    __tablename__ = 'c_event'
 
-    @declared_attr
-    def __tablename__(cls):
-        return 'c_event'
-
-    """
-    Child table
-    """
     event_id = Column(Integer, primary_key=True)
     event_type = Column(Integer, nullable=False)
     calling_party = Column(Text)
@@ -61,7 +46,3 @@ class EventTable(Base):
     @hybrid_property
     def length(self):
         return self.end_time - self.start_time
-
-    def __lt__(self, other):
-        # Gives EventTable a sortable property
-        return self.event_id < other.event_id

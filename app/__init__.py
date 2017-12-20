@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_restful import Api
 
 
-from app.util import Flask, make_celery, AlchemyEncoder, get_nav
+from app.util import Flask, make_celery, AlchemyEncoder, get_nav, get_sqlalchemy
 
 
 app = Flask(
@@ -18,7 +18,6 @@ app = Flask(
 )
 api = Api(app)
 
-
 # Settings
 app.config.from_object('app.celery_config.Config')
 app.config.from_object('app.default_config.DevelopmentConfig')
@@ -30,6 +29,7 @@ celery = make_celery(app)
 Bootstrap(app)
 nav = get_nav(app)
 moment = Moment(app)
+db = get_sqlalchemy(app)
 
 
 @app.before_first_request

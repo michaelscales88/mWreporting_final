@@ -6,3 +6,4 @@ from .navigation import get_nav
 from .update_cdn import add_cdns
 from .get_json import json_type
 from .db_manager import DbManager
+from .flask_sqlalchemy import get_sqlalchemy

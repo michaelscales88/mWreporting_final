@@ -4,7 +4,7 @@ from sqlalchemy.sql import func, and_
 from sqlalchemy.dialects import postgresql
 
 from app import celery
-from app.database import pg_session, mypg_session
+from app.database import data_session
 
 
 def add_scheduled_tasks(app):
@@ -15,15 +15,26 @@ def add_scheduled_tasks(app):
     }
 
 
+def data_task(task, start_date, end_date, id=None):
+    if task == 'load':
+        async_result = load_data.delay(start_date, end_date)
+    else:
+        async_result = get_data.delay(start_date, end_date)
+    try:
+        result = async_result.get(timeout=5, propagate=False)
+    except TimeoutError:
+        result = None
+    return result, async_result.status, async_result.traceback
+
+
 class SqlAlchemyTask(celery.Task):
     """An abstract Celery Task that ensures that the connection the the
     database is closed on task completion"""
     abstract = True
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        pg_session.remove()
-        mypg_session.remove()
-        print('closed sessions.', pg_session, mypg_session)
+        data_session.remove()
+        print('closed sessions.', data_session)
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
@@ -32,26 +43,25 @@ def load_data(start_date, end_date, event_id=None):
     from .models import CallTable, EventTable
     from datetime import datetime, timedelta
     start_time = end_time = datetime.today()
-    start_time -= timedelta(days=1)
+    start_time -= timedelta(hours=12)
     end_time -= timedelta(hours=2)
-    results = pg_session.query(CallTable).filter(
-        and_(
-            CallTable.start_time >= start_time,
-            CallTable.end_time <= end_time,
+    try:
+        print(start_time, end_time, event_id)
+        results = data_session.query(CallTable).filter(
+            and_(
+                CallTable.start_time >= start_time,
+                CallTable.end_time <= end_time,
+            )
         )
-    )
-    print(results)
-    print(str(results.statement.compile(dialect=postgresql.dialect())))
+        print(results)
+        print(str(results.statement.compile(dialect=postgresql.dialect())))
+    except NoResultFound as exc:
+        print('No Result Found')
+        raise load_data.retry(exc=exc)
     # do something with the user
-    print('loading data in load_data')
+    print('load data in load_data')
     for r in results:
-        instance = mypg_session.query(CallTable).filter(CallTable.call_id == r.call_id).first()
-
-        if not instance:
-            mypg_session.add(r)
-            print('added ', r)
-    mypg_session.commit()
-    return True
+        print(r)
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
@@ -60,11 +70,11 @@ def get_data(start_date=None, end_date=None, event_id=None):
     from .models import CallTable, EventTable
     from datetime import datetime, timedelta
     start_time = end_time = datetime.today()
-    start_time -= timedelta(days=1)
+    start_time -= timedelta(hours=12)
     end_time -= timedelta(hours=2)
     try:
         print(start_time, end_time, event_id)
-        results = mypg_session.query(CallTable).filter(
+        results = data_session.query(CallTable).filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
