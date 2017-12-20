@@ -11,7 +11,9 @@ class DataApi(Resource):
         print('Hit Data API')
         parser = RequestParser()
         args = parser.parse_args()
-        result, status, tb = data_task('load', 'Today', 'Yesterday')
+        print('starting a task')
+        result, status, tb = data_task('load_test', 'Today', 'Yesterday')
+        print('did a task')
         if isinstance(result, Exception):
             return jsonify(
                 {

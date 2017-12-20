@@ -68,7 +68,7 @@ services:
     depends_on:
       - rabbit
     ports:
-    - "5555:5555"
+      - "5555:5555"
     command: sh /var/www/run_flower.sh
 
   dbdata:

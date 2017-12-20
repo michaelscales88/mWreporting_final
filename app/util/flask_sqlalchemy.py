@@ -2,6 +2,7 @@ from flask_sqlalchemy import BaseQuery, SQLAlchemy
 from flask_sqlalchemy.model import BindMetaMixin, Model
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from sqlalchemy_mixins import AllFeaturesMixin, ReprMixin
 
 
 # Support migrate
@@ -12,6 +13,12 @@ convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s"
 }
+
+
+class Base(Model, AllFeaturesMixin):
+    __abstract__ = True
+    __repr__ = ReprMixin.__repr__
+    pass
 
 
 # get a Model by id, or return a default
@@ -33,6 +40,6 @@ def get_sqlalchemy(app):
     _db = SQLAlchemy(
         app, metadata=metadata,
         query_class=GetOrQuery,
-        model_class=declarative_base(cls=Model, metaclass=NoNameMeta, name='Model')
+        model_class=declarative_base(cls=Base, metaclass=NoNameMeta, name='Model')
     )
     return _db

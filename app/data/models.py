@@ -1,14 +1,14 @@
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_mixins import AllFeaturesMixin
 
 
 from app import db
 
 
-class CallTable(AllFeaturesMixin, db.Model):
+class CallTable(db.Model):
 
-    __bind_key__ = ''
+    __bind_key__ = None
     __tablename__ = 'c_call'
+    __repr_attrs__ = ['call_id', 'calling_party_number', 'dialed_party_number', 'start_time', 'end_time', 'caller_id']
 
     call_id = db.Column(db.Integer, primary_key=True)
     call_direction = db.Column(db.Integer)
@@ -22,10 +22,12 @@ class CallTable(AllFeaturesMixin, db.Model):
     inbound_route = db.Column(db.Text)
 
 
-class EventTable(AllFeaturesMixin, db.Model):
+class EventTable(db.Model):
 
-    __bind_key__ = ''
+    __bind_key__ = None
     __tablename__ = 'c_event'
+    __repr_attrs__ = ['event_id', 'event_type', 'calling_party', 'receiving_party',
+                      'is_conference', 'start_time', 'end_time', 'call_id']
 
     event_id = db.Column(db.Integer, primary_key=True)
     event_type = db.Column(db.Integer, nullable=False)
