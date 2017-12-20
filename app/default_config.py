@@ -19,15 +19,30 @@ class Config(object):
     """
     DB Config
     """
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_FILENAME',
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
+        user=os.environ.get('POSTGRES_USER', ''), pwd=os.environ.get('POSTGRES_PASSWORD', ''),
+        host=os.environ.get('POSTGRES_HOST', ''), port=os.environ.get('POSTGRES_PORT', ''),
+        name=os.environ.get('POSTGRES_DB', '')
+    )
+    SQLALCHEMY_BINDS = {
+        'users': 'mysqldb://localhost/users',
+        'appmeta': 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_FILENAME',
                                                             os.path.join(PACKAGEDIR, 'tmp/local_app.db'))
+    }
+
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
                                              os.path.join(PACKAGEDIR, 'tmp/db_repository'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Keep this off to reduce overhead
     # This connects to our source data
     EXT_DATA_PG_URI = 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
-        user=os.environ.get('DBUSER', 'Chronicall'), pwd=os.environ.get('DBPASS', 'ChR0n1c@ll1337'),
-        host=os.environ.get('DBHOST', '10.1.3.17'), port=os.environ.get('DBPORT', '9086'), name=os.environ.get('DBNAME', 'chronicall')
+        user=os.environ.get('DBUSER', ''), pwd=os.environ.get('DBPASS', ''),
+        host=os.environ.get('DBHOST', ''), port=os.environ.get('DBPORT', ''), name=os.environ.get('DBNAME', '')
+    )
+    # Local copy of source tables
+    INT_DATA_PG_URI = 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
+        user=os.environ.get('POSTGRES_USER', ''), pwd=os.environ.get('POSTGRES_PASSWORD', ''),
+        host=os.environ.get('POSTGRES_HOST', ''), port=os.environ.get('POSTGRES_PORT', ''),
+        name=os.environ.get('POSTGRES_DB', '')
     )
 
     # email server

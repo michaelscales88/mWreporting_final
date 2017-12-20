@@ -5,13 +5,14 @@ services:
     build:
       context: .
       dockerfile: ./flask/Dockerfile
-    env_file:
-      - ./flask.env
+    env_file: app.env
     volumes:
       - ../app:/var/www/app
       - ../tmp:/var/www/tmp
     ports:
       - "5000:5000"
+    depends_on:
+      - postgres
 #    command: uwsgi --ini uwsgi.ini
     command: sh /var/www/run.sh
     restart: always
@@ -33,15 +34,13 @@ services:
 
   rabbit:
     image: rabbitmq:latest
-    env_file:
-      - ./flask.env
+    env_file: app.env
 
   celeryworker:
     build:
       context: .
       dockerfile: ./celery/Dockerfile
-    env_file:
-      - ./flask.env
+    env_file: app.env
     volumes_from:
       - website
     depends_on:
@@ -52,8 +51,7 @@ services:
     build:
       context: .
       dockerfile: ./celery/Dockerfile
-    env_file:
-      - ./flask.env
+    env_file: app.env
     volumes_from:
       - website
     depends_on:
@@ -61,23 +59,31 @@ services:
     command: sh /var/www/run_beat.sh
 
   flower:
-      build:
-        context: .
-        dockerfile: ./celery/Dockerfile
-      env_file:
-        - ./flask.env
-      volumes_from:
-        - website
-      depends_on:
-        - rabbit
-        - celerybeat
-        - celeryworker
-      ports:
-      - "5555:5555"
-      command: sh /var/www/run_flower.sh
+    build:
+      context: .
+      dockerfile: ./celery/Dockerfile
+    env_file: app.env
+    volumes_from:
+      - website
+    depends_on:
+      - rabbit
+    ports:
+    - "5555:5555"
+    command: sh /var/www/run_flower.sh
+
+  dbdata:
+    build:
+      context: .
+      dockerfile: ./postgres/Dockerfile
+    volumes:
+      - /var/lib/postgresql
+    command: "true"
 
   postgres:
-    image: postgres:9.4
-    volumes:
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-
+    build:
+      context: .
+      dockerfile: ./postgres/Dockerfile
+    volumes_from:
+      - dbdata
+    ports:
+      - "5432:5432"

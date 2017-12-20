@@ -64,6 +64,9 @@ database/db_repository/
 *.db
 .webassets-cache
 
+# Post-gres settings
+pg_data/
+
 # Scrapy stuff:
 .scrapy
 

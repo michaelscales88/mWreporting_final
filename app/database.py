@@ -19,20 +19,24 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=app_db_engine))
 
-
 ext_pg_engine = create_engine(app.config['EXT_DATA_PG_URI'])
 pg_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=ext_pg_engine))
+
+int_pg_engine = create_engine(app.config['INT_DATA_PG_URI'])
+mypg_session = scoped_session(sessionmaker(autocommit=False,
+                                           autoflush=False,
+                                           bind=int_pg_engine))
+
 # Bind session to the ORM model query method
 Base.query = db_session.query_property()
 
 
-def init_db():
-
+def init_base():
     # Import models to include in the Base
-    from app.report.models import CallTable, EventTable
-
+    from app.data.models import CallTable, EventTable
+    from app.report.models import SLAReport
     Base.metadata.create_all(bind=app_db_engine)
 
 
@@ -42,4 +46,4 @@ def receive_begin(conn):
 
 
 # Create metadata during app init
-init_db()
+init_base()
