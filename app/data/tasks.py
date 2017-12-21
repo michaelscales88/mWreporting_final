@@ -16,16 +16,20 @@ def add_scheduled_tasks(app):
     pass
 
 
-def data_task(task, start_date, end_date, id=None):
+def data_task(task, start_time, end_time, id=None):
     if task == 'load_test':
-        result = load_test()
+        result = load_test(start_time, end_time)
+        status = 'Test'
+        tb = 'Okay'
+    elif task == 'get_test':
+        result = get_test(start_time, end_time)
         status = 'Test'
         tb = 'Okay'
     else:
         if task == 'load':
-            async_result = load_data.delay(start_date, end_date)
+            async_result = load_data.delay(start_time, end_time)
         else:
-            async_result = get_data.delay(start_date, end_date)
+            async_result = get_data.delay(start_time, end_time)
         try:
             result = async_result.get(timeout=5, propagate=False)
         except TimeoutError:
@@ -35,46 +39,57 @@ def data_task(task, start_date, end_date, id=None):
     return result, status, tb
 
 
-def load_test():
+def load_test(start_time, end_time):
+    success = True
     from .models import CallTable
-    from datetime import datetime, timedelta
-    start_time = end_time = datetime.today().now()
-    start_time -= timedelta(hours=3)
-    end_time -= timedelta(hours=2)
     try:
-        print(start_time, end_time)
         results = data_session.query(CallTable).filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
             )
         )
-        print(results)
-        print(str(results.statement.compile(dialect=postgresql.dialect())))
-        # do something with the user
-        data_session.remove()
-        print('load data in load_data')
+
         for r in results.all():
-            # print(type(r), r)
-            local_session.add(r)
+            exists = local_session.query(CallTable.call_id).filter_by(call_id=r.call_id).scalar() is not None
+            if exists:
+                print('record already exists')
+            else:
+                print('adding ', r.__dict__)
+                local_session.add(CallTable(**r.__dict__))
         local_session.commit()
+    except Exception as e:
+        success = False
+        print('Encountered an error', e)
+        local_session.rollback()
+        data_session.rollback()
+    else:
+        print('loaded data into local db')
+    finally:
         local_session.remove()
+        data_session.remove()
+
+    return success
+
+
+def get_test(start_time, end_time):
+    from .models import CallTable
+    try:
         new_results = local_session.query(CallTable).filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
             )
         )
+    except Exception as e:
+        print('Error getting records', e)
+        local_session.rollback()
+        return None
+    else:
         print('from local database')
-        for result in new_results.all():
-            print(result)
-        print('loaded data into local db')
+        return new_results.frame()
     finally:
         local_session.remove()
-        data_session.remove()
-
-
-    return True
 
 
 class SqlAlchemyTask(celery.Task):
@@ -89,55 +104,55 @@ class SqlAlchemyTask(celery.Task):
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
-def load_data(start_date, end_date, event_id=None):
-    # event_id can be call_id or event_id from models.py
-    from .models import CallTable, EventTable
-    from datetime import datetime, timedelta
-    start_time = end_time = datetime.today().now()
-    start_time -= timedelta(hours=6)
-    end_time -= timedelta(hours=2)
+def load_data(start_time=None, end_time=None, event_id=None):
+    success = True
+    from .models import CallTable
     try:
-        print(start_time, end_time, event_id)
         results = data_session.query(CallTable).filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
             )
         )
-        print(results)
-        print(str(results.statement.compile(dialect=postgresql.dialect())))
-    except NoResultFound as exc:
-        print('No Result Found')
-        raise load_data.retry(exc=exc)
-    # do something with the user
-    print('load data in load_data')
-    for r in results:
-        print(r)
-    print('loaded data into local db')
+
+        for r in results.all():
+            exists = local_session.query(CallTable.call_id).filter_by(call_id=r.call_id).scalar() is not None
+            if exists:
+                print('record already exists')
+            else:
+                print('adding ', r.__dict__)
+                local_session.add(CallTable(**r.__dict__))
+        local_session.commit()
+    except Exception as e:
+        success = False
+        print('Encountered an error', e)
+        local_session.rollback()
+        data_session.rollback()
+    else:
+        print('loaded data into local db')
+    finally:
+        local_session.remove()
+        data_session.remove()
+
+    return success
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
-def get_data(start_date=None, end_date=None, event_id=None):
-    # event_id can be call_id or event_id from models.py
-    from .models import CallTable, EventTable
-    from datetime import datetime, timedelta
-    start_time = end_time = datetime.today()
-    start_time -= timedelta(hours=12)
-    end_time -= timedelta(hours=2)
+def get_data(start_time=None, end_time=None, event_id=None):
+    from .models import CallTable
     try:
-        print(start_time, end_time, event_id)
-        results = data_session.query(CallTable).filter(
+        new_results = local_session.query(CallTable).filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
             )
         )
-        print(results)
-        print(str(results.statement.compile(dialect=postgresql.dialect())))
-    except NoResultFound as exc:
-        print('No Result Found')
-        raise load_data.retry(exc=exc)
-    # do something with the user
-    print('fetched data in get_data')
-    for r in results.all():
-        print(r)
+    except Exception as e:
+        print('Error getting records', e)
+        local_session.rollback()
+        return None
+    else:
+        print('from local database')
+        return new_results.frame()
+    finally:
+        local_session.remove()

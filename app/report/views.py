@@ -2,7 +2,7 @@ from flask import Blueprint, abort, render_template, jsonify, current_app
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
-
+from app.data.models import CallTable
 from .tasks import fetch_report
 
 
@@ -13,7 +13,8 @@ report_blueprint = Blueprint(
     static_url_path='/report/static'
 )
 _BASE_URL = '/report'
-TEMP_HEADER_ORDER = ('report_id', 'end_date', 'start_date', 'test')
+# TEMP_HEADER_ORDER = ('report_id', 'end_date', 'start_date', 'test')
+TEMP_HEADER_ORDER = CallTable.__table__.columns.keys()
 
 
 @report_blueprint.route(_BASE_URL, defaults={'page': 'report.html'})
@@ -42,31 +43,27 @@ class ReportApi(Resource):
         parser.add_argument('length', type=int, location='args')
         args = parser.parse_args()
 
-        async_result = fetch_report.delay('Today', 'Yesterday', 1)
-        try:
-            result = async_result.get(timeout=5, propagate=False)
-        except TimeoutError:
-            result = None
-        status = async_result.status
-        traceback = async_result.traceback
-        data = []
-        for r in result:
-            data.append([r.get(header, '') for header in TEMP_HEADER_ORDER])
-        print(data)
+        from app.data.tasks import data_task
+        from datetime import datetime, timedelta
+        today = datetime.today().now()
+        result, status, tb = data_task('get_test', today - timedelta(hours=8), today - timedelta(hours=3))
+        print(result)
+        results = result.to_dict(orient='split')
+        data = results['data']
+        print(results['data'])
         if isinstance(result, Exception):
             return jsonify(
                 {
                     'status': status,
                     'error': str(result),
-                    'traceback': traceback,
+                    'traceback': tb,
                 }
             )
         else:
             return jsonify(
                 status=status,
-                result=result,
                 draw=args['draw'],
-                recordsTotal=1,
-                recordsFiltered=1,
-                data=data
+                recordsTotal=len(result.index),
+                recordsFiltered=len(result.index),
+                data=results['data']
             )

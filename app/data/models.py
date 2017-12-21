@@ -21,6 +21,21 @@ class CallTable(db.Model):
     caller_id = db.Column(db.Text)
     inbound_route = db.Column(db.Text)
 
+    def __init__(self, call_id=None, call_direction=None, calling_party_number='',
+                 dialed_party_number='', account_code='', start_time=None,
+                 end_time=None, system_id=None, caller_id='', inbound_route='',
+                 **kwargs):
+        self.call_id = call_id
+        self.call_direction = call_direction
+        self.calling_party_number = calling_party_number
+        self.dialed_party_number = dialed_party_number
+        self.account_code = account_code
+        self.start_time = start_time
+        self.end_time = end_time
+        self.system_id = system_id
+        self.caller_id = caller_id
+        self.inbound_route = inbound_route
+
 
 class EventTable(db.Model):
 
@@ -40,6 +55,22 @@ class EventTable(db.Model):
     tag = db.Column(db.Text)
     recording_rule = db.Column(db.Integer)
     call_id = db.Column(db.Integer, db.ForeignKey(CallTable.call_id))
+
+    def __init__(self, event_id=None, event_type=None, calling_party='',
+                 receiving_party='', hunt_group='', is_conference=None,
+                 start_time=None, end_time=None, tag='', recording_rule='',
+                 call_id=None, **kwargs):
+        self.event_id = event_id
+        self.event_type = event_type
+        self.calling_party = calling_party
+        self.receiving_party = receiving_party
+        self.hunt_group = hunt_group
+        self.is_conference = is_conference
+        self.start_time = start_time
+        self.end_time = end_time
+        self.tag = tag
+        self.recording_rule = recording_rule
+        self.call_id = call_id
 
     @hybrid_property
     def length(self):
