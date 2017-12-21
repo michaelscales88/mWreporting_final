@@ -87,7 +87,7 @@ def get_test(start_time, end_time):
         return None
     else:
         print('from local database')
-        return new_results.frame()
+        return new_results
     finally:
         local_session.remove()
 

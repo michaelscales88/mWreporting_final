@@ -4,6 +4,8 @@ from flask_restful.reqparse import RequestParser
 
 from app.data.models import CallTable
 from .tasks import fetch_report
+from app.util import server_side_processing
+
 
 
 report_blueprint = Blueprint(
@@ -47,10 +49,10 @@ class ReportApi(Resource):
         from datetime import datetime, timedelta
         today = datetime.today().now()
         result, status, tb = data_task('get_test', today - timedelta(hours=8), today - timedelta(hours=3))
-        print(result)
-        results = result.to_dict(orient='split')
+        data = server_side_processing(result, args)
+        results = data.to_dict(orient='split')
         data = results['data']
-        print(results['data'])
+        print(data)
         if isinstance(result, Exception):
             return jsonify(
                 {
@@ -65,5 +67,5 @@ class ReportApi(Resource):
                 draw=args['draw'],
                 recordsTotal=len(result.index),
                 recordsFiltered=len(result.index),
-                data=results['data']
+                data=data
             )
