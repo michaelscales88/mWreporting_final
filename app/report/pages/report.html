@@ -1,18 +1,45 @@
 <!-- Index to blueprint index pages -->
 {% extends 'base.html' %}
 {%- block styles %}
-{{ super() }}
-<link href="{{bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp')}}" rel="stylesheet">
-<link href="{{bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTables', use_minified=true)}}" rel="stylesheet">
+    {{ super() }}
+    <link href="{{ bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp') }}" rel="stylesheet">
+    <link href="{{ bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTables', use_minified=true) }}"
+          rel="stylesheet">
 {% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="jumbotron">
-            <h1>Reports</h1>
+            <div class="row">
+                <div class='col-md-4'>
+                    <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
+                </div>
+                <div class='col-md-4'>
+                    <div class="form-group">
+                        <div class="input-group input-group-lg date" id="datetime-start">
+                            <input type="text" class="form-control" placeholder="Start from..."
+                                   aria-describedby="sizing-addon1">
+                            <span class="input-group-addon" id="sizing-addon1">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class="form-group">
+                        <div class="input-group input-group-lg date" id="datetime-end">
+                            <input type="text" class="form-control" placeholder="Go to..."
+                                   aria-describedby="sizing-addon1">
+                            <span class="input-group-addon" id="sizing-addon1">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                <p><button type="button" class="btn btn-primary" id="run_range">Run</button>
+                </p>
+                </div>
+            </div>
         </div>
-        <button type="button" class="btn btn-primary" id="run_range">Run</button>
-
         <table id="displayTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <!-- Configure the headers for the ajax call-->
             <thead>
@@ -25,71 +52,51 @@
             </tfoot>
         </table>
     </div>  <!-- /.container -->
-    <div class="container">
-        <div class='col-md-5'>
-            <div class="form-group">
-                <div class="input-group input-group-lg date" id="datetime-start">
-                    <input type="text" class="form-control" placeholder="Start from..." aria-describedby="sizing-addon1">
-                    <span class="input-group-addon" id="sizing-addon1">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class='col-md-5'>
-            <div class="form-group">
-                <div class="input-group input-group-lg date" id="datetime-end">
-                    <input type="text" class="form-control" placeholder="Go to..." aria-describedby="sizing-addon1">
-                    <span class="input-group-addon" id="sizing-addon1">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-{{ moment.include_moment() }}
-<script src="{{bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true)}}" rel="stylesheet"></script>
-<script src="{{bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTables', use_minified=true)}}" rel="stylesheet"></script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#datetime-start').datetimepicker();
-        $('#datetime-end').datetimepicker({
-            useCurrent: false //Important! See issue #1075
-        });
-        $("#datetime-start").on("dp.change", function (e) {
-            $('#datetime-end').data("DateTimePicker").minDate(e.date);
-        });
-        $("#datetime-end").on("dp.change", function (e) {
-            $('#datetime-start').data("DateTimePicker").maxDate(e.date);
-        });
-    });
-    $(document).ready(function () {
-
-        $.getScript("{{ url_for('report.static', filename='js/ajax_fn.js') }}", function () {
-            /* Super hack */
-
-            let table = $('#displayTable').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
-                    "url": "{{ url_for(api) }}",
-                    "data": buildAjaxData
-                },
-                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                "iDisplayLength": {{ iDisplayLength }}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    <script src="{{ bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTables', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#datetime-start').datetimepicker();
+            $('#datetime-end').datetimepicker({
+                useCurrent: false //Important! See issue #1075
             });
-
-            function page_api() {
-                console.log("refreshing api");
-                table.ajax.reload();
-            }
-
-            $('button#run_range').on('click', page_api);
+            $("#datetime-start").on("dp.change", function (e) {
+                $('#datetime-end').data("DateTimePicker").minDate(e.date);
+            });
+            $("#datetime-end").on("dp.change", function (e) {
+                $('#datetime-start').data("DateTimePicker").maxDate(e.date);
+            });
         });
-    });
-</script>
+        $(document).ready(function () {
+
+            $.getScript("{{ url_for('report.static', filename='js/ajax_fn.js') }}", function () {
+                /* Super hack */
+
+                let table = $('#displayTable').DataTable({
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "{{ url_for(api) }}",
+                        "data": buildAjaxData
+                    },
+                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                    "iDisplayLength": {{ iDisplayLength }}
+                });
+
+                function page_api() {
+                    console.log("refreshing api");
+                    table.ajax.reload();
+                }
+
+                $('button#run_range').on('click', page_api);
+            });
+        });
+    </script>
 {% endblock %}

@@ -25,7 +25,7 @@ def test_report(start_date, end_date, report_id=None):
         'date': start_date,
         'report': end_date,
         'notes': report_id
-    }]
+    }], None, 200
 
 
 @celery.task
