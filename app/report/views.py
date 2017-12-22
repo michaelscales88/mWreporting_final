@@ -2,10 +2,12 @@ from flask import Blueprint, abort, render_template, jsonify, current_app
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
-from app.data.models import CallTable
-from .tasks import fetch_report
-from app.util import server_side_processing
 
+from app.data.tasks import get_model_headers
+from app.util.server_processing import server_side_processing
+
+
+from .tasks import test_report, fetch_report, get_report_headers
 
 
 report_blueprint = Blueprint(
@@ -15,8 +17,6 @@ report_blueprint = Blueprint(
     static_url_path='/report/static'
 )
 _BASE_URL = '/report'
-# TEMP_HEADER_ORDER = ('report_id', 'end_date', 'start_date', 'test')
-TEMP_HEADER_ORDER = CallTable.__table__.columns.keys()
 
 
 @report_blueprint.route(_BASE_URL, defaults={'page': 'report.html'})
@@ -29,7 +29,15 @@ def serve_pages(page):
             title='Reports',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='reportapi',
-            columns=TEMP_HEADER_ORDER
+            columns=get_report_headers('sla_report')
+        )
+    elif page == "data.html":
+        return render_template(
+            'report.html',
+            title='Data',
+            iDisplayLength=current_app.config['ROWS_PER_PAGE'],
+            api='dataapi',
+            columns=get_model_headers('loc_call')
         )
     else:
         return abort(404)
@@ -38,6 +46,9 @@ def serve_pages(page):
 class ReportApi(Resource):
 
     def get(self):
+        from datetime import datetime, timedelta
+        today = datetime.today().now()
+
         print('Hit API')
         parser = RequestParser()
         parser.add_argument('start', type=int, location='args')
@@ -45,14 +56,9 @@ class ReportApi(Resource):
         parser.add_argument('length', type=int, location='args')
         args = parser.parse_args()
 
-        from app.data.tasks import data_task
-        from datetime import datetime, timedelta
-        today = datetime.today().now()
-        result, status, tb = data_task('get_test', today - timedelta(hours=8), today - timedelta(hours=3))
-        data = server_side_processing(result, args)
-        results = data.to_dict(orient='split')
-        data = results['data']
-        print(data)
+        result, status, tb = test_report('get_test', today - timedelta(hours=8), today - timedelta(hours=3))
+        frame, total = server_side_processing(result, args, model_name='loc_call')
+        data = frame.to_dict(orient='split')
         if isinstance(result, Exception):
             return jsonify(
                 {
@@ -65,7 +71,7 @@ class ReportApi(Resource):
             return jsonify(
                 status=status,
                 draw=args['draw'],
-                recordsTotal=len(result.index),
-                recordsFiltered=len(result.index),
-                data=data
+                recordsTotal=total,
+                recordsFiltered=total,
+                data=data['data']
             )

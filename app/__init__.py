@@ -4,9 +4,11 @@ from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from flask_restful import Api
 from healthcheck import HealthCheck, EnvironmentDump
+from sqlalchemy import event
 
 
-from app.util import Flask, make_celery, AlchemyEncoder, get_nav, get_sqlalchemy
+from app.database import get_sql_alchemy, init_db
+from app.util import Flask, make_celery, AlchemyEncoder, get_nav
 
 
 app = Flask(
@@ -30,9 +32,17 @@ celery = make_celery(app)
 Bootstrap(app)
 nav = get_nav(app)
 moment = Moment(app)
-db = get_sqlalchemy(app)
 health = HealthCheck(app, "/healthcheck")
 envdump = EnvironmentDump(app, "/environment")
+db = get_sql_alchemy(app)
+init_db(db)
+
+
+# Never want to modify data source
+@event.listens_for(db.get_engine(app, 'ext_data'), 'begin')
+def receive_begin(conn):
+    print('setting read only transaction', flush=True)
+    conn.execute('SET TRANSACTION READ ONLY')
 
 
 @app.before_first_request

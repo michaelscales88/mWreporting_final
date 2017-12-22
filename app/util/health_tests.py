@@ -1,4 +1,7 @@
-from app.database import data_session, local_session, app_session
+from app import app, db
+
+
+from app.database import get_scoped_session
 
 
 def health_database_status(db_session, session_name):
@@ -18,12 +21,12 @@ def health_database_status(db_session, session_name):
 
 
 def get_local_healthcheck():
-    return health_database_status(local_session, 'local')
+    return health_database_status(get_scoped_session(app, db, bind=None), 'local')
 
 
 def get_data_healthcheck():
-    return health_database_status(data_session, 'data')
+    return health_database_status(get_scoped_session(app, db, bind='ext_data'), 'data')
 
 
 def get_app_healthcheck():
-    return health_database_status(app_session, 'app')
+    return health_database_status(get_scoped_session(app, db, bind='app_meta'), 'app')

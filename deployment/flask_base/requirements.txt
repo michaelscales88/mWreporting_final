@@ -12,7 +12,6 @@ healthcheck
 kombu
 psycopg2
 pyyaml
-redpanda
 sqlalchemy
 SQLAlchemy-utils
 sqlalchemy-migrate

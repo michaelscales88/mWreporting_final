@@ -4,7 +4,7 @@ from app.util import json_type
 
 class SLAReport(db.Model):
 
-    __bind_key__ = ''
+    __bind_key__ = None
     __tablename__ = 'sla_report'
 
     id = db.Column(db.Integer, primary_key=True)

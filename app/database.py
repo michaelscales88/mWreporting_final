@@ -1,33 +1,28 @@
-from redpanda.orm import sessionmaker
-from sqlalchemy import event
-from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import scoped_session, sessionmaker
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
+from sqlalchemy.ext.declarative import declarative_base
 
-from app.util.db_manager import DbManager
-from app import app, db
-
-
-local_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db.engine)
-)
-app_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine(app, 'app_meta'))
-)
-data_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine(app, 'ext_data'))
-)
+from app.util.base_models import convention, NoNameMeta, ModelBase
 
 
-@event.listens_for(db.get_engine(app, 'ext_data'), 'begin')
-def receive_begin(conn):
-    print('setting read only transaction', flush=True)
-    conn.execute('SET TRANSACTION READ ONLY')
+def get_sql_alchemy(app):
+    metadata = MetaData(naming_convention=convention)
+    return SQLAlchemy(
+        app, metadata=metadata,
+        model_class=declarative_base(cls=ModelBase, metaclass=NoNameMeta, name='Model')
+    )
 
 
-def init_db():
+def get_scoped_session(app, db, bind=None):
+    return scoped_session(
+        sessionmaker(autocommit=False, autoflush=False,
+                     bind=db.engine if bind is None else db.get_engine(app, bind))
+    )
+
+
+def init_db(o):
     # Create database and tables
     from app.report.models import SLAReport
-    from app.data.models import CallTable, EventTable
-    db.create_all(bind=[None, 'app_meta'])
-
-
-init_db()
+    from app.data.models import CallTable, EventTable, LocalEventTable, LocalCallTable
+    o.create_all(bind=[None, 'app_meta'])

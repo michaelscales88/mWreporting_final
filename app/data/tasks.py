@@ -1,10 +1,25 @@
 from celery.schedules import crontab
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func, and_
 from sqlalchemy.dialects import postgresql
 
-from app import celery, app
-from app.database import data_session, local_session
+from app import celery
+from .models import CallTable, LocalCallTable, EventTable, LocalEventTable, loc_data_session, ext_data_session
+
+
+_mmap = {
+    'loc_call': LocalCallTable,
+    'loc_event': LocalEventTable,
+    'c_call': CallTable,
+    'c_event': EventTable
+}
+
+
+def get_model_headers(model=None):
+    if model in _mmap.keys():
+        return _mmap.get(model, None).__repr_attrs__
+    return None
 
 
 def add_scheduled_tasks(app):
@@ -40,10 +55,8 @@ def data_task(task, start_time, end_time, id=None):
 
 
 def load_test(start_time, end_time):
-    success = True
-    from .models import CallTable
     try:
-        results = data_session.query(CallTable).filter(
+        results = CallTable.query.filter(
             and_(
                 CallTable.start_time >= start_time,
                 CallTable.end_time <= end_time,
@@ -51,45 +64,30 @@ def load_test(start_time, end_time):
         )
 
         for r in results.all():
-            exists = local_session.query(CallTable.call_id).filter_by(call_id=r.call_id).scalar() is not None
+            exists = LocalCallTable.query.get_or(r.call_id) is not None
             if exists:
                 print('record already exists')
             else:
                 print('adding ', r.__dict__)
-                local_session.add(CallTable(**r.__dict__))
-        local_session.commit()
-    except Exception as e:
-        success = False
-        print('Encountered an error', e)
-        local_session.rollback()
-        data_session.rollback()
+                LocalCallTable(**r.__dict__).save()
+    except (DatabaseError, NoResultFound):
+        loc_data_session.rollback()
+        ext_data_session.rollback()
     else:
-        print('loaded data into local db')
+        loc_data_session.commit()
     finally:
-        local_session.remove()
-        data_session.remove()
-
-    return success
+        loc_data_session.remove()
+        ext_data_session.remove()
+    return True
 
 
 def get_test(start_time, end_time):
-    from .models import CallTable
-    try:
-        new_results = local_session.query(CallTable).filter(
-            and_(
-                CallTable.start_time >= start_time,
-                CallTable.end_time <= end_time,
-            )
+    return LocalCallTable.query.filter(
+        and_(
+            LocalCallTable.start_time >= start_time,
+            LocalCallTable.end_time <= end_time,
         )
-    except Exception as e:
-        print('Error getting records', e)
-        local_session.rollback()
-        return None
-    else:
-        print('from local database')
-        return new_results
-    finally:
-        local_session.remove()
+    )
 
 
 class SqlAlchemyTask(celery.Task):
@@ -97,62 +95,48 @@ class SqlAlchemyTask(celery.Task):
     database is closed on task completion"""
     abstract = True
 
+    def __call__(self, *args, **kwargs):
+        try:
+            return super().__call__(*args, **kwargs)
+        except DatabaseError:
+            loc_data_session.rollback()
+        finally:
+            loc_data_session.commit()
+
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        local_session.remove()
-        data_session.remove()
-        print('closed sessions.', local_session, data_session)
+        loc_data_session.remove()
+        ext_data_session.remove()
+        print(task_id, ' closed sessions: ', loc_data_session, ext_data_session)
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
 def load_data(start_time=None, end_time=None, event_id=None):
     success = True
-    from .models import CallTable
-    try:
-        results = data_session.query(CallTable).filter(
-            and_(
-                CallTable.start_time >= start_time,
-                CallTable.end_time <= end_time,
-            )
+    results = CallTable.query.filter(
+        and_(
+            CallTable.start_time >= start_time,
+            CallTable.end_time <= end_time,
         )
+    )
+    print(results)
+    print(str(results.statement.compile(dialect=postgresql.dialect())))
 
-        for r in results.all():
-            exists = local_session.query(CallTable.call_id).filter_by(call_id=r.call_id).scalar() is not None
-            if exists:
-                print('record already exists')
-            else:
-                print('adding ', r.__dict__)
-                local_session.add(CallTable(**r.__dict__))
-        local_session.commit()
-    except Exception as e:
-        success = False
-        print('Encountered an error', e)
-        local_session.rollback()
-        data_session.rollback()
-    else:
-        print('loaded data into local db')
-    finally:
-        local_session.remove()
-        data_session.remove()
+    for r in results.all():
+        exists = LocalCallTable.query.get_or(r.call_id) is not None
+        if exists:
+            print('record already exists')
+        else:
+            print('adding ', r.__dict__)
+            LocalCallTable(**r.__dict__).save()
 
     return success
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
 def get_data(start_time=None, end_time=None, event_id=None):
-    from .models import CallTable
-    try:
-        new_results = local_session.query(CallTable).filter(
-            and_(
-                CallTable.start_time >= start_time,
-                CallTable.end_time <= end_time,
-            )
+    return CallTable.query.filter(
+        and_(
+            CallTable.start_time >= start_time,
+            CallTable.end_time <= end_time,
         )
-    except Exception as e:
-        print('Error getting records', e)
-        local_session.rollback()
-        return None
-    else:
-        print('from local database')
-        return new_results.frame()
-    finally:
-        local_session.remove()
+    )
