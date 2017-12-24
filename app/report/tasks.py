@@ -6,11 +6,12 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app import celery
 
-from .models import SLAReport, app_meta_session
+from .models import SLAReport, Client, app_meta_session
 
 
 _mmap = {
-    "sla_report": SLAReport
+    "sla_report": SLAReport,
+    "client": Client
 }
 
 

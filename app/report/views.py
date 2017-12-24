@@ -38,5 +38,15 @@ def serve_pages(page):
             start_date=None,
             end_date=None
         )
+    elif page in ("client.html", "client"):
+        return render_template(
+            'client.html',
+            title='Clients',
+            iDisplayLength=current_app.config['ROWS_PER_PAGE'],
+            api='dataapi',
+            columns=get_model_headers('loc_call'),
+            start_date=None,
+            end_date=None
+        )
     else:
         return abort(404)
