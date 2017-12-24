@@ -12,6 +12,7 @@ def get_nav(app):
                 View('SLA Report', 'report.serve_pages', page='report'),
                 View('Data', 'report.serve_pages', page='data'),
                 Separator(),
+                View('Clients', 'report.serve_pages', page='client'),
             )
         )
     )

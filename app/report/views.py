@@ -1,8 +1,7 @@
 from flask import Blueprint, abort, render_template, current_app
 
 
-from app.data.tasks import get_model_headers
-from .tasks import get_report_headers
+from app.util.server_processing import get_model_headers
 
 
 report_blueprint = Blueprint(
@@ -24,7 +23,7 @@ def serve_pages(page):
             title='Reports',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='reportapi',
-            columns=get_report_headers('sla_report'),
+            columns=get_model_headers('sla_report'),
             start_date=None,
             end_date=None
         )
@@ -43,8 +42,8 @@ def serve_pages(page):
             'client.html',
             title='Clients',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
-            api='dataapi',
-            columns=get_model_headers('loc_call'),
+            api='clientapi',
+            columns=get_model_headers('client'),
             start_date=None,
             end_date=None
         )

@@ -80,7 +80,7 @@
 
                 let table = $('#displayTable').DataTable({
                     "processing": true,
-                    "serverSide": true,
+                    "serverSide": false,
                     "ajax": {
                         "url": "{{ url_for(api) }}",
                         "data": buildAjaxData

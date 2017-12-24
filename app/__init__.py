@@ -67,12 +67,14 @@ add_scheduled_data_tasks(app)
 
 # Modules
 from .home import home_blueprint
+from .client import ClientApi
 from .data import DataApi
 from .report import report_blueprint, ReportApi
 
 app.register_blueprint(home_blueprint)
 app.register_blueprint(report_blueprint)
 
+api.add_resource(ClientApi, '/clientapi')
 api.add_resource(DataApi, '/dataapi')
 api.add_resource(ReportApi, '/reportapi')
 

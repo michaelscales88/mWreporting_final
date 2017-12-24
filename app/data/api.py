@@ -2,7 +2,7 @@ from flask import jsonify
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
-from app.util.server_processing import server_side_processing
+# from app.util.server_processing import server_side_processing
 from .tasks import data_task
 
 
@@ -19,8 +19,10 @@ class DataApi(Resource):
         from datetime import datetime, timedelta
         today = datetime.today().now()
         result, status, tb = data_task('get_test', today - timedelta(hours=8), today - timedelta(hours=3))
-        frame, total = server_side_processing(result, args, model_name='loc_call')
-        data = frame.to_dict(orient='split')
+        # frame, total = server_side_processing(result, args, model_name='loc_call')
+        # data = frame.to_dict(orient='split')
+        total = 100
+        data = {'data': []}
         if isinstance(result, Exception):
             return jsonify(
                 {

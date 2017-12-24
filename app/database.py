@@ -23,6 +23,7 @@ def get_scoped_session(app, db, bind=None):
 
 def init_db(o):
     # Create database and tables
-    from app.report.models import SLAReport
+    from app.client.models import Client
     from app.data.models import CallTable, EventTable, LocalEventTable, LocalCallTable
+    from app.report.models import SLAReport
     o.create_all(bind=[None, 'app_meta'])

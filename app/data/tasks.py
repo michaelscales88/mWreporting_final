@@ -16,12 +16,6 @@ _mmap = {
 }
 
 
-def get_model_headers(model=None):
-    if model in _mmap.keys():
-        return _mmap.get(model, None).__repr_attrs__
-    return None
-
-
 def add_scheduled_tasks(app):
     # app.config['CELERYBEAT_SCHEDULE']['test'] = {
     #     'task': 'app.data.tasks.load_data',

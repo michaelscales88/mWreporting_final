@@ -6,19 +6,12 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app import celery
 
-from .models import SLAReport, Client, app_meta_session
+from .models import SLAReport, app_meta_session
 
 
 _mmap = {
-    "sla_report": SLAReport,
-    "client": Client
+    "sla_report": SLAReport
 }
-
-
-def get_report_headers(model=None):
-    if model in _mmap.keys():
-        return _mmap.get(model, None).__repr_attrs__
-    return None
 
 
 def test_report(start_date, end_date, report_id=None):
@@ -115,14 +108,6 @@ class SqlAlchemyTask(celery.Task):
 #         'report': end_time,
 #         'notes': report
 #     }]
-
-
-from flask import current_app
-from datetime import time
-
-from app import celery
-
-from .common import *
 
 
 @celery.task
