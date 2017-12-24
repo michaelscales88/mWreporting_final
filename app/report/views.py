@@ -24,7 +24,9 @@ def serve_pages(page):
             title='Reports',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='reportapi',
-            columns=get_report_headers('sla_report')
+            columns=get_report_headers('sla_report'),
+            start_date=None,
+            end_date=None
         )
     elif page in ("data.html", "data"):
         return render_template(
@@ -32,7 +34,9 @@ def serve_pages(page):
             title='Data',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='dataapi',
-            columns=get_model_headers('loc_call')
+            columns=get_model_headers('loc_call'),
+            start_date=None,
+            end_date=None
         )
     else:
         return abort(404)

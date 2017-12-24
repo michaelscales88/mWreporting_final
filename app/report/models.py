@@ -22,14 +22,14 @@ class SLAReport(db.Model):
     notes = db.Column(db.Text)
 
 
-class Clients(db.Model):
+class Client(db.Model):
 
     __bind_key__ = 'app_meta'
-    __tablename__ = 'clients'
-    __repr_attrs__ = ['id', 'date', 'report', 'notes']
+    __tablename__ = 'client'
+    __repr_attrs__ = ['id', 'client_name', 'ext', 'active']
     query = app_meta_session.query_property(query_cls=GetOrQuery)
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
-    report = db.Column(json_type)
-    notes = db.Column(db.Text)
+    ext = db.Column(db.Integer, nullable=False)
+    active = db.Column(db.Boolean, default=True)

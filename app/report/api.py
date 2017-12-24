@@ -4,7 +4,7 @@ from flask_restful.reqparse import RequestParser
 
 
 from app.util.server_processing import server_side_processing
-from .tasks import test_report, test_or_make_report
+from .tasks import test_report, report_dispatch
 
 
 class ReportApi(Resource):
@@ -20,7 +20,7 @@ class ReportApi(Resource):
         parser.add_argument('length', type=int, location='args')
         args = parser.parse_args()
 
-        result, status, tb = test_or_make_report(today - timedelta(hours=8), today - timedelta(hours=3))
+        result, status, tb = report_dispatch(today - timedelta(hours=8), today - timedelta(hours=3))
         frame, total = server_side_processing(result, args, model_name='sla_report')
         data = frame.to_dict(orient='split')
         if isinstance(result, Exception):
