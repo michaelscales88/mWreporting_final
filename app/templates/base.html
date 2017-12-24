@@ -15,20 +15,27 @@
 {% import "bootstrap/fixes.html" as fixes %}
 
 {% block head %}
-{{super()}}
-{{fixes.ie8()}}
+{{ super() }}
+{{ fixes.ie8() }}
 <link rel="shortcut icon"
       href="{{ url_for('static', filename='img/favicon.ico') }}">
 {%- endblock %}
 
 {% block styles -%}
-{{super()}}
+{{ super() }}
 <link rel="stylesheet" type="text/css"
       href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block navbar %}
 {{nav.main_nav.render()}}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
 {% endblock %}
 
 {% block footer %}

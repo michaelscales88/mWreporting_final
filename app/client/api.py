@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, flash
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
@@ -36,3 +36,16 @@ class ClientApi(Resource):
                 recordsFiltered=len(frame.index),
                 data=data['data']
             )
+
+    def post(self):
+        print('hit POST Client API')
+        flash('Added client!')
+        parser = RequestParser()
+        parser.add_argument('client_name')
+        parser.add_argument('client_ext')
+        args = parser.parse_args()
+        print(args)
+        status = 204
+        return jsonify(
+            status=status,
+        )

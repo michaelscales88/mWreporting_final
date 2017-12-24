@@ -97,5 +97,5 @@ def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
 
 
-if app.debug:
-    print(app.url_map)
+# if app.debug:
+#     print(app.url_map)

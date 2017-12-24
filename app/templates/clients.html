@@ -13,13 +13,20 @@
                 <div class='col-md-4'>
                     <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
                 </div>
-                <div class='col-md-4'>
+                <div class='col-md-8'>
+{#                    <select class="selectpicker" data-live-search="true" multiple>#}
+{#                          <option data-tokens="">Mustard</option>#}
+{#                        </select>#}
+{#                    <span id=result>?</span>#}
 
-                </div>
-                <div class='col-md-4'>
-
-                <p><button type="button" class="btn btn-primary" id="ajax_button">Run</button>
-                </p>
+                    {% include 'client_modal.html' %}
+                    <!-- Modal has the button to PUT -->
+                    <div class="text-center">
+                        <a href="" class="btn btn-default btn-rounded" data-toggle="modal"
+                           data-target="#addClientModal">Add</a>
+                    </div>
+                    <p><button type="button" class="btn btn-primary" id="remove_button">Run</button>
+                    </p>
                 </div>
             </div>
         </div>
@@ -44,25 +51,34 @@
             rel="stylesheet"></script>
     <script type="text/javascript">
         $(document).ready(function () {
+            function page_api() {
+                console.log("refreshing api");
+                table.ajax.reload();
+            }
 
-            $.getScript("{{ url_for('static', filename='js/ajax_fn.js') }}", function () {
+            let table = $('#displayTable').DataTable({
+                "processing": true,
+                "pageLength": 50,
+                "ajax": {
+                    "url": "{{ url_for(api) }}",
+                    "data": 'data'
+                }
+            });
 
-                let table = $('#displayTable').DataTable({
-                    "processing": true,
-                    "pageLength": 50,
-                    "ajax": {
-                        "url": "{{ url_for(api) }}",
-                        "data": 'data'
-                    }
+            function processForm( e ){
+                $.ajax({
+                    url: "{{ url_for(api) }}",
+                    type: 'post',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: $('#addClientForm').serialize()
                 });
 
-                function page_api() {
-                    console.log("refreshing api");
-                    table.ajax.reload();
-                }
+                e.preventDefault();
+            }
 
-                $('button#ajax_button').on('click', page_api);
-            });
+
+            $('button#add_button').click( processForm );
+            $('button#remove_button').click(page_api);
         });
     </script>
 {% endblock %}
