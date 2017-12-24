@@ -19,8 +19,11 @@ def get_model_headers(model=None):
     return None
 
 
-def query_to_frame(query):
-    return frame
+def query_to_frame(query, table_name=''):
+    try:
+        return pd.read_sql(query.statement, query.session.bind)
+    except AttributeError:
+        return pd.DataFrame.from_records(query, columns=get_model_headers(table_name))
 
 
 def server_side_processing(

@@ -3,7 +3,6 @@ from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
-from app.util.server_processing import server_side_processing
 from .tasks import test_report, report_dispatch
 
 
@@ -13,7 +12,7 @@ class ReportApi(Resource):
         from datetime import datetime, timedelta
         today = datetime.today().now()
 
-        print('Hit API')
+        print('Hit GET Report API')
         parser = RequestParser()
         parser.add_argument('start', type=int, location='args')
         parser.add_argument('draw', type=int, location='args')

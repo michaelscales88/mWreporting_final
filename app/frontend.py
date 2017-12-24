@@ -1,23 +1,24 @@
+# app/frontend.py
 from flask import Blueprint, abort, render_template, current_app
 
 
 from app.util.server_processing import get_model_headers
 
 
-report_blueprint = Blueprint(
-    'report', __name__,
-    template_folder='pages',
-    static_folder='static',
-    static_url_path='/report/static'
+frontend_bp = Blueprint(
+    'frontend', __name__
 )
-_BASE_URL = '/report'
 
 
-@report_blueprint.route(_BASE_URL, defaults={'page': 'report.html'})
-@report_blueprint.route(_BASE_URL + '/', defaults={'page': 'report.html'})
-@report_blueprint.route(_BASE_URL + '/<page>')
+@frontend_bp.route('/', defaults={'page': 'index.html'})
+@frontend_bp.route('/<string:page>')
 def serve_pages(page):
-    if page in ("report.html", "report"):
+    if page in ("index.html", "index"):
+        return render_template(
+            'index.html',
+            title='Home'
+        )
+    elif page in ("report.html", "report"):
         return render_template(
             'report.html',
             title='Reports',
@@ -43,7 +44,7 @@ def serve_pages(page):
             title='Clients',
             iDisplayLength=current_app.config['ROWS_PER_PAGE'],
             api='clientapi',
-            columns=get_model_headers('client'),
+            columns=get_model_headers('client_table'),
             start_date=None,
             end_date=None
         )

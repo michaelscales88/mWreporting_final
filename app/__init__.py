@@ -66,13 +66,13 @@ add_scheduled_data_tasks(app)
 
 
 # Modules
-from .home import home_blueprint
+from .frontend import frontend_bp
+
+app.register_blueprint(frontend_bp)
+
 from .client import ClientApi
 from .data import DataApi
-from .report import report_blueprint, ReportApi
-
-app.register_blueprint(home_blueprint)
-app.register_blueprint(report_blueprint)
+from .report import ReportApi
 
 api.add_resource(ClientApi, '/clientapi')
 api.add_resource(DataApi, '/dataapi')
@@ -86,13 +86,6 @@ health.add_check(get_data_healthcheck)
 # envdump.add_section("application", app)
 
 
-# Routes
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    """Render homepage"""
-    return redirect(url_for('home.serve_pages'))
-
-
 # Error pages
 @app.errorhandler(404)
 def not_found_error(error):
@@ -104,5 +97,5 @@ def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
 
 
-# if app.debug:
-#     print(app.url_map)
+if app.debug:
+    print(app.url_map)

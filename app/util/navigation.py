@@ -6,13 +6,13 @@ def get_nav(app):
     nav = Nav(app)
     nav.register_element(
         'main_nav', Navbar(
-            View('Home', 'index'),
+            View('Home', 'frontend.serve_pages', page='index'),
             Subgroup(
                 'Reports',
-                View('SLA Report', 'report.serve_pages', page='report'),
-                View('Data', 'report.serve_pages', page='data'),
+                View('SLA Report', 'frontend.serve_pages', page='report'),
+                View('Data', 'frontend.serve_pages', page='data'),
                 Separator(),
-                View('Clients', 'report.serve_pages', page='client'),
+                View('Clients', 'frontend.serve_pages', page='client'),
             )
         )
     )

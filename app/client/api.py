@@ -10,16 +10,17 @@ from .tasks import get_clients
 class ClientApi(Resource):
 
     def get(self):
-        print('Hit GET Data API')
+        print('Hit GET Client API')
         parser = RequestParser()
         args = parser.parse_args()
 
-        query = get_clients()
-        frame = query_to_frame(query)
+        query, table_name = get_clients()
+        frame = query_to_frame(query, table_name=table_name)
+        print(frame)
         data = frame.to_dict(orient='split')
         status = 200
         tb = 'Test'
-
+        print(data)
         if isinstance(query, Exception):
             return jsonify(
                 {

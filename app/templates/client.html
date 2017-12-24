@@ -45,7 +45,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $.getScript("{{ url_for('report.static', filename='js/ajax_fn.js') }}", function () {
+            $.getScript("{{ url_for('static', filename='js/ajax_fn.js') }}", function () {
 
                 let table = $('#displayTable').DataTable({
                     "processing": true,
