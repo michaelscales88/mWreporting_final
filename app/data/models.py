@@ -54,28 +54,8 @@ class EventTable(db.Model):
 class LocalSessionMixin(object):
 
     __bind_key__ = None
-    query = loc_data_session.query_property(query_cls=GetOrQuery)
-
-    def save(self):
-        loc_data_session.add(self)
-        self._flush()
-        return self
-
-    def update(self, **kwargs):
-        for attr, value in kwargs.items():
-            setattr(self, attr, value)
-        return self.save()
-
-    def delete(self):
-        loc_data_session.delete(self)
-        self._flush()
-
-    def _flush(self):
-        try:
-            loc_data_session.flush()
-        except DatabaseError:
-            loc_data_session.rollback()
-            raise
+    session = loc_data_session
+    query = session.query_property(query_cls=GetOrQuery)
 
 
 class LocalCallTable(LocalSessionMixin, db.Model):
@@ -109,6 +89,10 @@ class LocalCallTable(LocalSessionMixin, db.Model):
         self.system_id = system_id
         self.caller_id = caller_id
         self.inbound_route = inbound_route
+
+    @hybrid_property
+    def length(self):
+        return self.end_time - self.start_time
 
 
 class LocalEventTable(LocalSessionMixin, db.Model):

@@ -3,26 +3,26 @@ from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
-from .tasks import test_report, report_dispatch
+from app.util.tasks import query_to_frame
+from .tasks import get_reports
 
 
 class ReportApi(Resource):
 
     def get(self):
-        from datetime import datetime, timedelta
-        today = datetime.today().now()
-
         print('Hit GET Report API')
         parser = RequestParser()
-        parser.add_argument('start', type=int, location='args')
-        parser.add_argument('draw', type=int, location='args')
-        parser.add_argument('length', type=int, location='args')
         args = parser.parse_args()
 
-        result, status, tb = report_dispatch(today - timedelta(hours=8), today - timedelta(hours=3))
-        frame, total = server_side_processing(result, args, model_name='sla_report')
+        query = get_reports()
+        frame = query_to_frame(query)
         data = frame.to_dict(orient='split')
-        if isinstance(result, Exception):
+
+        status = 200
+        result = 'test'
+        tb = 'good'
+
+        if isinstance(query, Exception):
             return jsonify(
                 {
                     'status': status,
@@ -33,8 +33,7 @@ class ReportApi(Resource):
         else:
             return jsonify(
                 status=status,
-                draw=args['draw'],
-                recordsTotal=total,
-                recordsFiltered=total,
+                recordsTotal=len(frame.index),
+                recordsFiltered=len(frame.index),
                 data=data['data']
             )

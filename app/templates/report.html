@@ -80,13 +80,11 @@
 
                 let table = $('#displayTable').DataTable({
                     "processing": true,
-                    "serverSide": false,
+                    "pageLength": 50,
                     "ajax": {
                         "url": "{{ url_for(api) }}",
-                        "data": buildAjaxData
-                    },
-                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    "iDisplayLength": {{ iDisplayLength }}
+                        "data": 'data'
+                    }
                 });
 
                 function page_api() {

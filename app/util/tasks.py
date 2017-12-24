@@ -1,6 +1,28 @@
+import pandas as pd
 from kombu import serialization
 
 from app import celery, mail
+
+
+def get_model_headers(model=None):
+    from app.client.tasks import _mmap as client_map
+    from app.data.tasks import _mmap as model_map
+    from app.report.tasks import _mmap as report_map
+
+    all_map = {
+        **client_map,
+        **model_map,
+        **report_map
+    }
+    if model in all_map.keys():
+        return all_map.get(model, None).__repr_attrs__
+    return None
+
+
+def query_to_frame(query):
+    q_entity = query.column_descriptions[0]['type']
+    frame = pd.read_sql(query.statement, query.session.bind)
+    return frame[get_model_headers(q_entity.__tablename__)]
 
 
 @celery.task

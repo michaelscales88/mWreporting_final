@@ -14,6 +14,10 @@ _mmap = {
 }
 
 
+def get_reports():
+    return SLAReport.query
+
+
 def test_report(start_date, end_date, report_id=None):
     """
     Get report from id if it exists or make the report for the interval

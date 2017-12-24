@@ -1,12 +1,15 @@
 from celery.schedules import crontab
+
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func, and_
 from sqlalchemy.dialects import postgresql
 
 from app import celery
-from .models import CallTable, LocalCallTable, EventTable, LocalEventTable, loc_data_session, ext_data_session
-
+from .models import (
+    CallTable, LocalCallTable, EventTable,
+    LocalEventTable, ext_data_session, loc_data_session
+)
 
 _mmap = {
     'loc_call': LocalCallTable,
@@ -14,6 +17,10 @@ _mmap = {
     'c_call': CallTable,
     'c_event': EventTable
 }
+
+
+def get_records():
+    return LocalCallTable.query
 
 
 def add_scheduled_tasks(app):

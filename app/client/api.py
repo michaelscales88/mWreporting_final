@@ -3,7 +3,7 @@ from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
-from app.util.server_processing import query_to_frame
+from app.util.tasks import query_to_frame
 from .tasks import get_clients
 
 
@@ -14,8 +14,8 @@ class ClientApi(Resource):
         parser = RequestParser()
         args = parser.parse_args()
 
-        query, table_name = get_clients()
-        frame = query_to_frame(query, table_name=table_name)
+        query = get_clients()
+        frame = query_to_frame(query)
         print(frame)
         data = frame.to_dict(orient='split')
         status = 200
@@ -32,7 +32,6 @@ class ClientApi(Resource):
         else:
             return jsonify(
                 status=status,
-                draw=args['draw'],
                 recordsTotal=len(frame.index),
                 recordsFiltered=len(frame.index),
                 data=data['data']

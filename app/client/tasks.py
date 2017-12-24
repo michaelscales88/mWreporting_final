@@ -13,4 +13,4 @@ _mmap = {
 
 
 def get_clients():
-    return Client.all(), Client.__tablename__
+    return Client.query
