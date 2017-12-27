@@ -13,20 +13,17 @@
                 <div class='col-md-4'>
                     <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
                 </div>
-                <div class='col-md-8'>
+                <div class='col-md-4'>
 {#                    <select class="selectpicker" data-live-search="true" multiple>#}
 {#                          <option data-tokens="">Mustard</option>#}
 {#                        </select>#}
 {#                    <span id=result>?</span>#}
-
-                    {% include 'client_modal.html' %}
+                </div>
+                <div class='col-md-4'>
+                    {% include 'clientModal.html' %}
                     <!-- Modal has the button to PUT -->
-                    <div class="text-center">
-                        <a href="" class="btn btn-default btn-rounded" data-toggle="modal"
-                           data-target="#addClientModal">Add</a>
-                    </div>
-                    <p><button type="button" class="btn btn-primary" id="remove_button">Run</button>
-                    </p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal"
+                               data-target="#clientModal">Change</button>
                 </div>
             </div>
         </div>
@@ -51,9 +48,13 @@
             rel="stylesheet"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            function page_api() {
-                console.log("refreshing api");
+            function refresh_ajax() {
                 table.ajax.reload();
+            }
+
+            function modalSubmit(event) {
+                $("#clientForm").find("input[name=task]").val(event.data.action);
+                processForm(event);
             }
 
             let table = $('#displayTable').DataTable({
@@ -66,19 +67,29 @@
             });
 
             function processForm( e ){
+                alert('hit processForm' + e.data.action);
+
                 $.ajax({
                     url: "{{ url_for(api) }}",
-                    type: 'post',
+                    type: 'PUT',
                     contentType: 'application/x-www-form-urlencoded',
-                    data: $('#addClientForm').serialize()
-                });
+                    data: $('#clientForm').serialize(),
+                    success: function (data, status, jqXHR) {
+                        console.log(data, status);
+                        refresh_ajax()
+                    },
 
+                });
                 e.preventDefault();
             }
 
+            $('button#addButton').click({action: "add"}, modalSubmit);
+            $('button#removeButton').click({action: "remove"}, modalSubmit);
+            $('button#remove_button').click(refresh_ajax);
 
-            $('button#add_button').click( processForm );
-            $('button#remove_button').click(page_api);
+            $('#clientModal').on('hidden.bs.modal', function () {
+                    $('.modal-body').find('textarea,input').val('');
+            });
         });
     </script>
 {% endblock %}

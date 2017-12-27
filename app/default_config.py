@@ -28,17 +28,13 @@ class Config(object):
         name=os.environ.get('POSTGRES_DB', '')
     )
 
-    SQLALCHEMY_BINDS = {
-        'ext_data': 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
-            user=os.environ.get('DBUSER', ''),
-            pwd=os.environ.get('DBPASS', ''),
-            host=os.environ.get('DBHOST', ''),
-            port=os.environ.get('DBPORT', 9999),
-            name=os.environ.get('DBNAME', '')
-        ),
-        'app_meta': 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_FILENAME',
-                                                  os.path.join(PACKAGEDIR, 'tmp/local_app.db'))
-    }
+    EXTERNAL_DATABASE_URI = 'postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}'.format(
+        user=os.environ.get('DBUSER', ''),
+        pwd=os.environ.get('DBPASS', ''),
+        host=os.environ.get('DBHOST', ''),
+        port=os.environ.get('DBPORT', 9999),
+        name=os.environ.get('DBNAME', '')
+    )
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
                                              os.path.join(PACKAGEDIR, 'tmp/db_repository'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Keep this off to reduce overhead
@@ -65,4 +61,4 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                                            os.path.join(Config.PACKAGEDIR, 'tmp/local_test.db'))
+                                                            os.path.join(Config.PACKAGEDIR, 'tmp/local_app.db'))

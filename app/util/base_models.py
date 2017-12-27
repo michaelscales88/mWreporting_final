@@ -1,4 +1,3 @@
-from flask_sqlalchemy import BaseQuery
 from flask_sqlalchemy.model import BindMetaMixin, Model
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy_mixins import AllFeaturesMixin, ReprMixin
@@ -18,12 +17,6 @@ class ModelBase(Model, AllFeaturesMixin):
     __abstract__ = True
     __repr__ = ReprMixin.__repr__
     pass
-
-
-# get a Model by id, or return a default
-class GetOrQuery(BaseQuery):
-    def get_or(self, ident, default=None):
-        return self.get(ident) or default
 
 
 class NoNameMeta(BindMetaMixin, DeclarativeMeta):

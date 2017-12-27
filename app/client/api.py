@@ -1,10 +1,11 @@
+# client/api.py
 from flask import jsonify, flash
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
 from app.util.tasks import query_to_frame
-from .tasks import get_clients
+from .tasks import client_task
 
 
 class ClientApi(Resource):
@@ -14,9 +15,8 @@ class ClientApi(Resource):
         parser = RequestParser()
         args = parser.parse_args()
 
-        query = get_clients()
+        query = client_task('get')
         frame = query_to_frame(query)
-        print(frame)
         data = frame.to_dict(orient='split')
         status = 200
         tb = 'Test'
@@ -37,14 +37,16 @@ class ClientApi(Resource):
                 data=data['data']
             )
 
-    def post(self):
-        print('hit POST Client API')
+    def put(self):
+        print('hit PUT Client API')
         flash('Added client!')
         parser = RequestParser()
         parser.add_argument('client_name')
         parser.add_argument('client_ext')
+        parser.add_argument('task')
         args = parser.parse_args()
         print(args)
+        client_task(args['task'], args['client_name'], args['client_ext'])
         status = 204
         return jsonify(
             status=status,

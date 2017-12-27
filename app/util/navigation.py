@@ -8,7 +8,7 @@ def get_nav(app):
             View('Home', 'frontend.serve_pages', page='index'),
             Subgroup(
                 'Reports',
-                View('SLA Report', 'frontend.serve_pages', page='report'),
+                View('SLA Report', 'frontend.serve_pages', page='sla_report'),
                 View('Data', 'frontend.serve_pages', page='data'),
                 Separator(),
                 View('Clients', 'frontend.serve_pages', page='clients'),

@@ -1,15 +1,14 @@
-from flask import render_template, url_for, redirect
+from flask import render_template, request, g
+from flask_bootstrap import Bootstrap
 from flask_mail import Mail
 from flask_moment import Moment
-from flask_bootstrap import Bootstrap
 from flask_restful import Api
 from healthcheck import HealthCheck, EnvironmentDump
-from sqlalchemy import event
+from sqlalchemy.exc import DatabaseError
 
 
-from app.database import get_sql_alchemy, init_db
-from app.util import Flask, make_celery, AlchemyEncoder, get_nav
-
+from .database import init_db, get_sql_alchemy, get_session
+from .util import Flask, make_celery, AlchemyEncoder, get_nav
 
 app = Flask(
     __name__,
@@ -25,7 +24,6 @@ api = Api(app)
 app.config.from_object('app.celery_config.Config')
 app.config.from_object('app.default_config.DevelopmentConfig')
 
-
 # Services
 mail = Mail(app)
 celery = make_celery(app)
@@ -36,13 +34,6 @@ health = HealthCheck(app, "/healthcheck")
 envdump = EnvironmentDump(app, "/environment")
 db = get_sql_alchemy(app)
 init_db(db)
-
-
-# Never want to modify data source
-@event.listens_for(db.get_engine(app, 'ext_data'), 'begin')
-def receive_begin(conn):
-    print('setting read only transaction', flush=True)
-    conn.execute('SET TRANSACTION READ ONLY')
 
 
 @app.before_first_request
@@ -57,33 +48,61 @@ def startup_setup():
 
 # Set JSON serializer for the application
 from app.util.tasks import serialization_register_json
-serialization_register_json()
 
+serialization_register_json()
 
 # Init task stuff
 from app.data.tasks import add_scheduled_tasks as add_scheduled_data_tasks
-add_scheduled_data_tasks(app)
 
+add_scheduled_data_tasks(app)
 
 # Modules
 from .frontend import frontend_bp
 
 app.register_blueprint(frontend_bp)
 
-from .client import ClientApi
-from .data import DataApi
-from .report import ReportApi
+from .client.api import ClientApi
+from .data.api import DataApi
+from .report.api import ReportApi
 
 api.add_resource(ClientApi, '/clientapi')
 api.add_resource(DataApi, '/dataapi')
 api.add_resource(ReportApi, '/reportapi')
 
+from app.util.health_tests import get_local_healthcheck, get_data_healthcheck
 
-from app.util.health_tests import get_local_healthcheck, get_app_healthcheck, get_data_healthcheck
 health.add_check(get_local_healthcheck)
-health.add_check(get_app_healthcheck)
 health.add_check(get_data_healthcheck)
+
+
 # envdump.add_section("application", app)
+
+
+# Set API sessions
+@app.before_request
+def before_request():
+    if request.endpoint in ("clientapi",):
+        g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
+    else:
+        pass
+
+
+# Commit and remove API sessions
+@app.after_request
+def after_request(response):
+    session = g.get('local_session')
+    if session:
+        try:
+            session.commit()
+            print('commit local session')
+        # Rollback a bad session
+        except DatabaseError:
+            session.rollback()
+        # Always close the session
+        finally:
+            print('remove local session')
+            session.remove()
+    return response
 
 
 # Error pages
@@ -96,6 +115,5 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
 
-
-# if app.debug:
-#     print(app.url_map)
+if app.debug:
+    print(app.url_map)

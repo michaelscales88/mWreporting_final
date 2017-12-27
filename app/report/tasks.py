@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app import celery
 
-from .models import SLAReport, app_meta_session
+from .models import SLAReport
 
 
 _mmap = {
@@ -37,38 +37,38 @@ def report_dispatch(start_time, end_time, report_id=None):
     Get report from id if it exists or make the report for the interval
     """
     report = None
-    try:
-        # Check if the the report exists
-        if report_id:
-            report = SLAReport.query.get_or(report_id)
-        else:
-            report = SLAReport.query.filter(
-                and_(
-                    SLAReport.start_time == start_time,
-                    SLAReport.end_time == end_time,
-                )
-            )
-
-        # If none exists make one
-        if not report:
-
-            print(report)
-            report = "Success"
-
-    except (DatabaseError, NoResultFound):
-        app_meta_session.rollback()
-    else:
-        app_meta_session.commit()
-    finally:
-        app_meta_session.remove()
-    # Add report model stuff here
-    print('for sure i did this')
-    return [{
-        'id': 'Test Successful',
-        'date': start_time,
-        'report': end_time,
-        'notes': report
-    }], None, 200
+    # try:
+    #     # Check if the the report exists
+    #     if report_id:
+    #         report = SLAReport.query.get_or(report_id)
+    #     else:
+    #         report = SLAReport.query.filter(
+    #             and_(
+    #                 SLAReport.start_time == start_time,
+    #                 SLAReport.end_time == end_time,
+    #             )
+    #         )
+    #
+    #     # If none exists make one
+    #     if not report:
+    #
+    #         print(report)
+    #         report = "Success"
+    #
+    # except (DatabaseError, NoResultFound):
+    #     app_meta_session.rollback()
+    # else:
+    #     app_meta_session.commit()
+    # finally:
+    #     app_meta_session.remove()
+    # # Add report model stuff here
+    # print('for sure i did this')
+    # return [{
+    #     'id': 'Test Successful',
+    #     'date': start_time,
+    #     'report': end_time,
+    #     'notes': report
+    # }], None, 200
 
 
 class SqlAlchemyTask(celery.Task):
@@ -77,16 +77,18 @@ class SqlAlchemyTask(celery.Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
-        try:
-            return super().__call__(*args, **kwargs)
-        except DatabaseError:
-            app_meta_session.rollback()
-        finally:
-            app_meta_session.commit()
+        # try:
+        #     return super().__call__(*args, **kwargs)
+        # except DatabaseError:
+        #     app_meta_session.rollback()
+        # finally:
+        #     app_meta_session.commit()
+        pass
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        app_meta_session.remove()
-        print(task_id, ' closed sessions: ', app_meta_session)
+        # app_meta_session.remove()
+        # print(task_id, ' closed sessions: ', app_meta_session)
+        pass
 
 
 # @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)

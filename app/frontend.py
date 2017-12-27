@@ -1,7 +1,9 @@
 # app/frontend.py
-from flask import Blueprint, abort, render_template, current_app
+from flask import Blueprint, abort, render_template, current_app, request, g
+from sqlalchemy.exc import DatabaseError
 
 
+from app.database import get_session
 from app.util.tasks import get_model_headers
 
 
@@ -18,9 +20,9 @@ def serve_pages(page):
             'index.html',
             title='Home'
         )
-    elif page in ("report.html", "report"):
+    elif page in ("sla_report.html", "sla_report"):
         return render_template(
-            'report.html',
+            'gridDisplay.html',
             title='Reports',
             api='reportapi',
             columns=get_model_headers('sla_report'),
@@ -29,10 +31,10 @@ def serve_pages(page):
         )
     elif page in ("data.html", "data"):
         return render_template(
-            'report.html',
+            'gridDisplay.html',
             title='Data',
             api='dataapi',
-            columns=get_model_headers('loc_call'),
+            columns=get_model_headers('c_call'),
             start_date=None,
             end_date=None
         )

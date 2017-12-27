@@ -5,22 +5,25 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func, and_
 from sqlalchemy.dialects import postgresql
 
-from app import celery
-from .models import (
-    CallTable, LocalCallTable, EventTable,
-    LocalEventTable, ext_data_session, loc_data_session
-)
+from .models import CallTable, EventTable
+from app import app, celery
+from app.database import get_session
+
+
+ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
+local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
+CallTable.set_session(local_session)
+EventTable.set_session(local_session)
+
 
 _mmap = {
-    'loc_call': LocalCallTable,
-    'loc_event': LocalEventTable,
     'c_call': CallTable,
     'c_event': EventTable
 }
 
 
 def get_records():
-    return LocalCallTable.query
+    return CallTable.query
 
 
 def add_scheduled_tasks(app):
@@ -56,30 +59,31 @@ def data_task(task, start_time, end_time, id=None):
 
 
 def load_test(start_time, end_time):
-    try:
-        results = CallTable.query.filter(
-            and_(
-                CallTable.start_time >= start_time,
-                CallTable.end_time <= end_time,
-            )
-        )
-
-        for r in results.all():
-            exists = LocalCallTable.query.get_or(r.call_id) is not None
-            if exists:
-                print('record already exists')
-            else:
-                print('adding ', r.__dict__)
-                LocalCallTable(**r.__dict__).save()
-    except (DatabaseError, NoResultFound):
-        loc_data_session.rollback()
-        ext_data_session.rollback()
-    else:
-        loc_data_session.commit()
-    finally:
-        loc_data_session.remove()
-        ext_data_session.remove()
-    return True
+    pass
+    # try:
+    #     results = CallTable.query.filter(
+    #         and_(
+    #             CallTable.start_time >= start_time,
+    #             CallTable.end_time <= end_time,
+    #         )
+    #     )
+    #
+    #     for r in results.all():
+    #         exists = LocalCallTable.query.get_or(r.call_id) is not None
+    #         if exists:
+    #             print('record already exists')
+    #         else:
+    #             print('adding ', r.__dict__)
+    #             LocalCallTable(**r.__dict__).save()
+    # except (DatabaseError, NoResultFound):
+    #     loc_data_session.rollback()
+    #     ext_data_session.rollback()
+    # else:
+    #     loc_data_session.commit()
+    # finally:
+    #     loc_data_session.remove()
+    #     ext_data_session.remove()
+    # return True
 
 
 def get_test(start_time, end_time):
@@ -97,17 +101,19 @@ class SqlAlchemyTask(celery.Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
-        try:
-            return super().__call__(*args, **kwargs)
-        except DatabaseError:
-            loc_data_session.rollback()
-        finally:
-            loc_data_session.commit()
+        # try:
+        #     return super().__call__(*args, **kwargs)
+        # except DatabaseError:
+        #     loc_data_session.rollback()
+        # finally:
+        #     loc_data_session.commit()
+        pass
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        loc_data_session.remove()
-        ext_data_session.remove()
-        print(task_id, ' closed sessions: ', loc_data_session, ext_data_session)
+        # loc_data_session.remove()
+        # ext_data_session.remove()
+        # print(task_id, ' closed sessions: ', loc_data_session, ext_data_session)
+        pass
 
 
 @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)

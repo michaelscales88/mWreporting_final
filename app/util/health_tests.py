@@ -1,7 +1,5 @@
-from app import app, db
-
-
-from app.database import get_scoped_session
+from flask import current_app
+from app.database import get_session
 
 
 def health_database_status(db_session, session_name):
@@ -21,12 +19,8 @@ def health_database_status(db_session, session_name):
 
 
 def get_local_healthcheck():
-    return health_database_status(get_scoped_session(app, db, bind=None), 'local')
+    return health_database_status(get_session(current_app.config['SQLALCHEMY_DATABASE_URI']), 'local')
 
 
 def get_data_healthcheck():
-    return health_database_status(get_scoped_session(app, db, bind='ext_data'), 'data')
-
-
-def get_app_healthcheck():
-    return health_database_status(get_scoped_session(app, db, bind='app_meta'), 'app')
+    return health_database_status(get_session(current_app.config['EXTERNAL_DATABASE_URI'], readonly=True), 'data')
