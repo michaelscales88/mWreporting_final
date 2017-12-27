@@ -81,27 +81,35 @@ health.add_check(get_data_healthcheck)
 # Set API sessions
 @app.before_request
 def before_request():
-    if request.endpoint in ("clientapi",):
+    if request.endpoint in ("clientapi", "dataapi"):
         g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
-    else:
-        pass
+    if request.endpoint in ("dataapi",):
+        g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
 
 
 # Commit and remove API sessions
 @app.after_request
 def after_request(response):
+    ext_session = g.get('ext_session')
+    if ext_session:
+        ext_session.remove()
+        print('remove_session external', ext_session)
+
     session = g.get('local_session')
     if session:
         try:
+            print('trying to commit internal session')
             session.commit()
-            print('commit local session')
+            print('commit session internal: ', session)
         # Rollback a bad session
-        except DatabaseError:
+        except DatabaseError as e:
+            print('Rolling back internal session', e)
             session.rollback()
         # Always close the session
         finally:
-            print('remove local session')
+            print('remove session internal: ', session)
             session.remove()
+
     return response
 
 
@@ -114,6 +122,3 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
-
-if app.debug:
-    print(app.url_map)

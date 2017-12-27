@@ -22,7 +22,7 @@ def serve_pages(page):
         )
     elif page in ("sla_report.html", "sla_report"):
         return render_template(
-            'gridDisplay.html',
+            'reportDisplay.html',
             title='Reports',
             api='reportapi',
             columns=get_model_headers('sla_report'),
@@ -31,7 +31,7 @@ def serve_pages(page):
         )
     elif page in ("data.html", "data"):
         return render_template(
-            'gridDisplay.html',
+            'dataDisplay.html',
             title='Data',
             api='dataapi',
             columns=get_model_headers('c_call'),

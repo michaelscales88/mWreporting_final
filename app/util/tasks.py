@@ -1,5 +1,6 @@
 import pandas as pd
 from kombu import serialization
+from sqlalchemy.inspection import inspect
 
 from app import celery, mail
 
@@ -23,6 +24,10 @@ def query_to_frame(query):
     q_entity = query.column_descriptions[0]['type']
     frame = pd.read_sql(query.statement, query.session.bind)
     return frame[get_model_headers(q_entity.__tablename__)]
+
+
+def get_pk(table):
+    return inspect(table).primary_key[0]
 
 
 @celery.task
