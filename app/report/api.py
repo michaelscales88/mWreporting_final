@@ -7,7 +7,7 @@ from app.util.tasks import query_to_frame
 from .tasks import get_reports
 
 
-class ReportApi(Resource):
+class Report(Resource):
 
     def get(self):
         print('Hit GET Report API')

@@ -23,7 +23,7 @@ def serve_pages(page):
         return render_template(
             'reportDisplay.html',
             title='Reports',
-            api='reportapi',
+            api='backend.report',
             columns=get_model_headers('sla_report'),
             start_date=None,
             end_date=None
@@ -34,7 +34,7 @@ def serve_pages(page):
         return render_template(
             'dataDisplay.html',
             title='Data',
-            api='dataapi',
+            api='backend.data',
             columns=get_model_headers('c_call'),
             end_date=date_time.isoformat(' '),
             start_date=(date_time - timedelta(days=1)).isoformat(' ')
@@ -43,7 +43,7 @@ def serve_pages(page):
         return render_template(
             'clients.html',
             title='Clients',
-            api='clientapi',
+            api='backend.client',
             columns=get_model_headers('client_table'),
             start_date=None,
             end_date=None

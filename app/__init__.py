@@ -2,13 +2,14 @@ from flask import render_template, request, g
 from flask_bootstrap import Bootstrap
 from flask_mail import Mail
 from flask_moment import Moment
-from flask_restful import Api
+from flask_restful.reqparse import RequestParser
 from healthcheck import HealthCheck, EnvironmentDump
 from sqlalchemy.exc import DatabaseError
 
 
 from .database import init_db, get_sql_alchemy, get_session
 from .util import Flask, make_celery, AlchemyEncoder, get_nav
+
 
 app = Flask(
     __name__,
@@ -18,11 +19,12 @@ app = Flask(
     static_folder='static',
     static_url_path='/static'
 )
-api = Api(app)
+
 
 # Settings
 app.config.from_object('app.celery_config.Config')
 app.config.from_object('app.default_config.DevelopmentConfig')
+
 
 # Services
 mail = Mail(app)
@@ -51,23 +53,20 @@ from app.util.tasks import serialization_register_json
 
 serialization_register_json()
 
+
 # Init task stuff
 from app.data.tasks import add_scheduled_tasks as add_scheduled_data_tasks
 
 add_scheduled_data_tasks(app)
 
+
 # Modules
 from .frontend import frontend_bp
+from .backend import api_bp
 
 app.register_blueprint(frontend_bp)
+app.register_blueprint(api_bp)
 
-from .client.api import ClientApi
-from .data.api import DataApi
-from .report.api import ReportApi
-
-api.add_resource(ClientApi, '/clientapi')
-api.add_resource(DataApi, '/dataapi')
-api.add_resource(ReportApi, '/reportapi')
 
 from app.util.health_tests import get_local_healthcheck, get_data_healthcheck
 
@@ -81,9 +80,25 @@ health.add_check(get_data_healthcheck)
 # Set API sessions
 @app.before_request
 def before_request():
-    if request.endpoint in ("clientapi", "dataapi"):
+    g.parser = RequestParser()
+    # Set appropriate sessions and arguments based
+    # on which which api might be visited
+    if request.endpoint in ("backend.client", "backend.data"):
         g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
-    if request.endpoint in ("dataapi",):
+        # Client API arguments
+        g.parser.add_argument(
+            'task', dest='task', location='form',
+            help='A task to complete.',
+        )
+        g.parser.add_argument(
+            'client_name', dest='client_name', location='form',
+            help='A client to change.',
+        )
+        g.parser.add_argument(
+            'client_ext', dest='client_ext', type=int,
+            location='form', help='The client number to change.'
+        )
+    if request.endpoint in ("backend.data",):
         g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
 
 

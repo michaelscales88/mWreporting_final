@@ -8,7 +8,7 @@ from flask_restful.reqparse import RequestParser
 from .tasks import data_task
 
 
-class DataApi(Resource):
+class Data(Resource):
 
     def get(self):
         print('Hit GET Data API')
