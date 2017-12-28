@@ -26,8 +26,8 @@ def serve_pages(page):
             title='Reports',
             api='backend.report',
             columns=get_model_headers('sla_report'),
-            end_date=zero_hour.isoformat(' '),
-            start_date=(zero_hour - timedelta(days=1)).isoformat(' ')
+            end_time=zero_hour.isoformat(' '),
+            start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
         )
     elif page in ("data.html", "data"):
         return render_template(
@@ -35,8 +35,8 @@ def serve_pages(page):
             title='Data',
             api='backend.data',
             columns=get_model_headers('c_call'),
-            end_date=zero_hour.isoformat(' '),
-            start_date=(zero_hour - timedelta(days=1)).isoformat(' ')
+            end_time=zero_hour.isoformat(' '),
+            start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
         )
     elif page in ("clientsDisplay.html", "clients"):
         return render_template(

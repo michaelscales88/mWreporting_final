@@ -36,7 +36,7 @@
                         </span>
                     </div>
                     </form>
-                    <button type="button" class="btn btn-primary" id="ajax_button">Run</button>
+                    <button type="button" class="btn btn-primary" id="dataTableButton">Run</button>
                 </div>
             </div>
         </div>
@@ -64,12 +64,12 @@
         let dtStart = $('#dtSelectStart').datetimepicker({
             useCurrent: false,
             sideBySide: true,
-            defaultDate: "{{ start_date }}"
+            defaultDate: "{{ start_time }}"
         });
         let dtEnd = $('#dtSelectEnd').datetimepicker({
             useCurrent: false, //Important! See issue #1075
             sideBySide: true,
-            defaultDate: "{{ end_date }}"
+            defaultDate: "{{ end_time }}"
         });
         dtEnd.on("dp.change", function (e) {
             dtStart.data("DateTimePicker").maxDate(e.date);
@@ -82,12 +82,12 @@
         let dtLoadStart = $('#dtLoadStart').datetimepicker({
             useCurrent: false,
             sideBySide: true,
-            defaultDate: "{{ start_date }}"
+            defaultDate: "{{ start_time }}"
         });
         let dtLoadEnd = $('#dtLoadEnd').datetimepicker({
             useCurrent: false, //Important! See issue #1075
             sideBySide: true,
-            defaultDate: "{{ end_date }}"
+            defaultDate: "{{ end_time }}"
         });
         dtLoadEnd.on("dp.change", function (e) {
             dtLoadStart.data("DateTimePicker").maxDate(e.date);
@@ -106,16 +106,20 @@
         }
 
         function refresh_ajax() {
-            table.ajax.reload();
+            dataTable.ajax.reload();
         }
 
-        let table = $('#displayTable').DataTable({
-            "processing": true,
-            "pageLength": 50,
-            "ajax": {
-                "url": "{{ url_for(api) }}",
-                "data": ajax_data
-            }
+        let dataTable = $('#displayTable').DataTable({
+            processing: true,
+            pageLength: 50,
+            ajax: {
+                url: "{{ url_for(api) }}",
+                data: ajax_data
+            },
+            error: function (data, status, jqXHR) {
+                console.log(status);
+                alert('Returned from DATA Api');
+             }
         });
 
         function processForm( e ){
@@ -138,8 +142,8 @@
             processForm(event);
         }
 
-        $('button#submitButton').click({action: "load_test"}, modalSubmit);
-        $('button#ajax_button').on('click', refresh_ajax);
+        let submitButton = $('button#submitButton').click({action: "load_test"}, modalSubmit);
+        let dataTableButton = $('button#dataTableButton').on('click', refresh_ajax);
     });
     </script>
 {% endblock %}

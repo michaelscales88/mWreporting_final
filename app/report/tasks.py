@@ -1,12 +1,14 @@
 # report/tasks.py
+from celery.schedules import crontab
 from collections import OrderedDict
 from datetime import timedelta
-from sqlalchemy.exc import DatabaseError
-from sqlalchemy.sql import and_
+from flask import g, abort
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import and_
+
 
 from app import celery
-
+from app.util.tasks import query_to_frame
 from .models import SLAReport
 
 
@@ -15,61 +17,24 @@ _mmap = {
 }
 
 
-def get_reports():
-    return SLAReport.query
+def add_scheduled_tasks(app):
+    # TODO automatically make yesterdays report at 12:01 AM
+    # app.config['CELERYBEAT_SCHEDULE']['test'] = {
+    #     'task': 'app.data.tasks.load_data',
+    #     'schedule': crontab(minute='*/15'),
+    #     'args': ('date1', 'date2')
+    # }
+    pass
 
 
-def test_report(start_date, end_date, report_id=None):
-    """
-    Get report from id if it exists or make the report for the interval
-    """
-    # Add report model stuff here
-    print('for sure i did this')
-    return [{
-        'id': 'Test Successful',
-        'date': start_date,
-        'report': end_date,
-        'notes': report_id
-    }], None, 200
-
-
-def report_dispatch(start_time, end_time, report_id=None):
-    """
-    Get report from id if it exists or make the report for the interval
-    """
-    report = None
-    # try:
-    #     # Check if the the report exists
-    #     if report_id:
-    #         report = SLAReport.query.get_or(report_id)
-    #     else:
-    #         report = SLAReport.query.filter(
-    #             and_(
-    #                 SLAReport.start_time == start_time,
-    #                 SLAReport.end_time == end_time,
-    #             )
-    #         )
-    #
-    #     # If none exists make one
-    #     if not report:
-    #
-    #         print(report)
-    #         report = "Success"
-    #
-    # except (DatabaseError, NoResultFound):
-    #     app_meta_session.rollback()
-    # else:
-    #     app_meta_session.commit()
-    # finally:
-    #     app_meta_session.remove()
-    # # Add report model stuff here
-    # print('for sure i did this')
-    # return [{
-    #     'id': 'Test Successful',
-    #     'date': start_time,
-    #     'report': end_time,
-    #     'notes': report
-    # }], None, 200
+def get_report(session, table_name, start_time, end_time):
+    table = _mmap.get(table_name)
+    return session.query(table).filter(
+        and_(
+            table.start_time == start_time,
+            table.end_time == end_time,
+        )
+    )
 
 
 class SqlAlchemyTask(celery.Task):
@@ -90,6 +55,20 @@ class SqlAlchemyTask(celery.Task):
         # app_meta_session.remove()
         # print(task_id, ' closed sessions: ', app_meta_session)
         pass
+
+
+def test_report(start_date, end_date, report_id=None):
+    """
+    Get report from id if it exists or make the report for the interval
+    """
+    # Add report model stuff here
+    print('for sure i did this')
+    return [{
+        'id': 'Test Successful',
+        'date': start_date,
+        'report': end_date,
+        'notes': report_id
+    }], None, 200
 
 
 # @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
@@ -117,8 +96,7 @@ class SqlAlchemyTask(celery.Task):
 #     }]
 
 
-@celery.task
-def report_task(start, end):
+def report(start, end):
     success = False
 
     # Create a pyexcel table with the appropriate defaults by column name
@@ -267,3 +245,21 @@ def process_report(in_process_report, records):
                 in_process_report[row_name, 'Average Wait Lost'] += call_duration
 
     return in_process_report
+
+
+def report_task(task_name, start_time=None, end_time=None, id=None):
+    try:
+        query = None
+        if start_time and end_time:
+            if task_name == 'get':
+                query = get_report(g.local_session, 'sla_report', start_time, end_time).first()
+        if query is None:
+            raise NoResultFound()
+    except NoResultFound:
+        return abort(404)
+    else:
+        result = query_to_frame(query, is_report=True)
+        status = 200
+
+    print('returning ', result, status)
+    return result, status

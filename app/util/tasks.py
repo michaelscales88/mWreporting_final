@@ -32,10 +32,17 @@ def get_model_headers(model=None):
     return None
 
 
-def query_to_frame(query):
-    q_entity = query.column_descriptions[0]['type']
-    frame = pd.read_sql(query.statement, query.session.bind)
-    return frame[get_model_headers(q_entity.__tablename__)]
+def query_to_frame(query, is_report=False):
+    if is_report:
+        # convert the json_type from report into a frame
+        # frame =
+        frame = None
+        pass
+    else:
+        q_entity = query.column_descriptions[0]['type']
+        frame = pd.read_sql(query.statement, query.session.bind)
+        frame = frame[get_model_headers(q_entity.__tablename__)]
+    return frame
 
 
 def get_pk(table):

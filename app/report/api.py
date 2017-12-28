@@ -12,28 +12,16 @@ class Report(Resource):
         print('Hit GET Report API')
         args = g.parser.parse_args()
         print(args)
-        frame, status, tb = report_task(
+        frame, status = report_task(
             args['task'],
             start_time=args['start_time'],
             end_time=args['end_time']
         )
         data = frame.to_dict(orient='split')
-
-        if isinstance(data, Exception):
-            return jsonify(
-                {
-                    'status': status,
-                    'error': str(status),
-                    'traceback': tb,
-                }
-            )
-        else:
-            return jsonify(
-                status=status,
-                recordsTotal=len(frame.index),
-                recordsFiltered=len(frame.index),
-                data=data['data']
-            )
+        return jsonify(
+            status=status,
+            data=data['data']
+        )
 
     def put(self):
         print('Hit PUT Report API')

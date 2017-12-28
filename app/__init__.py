@@ -88,9 +88,8 @@ def before_request():
         'task', dest='task', help='A task to complete.'
     )
 
-    # Session + Parser configuration
-    if request.endpoint in ("backend.client", "backend.data"):
-        g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
+    # Parser configuration
+    if request.endpoint in ("backend.client",):
         # Client API arguments
         g.parser.add_argument(
             'client_name', dest='client_name', location='form',
@@ -100,8 +99,7 @@ def before_request():
             'client_ext', dest='client_ext', location='form',
             type=int, help='The client number to change.'
         )
-    if request.endpoint in ("backend.data",):
-        g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
+    elif request.endpoint in ("backend.report",  "backend.data"):
         # Data API arguments
         g.parser.add_argument(
             'start_time', dest='start_time', type=to_datetime,
@@ -111,6 +109,15 @@ def before_request():
             'end_time', dest='end_time', type=to_datetime,
             help='End time for data interval.'
         )
+    else:
+        pass
+
+    # Session configuration
+    if request.endpoint in ("backend.report", "backend.client", "backend.data"):
+        g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
+
+    if request.endpoint in ("backend.data",):
+        g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
 
 
 # Commit and remove API sessions
@@ -136,6 +143,8 @@ def after_request(response):
             print('remove session internal: ', session)
             session.remove()
 
+    from json import dumps
+    print(dumps(response, default=str, indent=4))
     return response
 
 
