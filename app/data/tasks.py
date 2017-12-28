@@ -6,7 +6,7 @@ from sqlalchemy.dialects import postgresql
 
 
 from app import celery
-from app.util.tasks import query_to_frame, get_pk
+from app.util.tasks import query_to_frame, get_pk, get_foreign_id
 from .models import CallTable, EventTable
 
 
@@ -96,8 +96,12 @@ def load_test(table_name, start_time, end_time):
     print('load_test ', table)
     if table is not None:
         results = get_data_interval(g.ext_session, table_name, start_time, end_time)
+        foreign_key = get_pk(table)
         for r in results.all():
-            record = g.local_session.query(table).get(r.call_id)
+            # TODO see if the get_foreign_id call can be made only once
+            record = g.local_session.query(table).get(
+                get_foreign_id(r, foreign_key)
+            )
             if record is None:
                 new_record = table(**r.__dict__)
                 g.local_session.add(new_record)
@@ -105,6 +109,7 @@ def load_test(table_name, start_time, end_time):
                 # print('added to ', g.local_session)
             else:
                 print('record already exists')
+                print(record)
 
     return True
 

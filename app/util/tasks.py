@@ -39,7 +39,11 @@ def query_to_frame(query):
 
 
 def get_pk(table):
-    return inspect(table).primary_key[0]
+    return inspect(table).primary_key[0].name
+
+
+def get_foreign_id(query_obj, column_name):
+    return getattr(query_obj, column_name, None)
 
 
 @celery.task
