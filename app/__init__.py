@@ -95,11 +95,13 @@ def before_request():
             help='A client to change.',
         )
         g.parser.add_argument(
-            'client_ext', dest='client_ext', type=int,
-            location='form', help='The client number to change.'
+            'client_ext', dest='client_ext', location='form',
+            type=int, help='The client number to change.'
         )
     if request.endpoint in ("backend.data",):
         g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
+        # Data API arguments
+        g.parser.add_argument()
 
 
 # Commit and remove API sessions
