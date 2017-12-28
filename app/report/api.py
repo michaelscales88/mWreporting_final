@@ -1,32 +1,29 @@
-from flask import jsonify
+# report/api.py
+from flask import jsonify, g
 from flask_restful import Resource
-from flask_restful.reqparse import RequestParser
 
 
-from app.util.tasks import query_to_frame
-from .tasks import get_reports
+from .tasks import report_task
 
 
 class Report(Resource):
 
     def get(self):
         print('Hit GET Report API')
-        parser = RequestParser()
-        args = parser.parse_args()
-
-        query = get_reports()
-        frame = query_to_frame(query)
+        args = g.parser.parse_args()
+        print(args)
+        frame, status, tb = report_task(
+            args['task'],
+            start_time=args['start_time'],
+            end_time=args['end_time']
+        )
         data = frame.to_dict(orient='split')
 
-        status = 200
-        result = 'test'
-        tb = 'good'
-
-        if isinstance(query, Exception):
+        if isinstance(data, Exception):
             return jsonify(
                 {
                     'status': status,
-                    'error': str(result),
+                    'error': str(status),
                     'traceback': tb,
                 }
             )
@@ -37,3 +34,17 @@ class Report(Resource):
                 recordsFiltered=len(frame.index),
                 data=data['data']
             )
+
+    def put(self):
+        print('Hit PUT Report API')
+        args = g.parser.parse_args()
+        print(args)
+        result, status, tb = report_task(
+            args['task'],
+            start_time=args['start_time'],
+            end_time=args['end_time']
+        )
+        print('did a task')
+        return jsonify(
+            status=status,
+        )

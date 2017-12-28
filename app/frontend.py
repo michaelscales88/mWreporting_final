@@ -22,7 +22,7 @@ def serve_pages(page):
         )
     elif page in ("sla_report.html", "sla_report"):
         return render_template(
-            'dataDisplay.html',
+            'data/dataDisplay.html',
             title='Reports',
             api='backend.report',
             columns=get_model_headers('sla_report'),
@@ -31,16 +31,16 @@ def serve_pages(page):
         )
     elif page in ("data.html", "data"):
         return render_template(
-            'dataDisplay.html',
+            'data/dataDisplay.html',
             title='Data',
             api='backend.data',
             columns=get_model_headers('c_call'),
             end_date=zero_hour.isoformat(' '),
             start_date=(zero_hour - timedelta(days=1)).isoformat(' ')
         )
-    elif page in ("clients.html", "clients"):
+    elif page in ("clientsDisplay.html", "clients"):
         return render_template(
-            'clients.html',
+            'clients/clientsDisplay.html',
             title='Clients',
             api='backend.client',
             columns=get_model_headers('client_table'),
