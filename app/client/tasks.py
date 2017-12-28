@@ -31,7 +31,7 @@ def add_client(client_name, client_ext):
     if client:
         client.active = True
     else:
-        new_client = Client.fill(client_name=client_name, ext=client_ext)
+        new_client = Client(client_name=client_name, ext=client_ext)
         g.local_session.add(new_client)
 
 
