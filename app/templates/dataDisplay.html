@@ -22,14 +22,14 @@
                 <div class='col-md-4'>
                     <form id="dateRange">
                     <div class="input-group input-group-lg date">
-                        <input type="text" id="datetimeStart" class="form-control" placeholder="Start from..."
+                        <input type="text" id="dtSelectStart" class="form-control" placeholder="Start from..."
                                aria-describedby="sizing-addon1" name="start_time">
                         <span class="input-group-addon" id="sizing-addon1">
                             <span class="glyphicon glyphicon-calendar"></span>
                         </span>
                     </div>
                     <div class="input-group input-group-lg date">
-                        <input type="text" id="datetimeEnd" class="form-control" placeholder="Go to..."
+                        <input type="text" id="dtSelectEnd" class="form-control" placeholder="Go to..."
                                aria-describedby="sizing-addon1" name="end_time">
                         <span class="input-group-addon" id="sizing-addon1">
                             <span class="glyphicon glyphicon-calendar"></span>
@@ -43,12 +43,10 @@
         <table id="displayTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
             <!-- Configure the headers for the ajax call-->
             <thead>
-            <tr>{% for column in columns %}
-                <th>{{ column }}</th>{% endfor %}</tr>
+                <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
             </thead>
             <tfoot>
-            <tr>{% for column in columns %}
-                <th>{{ column }}</th>{% endfor %}</tr>
+                <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
             </tfoot>
         </table>
     </div>  <!-- /.container -->
@@ -63,28 +61,46 @@
             rel="stylesheet"></script>
     <script type="text/javascript">
     $(document).ready(function () {
-        $('#datetimeStart').datetimepicker({
+        let dtStart = $('#dtSelectStart').datetimepicker({
             useCurrent: false,
             sideBySide: true,
             defaultDate: "{{ start_date }}"
         });
-        $('#datetimeEnd').datetimepicker({
+        let dtEnd = $('#dtSelectEnd').datetimepicker({
             useCurrent: false, //Important! See issue #1075
             sideBySide: true,
             defaultDate: "{{ end_date }}"
         });
-        $("#datetimeEnd").on("dp.change", function (e) {
-            $('#datetimeStart').data("DateTimePicker").maxDate(e.date);
+        dtEnd.on("dp.change", function (e) {
+            dtStart.data("DateTimePicker").maxDate(e.date);
         });
-        $("#datetimeStart").on("dp.change", function (e) {
-            $('#datetimeEnd').data("DateTimePicker").minDate(e.date);
+        dtStart.on("dp.change", function (e) {
+            dtEnd.data("DateTimePicker").minDate(e.date);
+        });
+    });
+    $(document).ready(function () {
+        let dtLoadStart = $('#dtLoadStart').datetimepicker({
+            useCurrent: false,
+            sideBySide: true,
+            defaultDate: "{{ start_date }}"
+        });
+        let dtLoadEnd = $('#dtLoadEnd').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
+            sideBySide: true,
+            defaultDate: "{{ end_date }}"
+        });
+        dtLoadEnd.on("dp.change", function (e) {
+            dtLoadStart.data("DateTimePicker").maxDate(e.date);
+        });
+        dtLoadStart.on("dp.change", function (e) {
+            dtLoadEnd.data("DateTimePicker").minDate(e.date);
         });
     });
     $(document).ready(function () {
         function ajax_data() {
             return {
-                start_time: $('#datetimeStart').val(),
-                end_time: $('#datetimeEnd').val(),
+                start_time: $('#dtSelectStart').val(),
+                end_time: $('#dtSelectEnd').val(),
                 task: 'get'
             };
         }
