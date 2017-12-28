@@ -77,16 +77,18 @@ health.add_check(get_data_healthcheck)
 # envdump.add_section("application", app)
 
 
-# Set API sessions
+# Configuration for API
 @app.before_request
 def before_request():
     from .util.tasks import to_datetime
+
+    # Default parser arguments
     g.parser = RequestParser()
-    # Set appropriate sessions and arguments based
-    # on which which api might be visited
     g.parser.add_argument(
         'task', dest='task', help='A task to complete.'
     )
+
+    # Session + Parser configuration
     if request.endpoint in ("backend.client", "backend.data"):
         g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
         # Client API arguments
