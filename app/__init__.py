@@ -80,19 +80,19 @@ health.add_check(get_data_healthcheck)
 # Set API sessions
 @app.before_request
 def before_request():
+    from .util.tasks import to_datetime
     g.parser = RequestParser()
     # Set appropriate sessions and arguments based
     # on which which api might be visited
+    g.parser.add_argument(
+        'task', dest='task', help='A task to complete.'
+    )
     if request.endpoint in ("backend.client", "backend.data"):
         g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
         # Client API arguments
         g.parser.add_argument(
-            'task', dest='task', location='form',
-            help='A task to complete.',
-        )
-        g.parser.add_argument(
             'client_name', dest='client_name', location='form',
-            help='A client to change.',
+            help='A client to change.'
         )
         g.parser.add_argument(
             'client_ext', dest='client_ext', location='form',
@@ -101,7 +101,14 @@ def before_request():
     if request.endpoint in ("backend.data",):
         g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
         # Data API arguments
-        g.parser.add_argument()
+        g.parser.add_argument(
+            'start_time', dest='start_time', type=to_datetime,
+            help='Start time for data interval.'
+        )
+        g.parser.add_argument(
+            'end_time', dest='end_time', type=to_datetime,
+            help='End time for data interval.'
+        )
 
 
 # Commit and remove API sessions

@@ -1,8 +1,20 @@
 import pandas as pd
+from dateutil.parser import parse
 from kombu import serialization
 from sqlalchemy.inspection import inspect
 
 from app import celery, mail
+
+
+def to_datetime(value, name):
+    try:
+        dt = parse(value)
+    except (ValueError, OverflowError):
+        raise ValueError(
+            "{param} is an invalid time value."
+            "You gave the value: {val}".format(param=name, val=value)
+        )
+    return dt
 
 
 def get_model_headers(model=None):

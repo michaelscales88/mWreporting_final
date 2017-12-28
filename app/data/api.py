@@ -1,8 +1,6 @@
 # data/api.py
-from datetime import datetime as dt
-from flask import jsonify
+from flask import jsonify, g
 from flask_restful import Resource
-from flask_restful.reqparse import RequestParser
 
 
 from .tasks import data_task
@@ -12,14 +10,13 @@ class Data(Resource):
 
     def get(self):
         print('Hit GET Data API')
-        parser = RequestParser()
-        parser.add_argument('start_time', type=str, location='args')
-        parser.add_argument('end_time', type=str, location='args')
-        args = parser.parse_args()
+        args = g.parser.parse_args()
         print(args)
-        from datetime import datetime, timedelta
-        today = datetime.today().now()
-        frame, status, tb = data_task('get', start_time=today - timedelta(hours=8), end_time=today - timedelta(hours=3))
+        frame, status, tb = data_task(
+            args['task'],
+            start_time=args['start_time'],
+            end_time=args['end_time']
+        )
         data = frame.to_dict(orient='split')
         if isinstance(data, Exception):
             return jsonify(
@@ -39,18 +36,12 @@ class Data(Resource):
 
     def put(self):
         print('Hit PUT Data API')
-        parser = RequestParser()
-        parser.add_argument('client_name')
-        parser.add_argument('client_ext')
-        parser.add_argument('task')
-        args = parser.parse_args()
+        args = g.parser.parse_args()
         print(args)
-        from datetime import datetime, timedelta
-        today = datetime.today().now()
         result, status, tb = data_task(
             args['task'],
-            start_time=today - timedelta(hours=4, minutes=30),
-            end_time=today - timedelta(hours=3)
+            start_time=args['start_time'],
+            end_time=args['end_time']
         )
         print('did a task')
         return jsonify(
