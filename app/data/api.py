@@ -1,4 +1,5 @@
 # data/api.py
+from datetime import datetime as dt
 from flask import jsonify
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
@@ -12,7 +13,10 @@ class DataApi(Resource):
     def get(self):
         print('Hit GET Data API')
         parser = RequestParser()
+        parser.add_argument('start_time', type=str, location='args')
+        parser.add_argument('end_time', type=str, location='args')
         args = parser.parse_args()
+        print(args)
         from datetime import datetime, timedelta
         today = datetime.today().now()
         frame, status, tb = data_task('get', start_time=today - timedelta(hours=8), end_time=today - timedelta(hours=3))

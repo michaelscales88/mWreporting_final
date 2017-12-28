@@ -117,7 +117,9 @@ def data_task(task_name, start_time=None, end_time=None, id=None):
             status = 200
             tb = 'Success'
         elif task_name == 'load_test':
-            result = load_test('c_call', start_time, end_time)
+            result1 = load_test('c_call', start_time, end_time)
+            result2 = load_test('c_event', start_time, end_time)
+            result = result1 and result2
             status = 204 if result else 302
             tb = 'Success'
         else:

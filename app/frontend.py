@@ -1,9 +1,8 @@
 # app/frontend.py
-from flask import Blueprint, abort, render_template, current_app, request, g
-from sqlalchemy.exc import DatabaseError
+from datetime import datetime, timedelta
+from flask import Blueprint, abort, render_template
 
 
-from app.database import get_session
 from app.util.tasks import get_model_headers
 
 
@@ -30,13 +29,15 @@ def serve_pages(page):
             end_date=None
         )
     elif page in ("data.html", "data"):
+        date_time = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+        print(date_time)
         return render_template(
             'dataDisplay.html',
             title='Data',
             api='dataapi',
             columns=get_model_headers('c_call'),
-            start_date=None,
-            end_date=None
+            end_date=date_time.isoformat(' '),
+            start_date=(date_time - timedelta(days=1)).isoformat(' ')
         )
     elif page in ("clients.html", "clients"):
         return render_template(

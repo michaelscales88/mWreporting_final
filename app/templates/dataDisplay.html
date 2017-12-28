@@ -20,23 +20,23 @@
                                data-target="#dataModal">Change</button>
                 </div>
                 <div class='col-md-4'>
-                    <div class="form-group">
-                        <div class="input-group input-group-lg date" id="datetime-start">
-                            <input type="text" class="form-control" placeholder="Start from..."
-                                   aria-describedby="sizing-addon1">
-                            <span class="input-group-addon" id="sizing-addon1">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                        <div class="input-group input-group-lg date" id="datetime-end">
-                            <input type="text" class="form-control" placeholder="Go to..."
-                                   aria-describedby="sizing-addon1">
-                            <span class="input-group-addon" id="sizing-addon1">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
+                    <form id="dateRange">
+                    <div class="input-group input-group-lg date">
+                        <input type="text" id="datetimeStart" class="form-control" placeholder="Start from..."
+                               aria-describedby="sizing-addon1" name="start_time">
+                        <span class="input-group-addon" id="sizing-addon1">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
                     </div>
-                <button type="button" class="btn btn-primary" id="ajax_button">Run</button>
+                    <div class="input-group input-group-lg date">
+                        <input type="text" id="datetimeEnd" class="form-control" placeholder="Go to..."
+                               aria-describedby="sizing-addon1" name="end_time">
+                        <span class="input-group-addon" id="sizing-addon1">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                    </form>
+                    <button type="button" class="btn btn-primary" id="ajax_button">Run</button>
                 </div>
             </div>
         </div>
@@ -62,58 +62,67 @@
     <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTables', use_minified=true) }}"
             rel="stylesheet"></script>
     <script type="text/javascript">
-        $(document).ready(function () {
-            $('#datetime-start').datetimepicker();
-            $('#datetime-end').datetimepicker({
-                useCurrent: false //Important! See issue #1075
-            });
-            $("#datetime-start").on("dp.change", function (e) {
-                $('#datetime-end').data("DateTimePicker").minDate(e.date);
-            });
-            $("#datetime-end").on("dp.change", function (e) {
-                $('#datetime-start').data("DateTimePicker").maxDate(e.date);
-            });
+    $(document).ready(function () {
+        $('#datetimeStart').datetimepicker({
+            useCurrent: false,
+            sideBySide: true,
+            defaultDate: "{{ start_date }}"
         });
-        $(document).ready(function () {
-
-            $.getScript("{{ url_for('static', filename='js/ajax_fn.js') }}", function () {
-
-                function refresh_ajax() {
-                    $('#displayTable').ajax.reload();
-                }
-
-                function modalSubmit(event) {
-                    $("#dataForm").find("input[name=task]").val(event.data.action);
-                    processForm(event);
-                }
-
-                $('#displayTable').DataTable({
-                    "processing": true,
-                    "pageLength": 50,
-                    "ajax": {
-                        "url": "{{ url_for(api) }}",
-                        "data": 'data'
-                    }
-                });
-
-                function processForm( e ){
-
-                    $.ajax({
-                        url: "{{ url_for(api) }}",
-                        type: 'PUT',
-                        contentType: 'application/x-www-form-urlencoded',
-                        data: $('#dataForm').serialize(),
-                        success: function (data, status, jqXHR) {
-                            console.log(data, status);
-                            refresh_ajax()
-                        }
-                    });
-                    e.preventDefault();
-                }
-
-                $('button#submitButton').click({action: "load_test"}, modalSubmit);
-                $('button#ajax_button').on('click', refresh_ajax);
-            });
+        $('#datetimeEnd').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
+            sideBySide: true,
+            defaultDate: "{{ end_date }}"
         });
+        $("#datetimeEnd").on("dp.change", function (e) {
+            $('#datetimeStart').data("DateTimePicker").maxDate(e.date);
+        });
+        $("#datetimeStart").on("dp.change", function (e) {
+            $('#datetimeEnd').data("DateTimePicker").minDate(e.date);
+        });
+    });
+    $(document).ready(function () {
+        function ajax_data() {
+            return {
+                start_time: $('#datetimeStart').val(),
+                end_time: $('#datetimeEnd').val()
+            };
+        }
+
+        function refresh_ajax() {
+            table.ajax.reload();
+        }
+
+        let table = $('#displayTable').DataTable({
+            "processing": true,
+            "pageLength": 50,
+            "ajax": {
+                "url": "{{ url_for(api) }}",
+                "data": ajax_data
+            }
+        });
+
+        function processForm( e ){
+
+            $.ajax({
+                url: "{{ url_for(api) }}",
+                type: 'PUT',
+                contentType: 'application/x-www-form-urlencoded',
+                data: $('#dataForm').serialize(),
+                success: function (data, status, jqXHR) {
+                    console.log(data, status);
+                    refresh_ajax()
+                }
+            });
+            e.preventDefault();
+        }
+
+        function modalSubmit(event) {
+            $("#dataForm").find("input[name=task]").val(event.data.action);
+            processForm(event);
+        }
+
+        $('button#submitButton').click({action: "load_test"}, modalSubmit);
+        $('button#ajax_button').on('click', refresh_ajax);
+    });
     </script>
 {% endblock %}
