@@ -27,7 +27,8 @@ def serve_pages(page):
             api='backend.report',
             columns=get_model_headers('sla_report'),
             end_time=zero_hour.isoformat(' '),
-            start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
+            start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
+            fallback='data'
         )
     elif page in ("data.html", "data"):
         return render_template(

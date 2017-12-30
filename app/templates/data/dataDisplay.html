@@ -97,6 +97,11 @@
         });
     });
     $(document).ready(function () {
+        function pageRedirect(tgt_url) {
+            window.location.replace(tgt_url);
+        }
+        setTimeout("pageRedirect()", 10000);
+
         function ajax_data() {
             return {
                 start_time: $('#dtSelectStart').val(),
@@ -106,20 +111,20 @@
         }
 
         function refresh_ajax() {
-            dataTable.ajax.reload();
+            displayTable.ajax.reload();
         }
 
-        let dataTable = $('#displayTable').DataTable({
+        let displayTable = $('#displayTable').DataTable({
             processing: true,
             pageLength: 50,
             ajax: {
                 url: "{{ url_for(api) }}",
-                data: ajax_data
-            },
-            error: function (data, status, jqXHR) {
-                console.log(status);
-                alert('Returned from DATA Api');
-             }
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Direct the API to create the report if none exists.
+                    submitButton.trigger( "click" );
+                },
+                data: ajax_data,
+            }
         });
 
         function processForm( e ){
@@ -129,9 +134,17 @@
                 type: 'PUT',
                 contentType: 'application/x-www-form-urlencoded',
                 data: $('#dataForm').serialize(),
-                success: function (data, status, jqXHR) {
-                    console.log(data, status);
+                success: function (jqXHR, textStatus, errorThrown) {
+                    // Refresh the datatable if the request was a success
                     refresh_ajax()
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Notify the user that the report cannot be generated
+                    // and redirect to data page.
+                    let redirect = "{{ url_for('frontend.serve_pages', page=fallback) }}";
+                    alert('Report cannot be created. Data does not exist.' +
+                          'Please download records for selected date range.');
+                    pageRedirect(redirect);
                 }
             });
             e.preventDefault();

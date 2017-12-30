@@ -253,6 +253,7 @@ def report_task(task_name, start_time=None, end_time=None, id=None):
         if start_time and end_time:
             if task_name == 'get':
                 query = get_report(g.local_session, 'sla_report', start_time, end_time).first()
+
         if query is None:
             raise NoResultFound()
     except NoResultFound:
@@ -261,5 +262,4 @@ def report_task(task_name, start_time=None, end_time=None, id=None):
         result = query_to_frame(query, is_report=True)
         status = 200
 
-    print('returning ', result, status)
     return result, status
