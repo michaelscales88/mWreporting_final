@@ -61,102 +61,56 @@
             rel="stylesheet"></script>
     <script type="text/javascript">
     $(document).ready(function () {
-        let dtStart = $('#dtSelectStart').datetimepicker({
-            useCurrent: false,
-            sideBySide: true,
-            defaultDate: "{{ start_time }}"
+        // DateTimePicker config
+        let dtpConfig = {
+            startTime: "{{ start_time }}",
+            endTime: "{{ end_time }}"
+        };
+
+        // DataTable config
+        let dtConfig = {
+            api: "{{ url_for(api) }}",
+            triggerEvent: 'button#submitButton',
+            tableName: '#displayTable'
+        };
+
+        // Modal config
+        let modalConfig = {
+            api: "{{ url_for(api) }}",
+            redirect: "{{ url_for('frontend.serve_pages', page=fallback) }}",
+            formName: "#dataForm"
+        };
+
+        // dateTimePicker for dtSelectStart & dtSelectEnd
+        $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
+            dtSelector('#dtSelectStart', '#dtSelectEnd', dtpConfig);
         });
-        let dtEnd = $('#dtSelectEnd').datetimepicker({
-            useCurrent: false, //Important! See issue #1075
-            sideBySide: true,
-            defaultDate: "{{ end_time }}"
+
+        // dateTimePicker for dtLoadStart & dtLoadEnd
+        $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
+            dtSelector('#dtLoadStart', '#dtLoadEnd', dtpConfig);
         });
-        dtEnd.on("dp.change", function (e) {
-            dtStart.data("DateTimePicker").maxDate(e.date);
+
+        // configure the data grid
+        $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function( data, textStatus, jqxhr ) {
+            let table = getDataTable('#dtSelectStart', '#dtSelectEnd', dtConfig);
+            $('button#dataTableButton').on('click', function() {
+                table.ajax.reload();
+            });
         });
-        dtStart.on("dp.change", function (e) {
-            dtEnd.data("DateTimePicker").minDate(e.date);
+
+        // configure the modalForm
+        $.getScript("{{ url_for('static', filename='js/modalForm.js') }}", function( data, textStatus, jqxhr ) {
+            let modalForm = getModalForm(modalConfig);
+            $('button#submitButton').on('click', function() {
+                modalForm.submit({action: "test"});
+            });
         });
-    });
-    $(document).ready(function () {
-        let dtLoadStart = $('#dtLoadStart').datetimepicker({
-            useCurrent: false,
-            sideBySide: true,
-            defaultDate: "{{ start_time }}"
-        });
-        let dtLoadEnd = $('#dtLoadEnd').datetimepicker({
-            useCurrent: false, //Important! See issue #1075
-            sideBySide: true,
-            defaultDate: "{{ end_time }}"
-        });
-        dtLoadEnd.on("dp.change", function (e) {
-            dtLoadStart.data("DateTimePicker").maxDate(e.date);
-        });
-        dtLoadStart.on("dp.change", function (e) {
-            dtLoadEnd.data("DateTimePicker").minDate(e.date);
-        });
-    });
-    $(document).ready(function () {
-        function pageRedirect(tgt_url) {
-            window.location.replace(tgt_url);
+
+        function pageRedirect() {
+            window.location.replace(" ");
         }
         setTimeout("pageRedirect()", 10000);
-
-        function ajax_data() {
-            return {
-                start_time: $('#dtSelectStart').val(),
-                end_time: $('#dtSelectEnd').val(),
-                task: 'get'
-            };
-        }
-
-        function refresh_ajax() {
-            displayTable.ajax.reload();
-        }
-
-        let displayTable = $('#displayTable').DataTable({
-            processing: true,
-            pageLength: 50,
-            ajax: {
-                url: "{{ url_for(api) }}",
-                error: function (jqXHR, textStatus, errorThrown) {
-                    // Direct the API to create the report if none exists.
-                    submitButton.trigger( "click" );
-                },
-                data: ajax_data,
-            }
-        });
-
-        function processForm( e ){
-
-            $.ajax({
-                url: "{{ url_for(api) }}",
-                type: 'PUT',
-                contentType: 'application/x-www-form-urlencoded',
-                data: $('#dataForm').serialize(),
-                success: function (jqXHR, textStatus, errorThrown) {
-                    // Refresh the datatable if the request was a success
-                    refresh_ajax()
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    // Notify the user that the report cannot be generated
-                    // and redirect to data page.
-                    let redirect = "{{ url_for('frontend.serve_pages', page=fallback) }}";
-                    alert('Report cannot be created. Data does not exist.' +
-                          'Please download records for selected date range.');
-                    pageRedirect(redirect);
-                }
-            });
-            e.preventDefault();
-        }
-
-        function modalSubmit(event) {
-            $("#dataForm").find("input[name=task]").val(event.data.action);
-            processForm(event);
-        }
-
-        let submitButton = $('button#submitButton').click({action: "load_test"}, modalSubmit);
-        let dataTableButton = $('button#dataTableButton').on('click', refresh_ajax);
     });
     </script>
 {% endblock %}

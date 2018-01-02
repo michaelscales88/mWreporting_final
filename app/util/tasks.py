@@ -1,9 +1,43 @@
 import pandas as pd
+from flask import jsonify
 from dateutil.parser import parse
 from kombu import serialization
 from sqlalchemy.inspection import inspect
+from functools import wraps
+
 
 from app import celery, mail
+
+
+def return_task(fn):
+
+    @wraps(fn)
+    def wrapper(*args, **kwds):
+        try:
+            frame, status = fn(*args, **kwds)
+            if isinstance(frame, bool):
+                # Boolean frame for model updates
+                key_words = {}
+            else:
+                # Transform data for AJAX
+                data = frame.to_dict(orient='split')
+                key_words = {
+                    # "recordsTotal": len(frame.index),
+                    # "recordsFiltered": len(frame.index),
+                    "data": data['data']
+                }
+        except Exception as e:
+            return jsonify(
+                status=404,
+                error=str(e)
+            )
+        else:
+            return jsonify(
+                status=status,
+                **key_words
+            )
+
+    return wrapper
 
 
 def to_datetime(value, name):

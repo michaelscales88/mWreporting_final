@@ -1,6 +1,6 @@
 # data/tasks.py
 from celery.schedules import crontab
-from flask import g
+from flask import g, abort
 from sqlalchemy.sql import and_
 from sqlalchemy.dialects import postgresql
 
@@ -115,44 +115,25 @@ def load_test(table_name, start_time, end_time):
 
 
 def data_task(task_name, start_time=None, end_time=None, id=None):
-    if start_time and end_time:
+    if start_time and end_time and False:
         if task_name == 'get':
             query = get_data_interval(g.local_session, 'c_call', start_time, end_time)
             result = query_to_frame(query)
             status = 200
-            tb = 'Success'
         elif task_name == 'load_test':
             result1 = load_test('c_call', start_time, end_time)
             result2 = load_test('c_event', start_time, end_time)
             result = result1 and result2
             status = 204 if result else 302
-            tb = 'Success'
+        elif task_name == 'test':
+            result = 'Nothing'
+            status = 200
         else:
             result = 'Nothing'
             status = 200
-            tb = 'Success'
     else:
-        result = 'Nothing'
-        status = 200
-        tb = 'Success'
-    # if task_name == 'load_test':
-    #     result = load_test(start_time, end_time)
-    #     status = 'Test'
-    #     tb = 'Okay'
-    # elif task_name == 'get_test':
-    #     result = get_test(start_time, end_time)
-    #     status = 'Test'
-    #     tb = 'Okay'
-    # else:
-    #     if task == 'load':
-    #         async_result = load_data.delay(start_time, end_time)
-    #     else:
-    #         async_result = get_data.delay(start_time, end_time)
-    #     try:
-    #         result = async_result.get(timeout=5, propagate=False)
-    #     except TimeoutError:
-    #         result = None
-    #     status = async_result.status
-    #     tb = async_result.traceback
+        result = False
+        status = 404
+        abort(status)
 
-    return result, status, tb
+    return result, status

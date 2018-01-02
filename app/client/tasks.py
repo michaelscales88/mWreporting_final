@@ -1,8 +1,10 @@
 # client/tasks.py
-from flask import g
+from flask import g, abort
 from sqlalchemy.sql import and_
 from sqlalchemy.dialects import postgresql
 
+
+from app.util.tasks import query_to_frame
 from .models import Client
 
 
@@ -33,6 +35,7 @@ def add_client(client_name, client_ext):
     else:
         new_client = Client(client_name=client_name, ext=client_ext)
         g.local_session.add(new_client)
+    return True
 
 
 def disable_client(client_name, client_ext):
@@ -40,16 +43,25 @@ def disable_client(client_name, client_ext):
     client = find_client(client_name, client_ext)
     if client:
         client.active = False
+    return True
 
 
 def client_task(task_name, client_name=None, client_ext=None):
-    if client_name or client_ext:
+    if client_name and client_ext:
         if task_name == 'add':
-            add_client(client_name, client_ext)
+            result = add_client(client_name, client_ext)
+
         elif task_name == 'remove':
-            disable_client(client_name, client_ext)
+            result = disable_client(client_name, client_ext)
         else:
-            print('Bad task_name.')
+            result = False
+        status = 200 if result else 404
+    elif task_name == 'get':
+        result = query_to_frame(get_clients())
+        status = 200
     else:
-        if task_name == 'get':
-            return get_clients()
+        result = False
+        status = 404
+        abort(status)
+
+    return result, status

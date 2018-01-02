@@ -1,38 +1,30 @@
 # report/api.py
-from flask import jsonify, g
+from flask import g
 from flask_restful import Resource
 
 
+from app.util.tasks import return_task
 from .tasks import report_task
 
 
 class Report(Resource):
 
+    decorators = [return_task]
+
     def get(self):
         print('Hit GET Report API')
         args = g.parser.parse_args()
-        print(args)
-        frame, status = report_task(
+        return report_task(
             args['task'],
             start_time=args['start_time'],
             end_time=args['end_time']
-        )
-        data = frame.to_dict(orient='split')
-        return jsonify(
-            status=status,
-            data=data['data']
         )
 
     def put(self):
         print('Hit PUT Report API')
         args = g.parser.parse_args()
-        print(args)
-        result, status, tb = report_task(
+        return report_task(
             args['task'],
             start_time=args['start_time'],
             end_time=args['end_time']
-        )
-        print('did a task')
-        return jsonify(
-            status=status,
         )
