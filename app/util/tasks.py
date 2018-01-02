@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import jsonify
+from flask import jsonify, current_app
 from dateutil.parser import parse
 from kombu import serialization
 from sqlalchemy.inspection import inspect
@@ -9,6 +9,14 @@ from functools import wraps
 from app import celery, mail
 
 
+# Celery Tasks
+@celery.task
+def send_async_email(msg):
+    """Background task to send an email with Flask-Mail."""
+    mail.send(msg)
+
+
+# Other Tasks
 def return_task(fn):
 
     @wraps(fn)
@@ -22,11 +30,15 @@ def return_task(fn):
                 # Transform data for AJAX
                 data = frame.to_dict(orient='split')
                 key_words = {
-                    # "recordsTotal": len(frame.index),
-                    # "recordsFiltered": len(frame.index),
                     "data": data['data']
                 }
         except Exception as e:
+            if current_app.config.get('NOISY_ERROR'):
+                import sys
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                          limit=2, file=sys.stdout)
             return jsonify(
                 status=404,
                 error=str(e)
@@ -85,12 +97,6 @@ def get_pk(table):
 
 def get_foreign_id(query_obj, column_name):
     return getattr(query_obj, column_name, None)
-
-
-@celery.task
-def send_async_email(msg):
-    """Background task to send an email with Flask-Mail."""
-    mail.send(msg)
 
 
 def serialization_register_json():

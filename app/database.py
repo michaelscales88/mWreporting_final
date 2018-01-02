@@ -9,10 +9,13 @@ from app.util.base_models import convention, NoNameMeta, ModelBase
 
 def init_db(db):
     # Create database and tables
+    # Must import Models before calling create_all to ensure
+    # tables and metadata are created
 
     from app.client.models import Client
     from app.data.models import EventTable, CallTable
     from app.report.models import SLAReport
+
     db.create_all()
 
 

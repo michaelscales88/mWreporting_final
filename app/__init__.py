@@ -5,7 +5,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 
 
 from .database import init_db, get_sql_alchemy
-from .util import Flask, make_celery, AlchemyEncoder, get_nav
+from .util import Flask, make_celery, AlchemyEncoder, get_nav, add_cdns
 
 
 app = Flask(
@@ -29,11 +29,14 @@ celery = make_celery(app)
 Bootstrap(app)
 nav = get_nav(app)
 moment = Moment(app)
+db = get_sql_alchemy(app)
 health = HealthCheck(app, "/healthcheck")
 # envdump = EnvironmentDump(app, "/environment")
 # envdump.add_section("application", app)
-db = get_sql_alchemy(app)
+
+# Initialize db and CDNS URI
 init_db(db)
+add_cdns(app)
 
 
 # Set JSON serializer for the application

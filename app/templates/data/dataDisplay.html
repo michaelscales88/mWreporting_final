@@ -77,8 +77,9 @@
         // Modal config
         let modalConfig = {
             api: "{{ url_for(api) }}",
-            redirect: "{{ url_for('frontend.serve_pages', page=fallback) }}",
-            formName: "#dataForm"
+            successTrigger: "button#dataTableButton",
+            errorCB: "",
+            form: "#dataForm"
         };
 
         // dateTimePicker for dtSelectStart & dtSelectEnd
@@ -95,6 +96,7 @@
         $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function( data, textStatus, jqxhr ) {
             let table = getDataTable('#dtSelectStart', '#dtSelectEnd', dtConfig);
             $('button#dataTableButton').on('click', function() {
+                console.log('reloading ajax');
                 table.ajax.reload();
             });
         });
@@ -103,14 +105,9 @@
         $.getScript("{{ url_for('static', filename='js/modalForm.js') }}", function( data, textStatus, jqxhr ) {
             let modalForm = getModalForm(modalConfig);
             $('button#submitButton').on('click', function() {
-                modalForm.submit({action: "test"});
+                modalForm.submit({action: "load"});
             });
         });
-
-        function pageRedirect() {
-            window.location.replace(" ");
-        }
-        setTimeout("pageRedirect()", 10000);
     });
     </script>
 {% endblock %}

@@ -105,22 +105,18 @@ def load_test(table_name, start_time, end_time):
             if record is None:
                 new_record = table(**r.__dict__)
                 g.local_session.add(new_record)
-                # print('added record', new_record)
-                # print('added to ', g.local_session)
-            else:
-                print('record already exists')
-                print(record)
 
     return True
 
 
 def data_task(task_name, start_time=None, end_time=None, id=None):
-    if start_time and end_time and False:
+    if start_time and end_time:
         if task_name == 'get':
             query = get_data_interval(g.local_session, 'c_call', start_time, end_time)
             result = query_to_frame(query)
             status = 200
-        elif task_name == 'load_test':
+        elif task_name == 'load':
+            print('starting load_test')
             result1 = load_test('c_call', start_time, end_time)
             result2 = load_test('c_event', start_time, end_time)
             result = result1 and result2

@@ -4,6 +4,8 @@ import os
 class Config(object):
     SECRET_KEY = os.urandom(24)  # Generate a random session key
 
+    NOISY_ERROR = True
+
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     PACKAGEDIR = os.path.dirname(BASEDIR)
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)

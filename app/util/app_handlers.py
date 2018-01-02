@@ -1,3 +1,4 @@
+# util/app_handlers
 from flask import render_template, request, g
 from flask_restful.reqparse import RequestParser
 from sqlalchemy.exc import DatabaseError
@@ -6,10 +7,9 @@ from app import app, mail
 from app.database import get_session
 
 
+# Configuration for APP
 @app.before_first_request
 def startup_setup():
-    from app.util import add_cdns
-    add_cdns(app)
     if not app.debug:
         app.config.from_object('app.default_config.ProductionConfig')
         from app.util import init_logging
@@ -56,11 +56,15 @@ def before_request():
         g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
 
     if request.endpoint in ("backend.data",):
-        # g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
-        pass
+        g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
 
 
 def commit_sessions():
+    """
+    Manage committing local sessions. Will remove the read-only
+    External Session only if one exists for this request
+    :return:
+    """
     ext_session = g.get('ext_session')
     if ext_session:
         ext_session.remove()
@@ -82,7 +86,11 @@ def commit_sessions():
             session.remove()
 
 
-def abort_rollback():
+def rollback_sessions():
+    """
+    Prevent committing any session changes
+    :return:
+    """
     session = g.get('local_session')
     if session:
         # Prevent after_request handler from committing data if aborting
@@ -93,20 +101,17 @@ def abort_rollback():
 @app.after_request
 def after_request(response):
     commit_sessions()
-
-    from json import dumps
-    print(dumps(response, default=str, indent=4))
     return response
 
 
 # Error pages
 @app.errorhandler(404)
 def not_found_error(error):
-    abort_rollback()
+    rollback_sessions()
     return render_template('404.html', title='Page Not Found'), 404
 
 
 @app.errorhandler(500)
 def internal_error(error):
-    abort_rollback()
+    rollback_sessions()
     return render_template('500.html', title='Resource Error'), 500
