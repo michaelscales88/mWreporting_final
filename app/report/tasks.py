@@ -96,10 +96,11 @@ def test_report(start_date, end_date, report_id=None):
 #     }]
 
 
-def report(start, end):
-    success = False
+def make_report(start, end):
+    # Check if the data exists for the interval
 
-    # Create a pyexcel table with the appropriate defaults by column name
+
+    # Create report matrix
     prepared_report = make_pyexcel_table(
         current_app.config['sla_report_headers'],
         list(current_app.config['CLIENTS']),
@@ -149,7 +150,7 @@ def report(start, end):
     finally:
         db_session.remove()
 
-    return success
+    return True
 
 
 def prepare_records(record_list):
@@ -249,17 +250,21 @@ def process_report(in_process_report, records):
 
 def report_task(task_name, start_time=None, end_time=None, id=None):
     try:
-        query = None
+        result = None
         if start_time and end_time:
             if task_name == 'get':
-                query = get_report(g.local_session, 'sla_report', start_time, end_time).first()
+                result = get_report(g.local_session, 'sla_report', start_time, end_time).first()
+            elif task_name == 'make':
+                result = make_report(start_time, end_time)
 
-        if query is None:
+        if result is None:
             raise NoResultFound()
     except NoResultFound:
-        return abort(404)
+        result = None
+        status = 404
+        abort(status)
     else:
-        result = query_to_frame(query, is_report=True)
+        result = query_to_frame(result, is_report=True)
         status = 200
 
     return result, status
