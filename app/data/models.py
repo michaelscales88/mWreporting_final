@@ -1,7 +1,17 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 
-
+from app.util import json_type
 from app import db
+
+
+class RecordDay(db.Model):
+
+    __tablename__ = 'record_day'
+    __repr_attrs__ = ['date', 'complete', 'created', 'last_updated']
+
+    date = db.Column(db.Date, primary_key=True)
+    complete = db.Column(db.Boolean, default=False, nullable=False)
+    complete_check = db.Column(json_type)
 
 
 class CallTable(db.Model):
