@@ -1,3 +1,4 @@
+# report/models.py
 from app.util import json_type
 from app import db
 
@@ -12,3 +13,8 @@ class SLAReport(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     report = db.Column(json_type)
     notes = db.Column(db.Text)
+
+
+_mmap = {
+    "sla_report": SLAReport
+}

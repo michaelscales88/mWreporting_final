@@ -3,18 +3,13 @@ from celery.schedules import crontab
 from collections import OrderedDict
 from datetime import timedelta
 from flask import g, abort
+from pyexcel import Sheet
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_
 
 
 from app import celery
-from app.util.tasks import query_to_frame
-from .models import SLAReport
-
-
-_mmap = {
-    "sla_report": SLAReport
-}
+from app.util.tasks import query_to_frame, get_model
 
 
 def add_scheduled_tasks(app):
@@ -28,11 +23,30 @@ def add_scheduled_tasks(app):
 
 
 def get_report(session, table_name, start_time, end_time):
-    table = _mmap.get(table_name)
+    table = get_model(table_name)
     return session.query(table).filter(
         and_(
             table.start_time == start_time,
             table.end_time == end_time,
+        )
+    )
+
+
+def get_report_data(session):
+    c_table = get_model('c_call')
+    e_table = get_model('c_event')
+    return session.query(
+        CallTable,
+        EventTable.event_type,
+        EventTable.start_time.label('event_start_time'),
+        EventTable.end_time.label('event_end_time')
+    ).join(
+        EventTable
+    ).filter(
+        and_(
+            CallTable.start_time >= start,
+            CallTable.end_time <= end,
+            CallTable.call_direction == 1
         )
     )
 
@@ -99,13 +113,7 @@ def test_report(start_date, end_date, report_id=None):
 def make_report(start, end):
     # Check if the data exists for the interval
 
-
-    # Create report matrix
-    prepared_report = make_pyexcel_table(
-        current_app.config['sla_report_headers'],
-        list(current_app.config['CLIENTS']),
-        current_app.config['sla_default_row']
-    )
+    # Create report for interval
 
     try:
         session.query(

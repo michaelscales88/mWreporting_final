@@ -63,19 +63,24 @@ def to_datetime(value, name):
     return dt
 
 
-def get_model_headers(model=None):
+def get_model(model=None):
     from app.client.tasks import _mmap as client_map
     from app.data.tasks import _mmap as model_map
-    from app.report.tasks import _mmap as report_map
+    from app.report.models import _mmap as report_map
 
+    # Access models from any module by name
     all_map = {
         **client_map,
         **model_map,
         **report_map
     }
-    if model in all_map.keys():
-        return all_map.get(model, None).__repr_attrs__
-    return None
+
+    return all_map.get(model, None)
+
+
+def get_model_headers(model=None):
+    model = get_model_headers(model)
+    return model.__repr_attrs__ if model else None
 
 
 def query_to_frame(query, is_report=False):

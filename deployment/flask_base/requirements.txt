@@ -11,6 +11,7 @@ flower
 healthcheck
 kombu
 psycopg2
+pyexcel
 pyyaml
 sqlalchemy
 SQLAlchemy-utils
