@@ -1,5 +1,5 @@
-from app import db
 from app.util import json_type
+from app import db
 
 
 class SLAReport(db.Model):
