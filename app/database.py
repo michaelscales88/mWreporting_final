@@ -14,7 +14,7 @@ def init_db(db):
 
     from app.client.models import Client
     from app.data.models import EventTable, CallTable
-    from app.report.models import SLAReport
+    from app.report.models import SlaData
 
     db.create_all()
 

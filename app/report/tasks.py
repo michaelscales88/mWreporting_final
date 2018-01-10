@@ -5,14 +5,14 @@ from datetime import timedelta
 from flask import g, abort
 from json import dumps
 from pandas import DataFrame
-from pyexcel import Sheet
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_
 
 
 from app import celery
 from app.data.tasks import get_data_interval
-from app.util.tasks import query_to_frame, get_model
+from app.util.tasks import get_model
+from .models import SlaData
 
 
 def add_scheduled_tasks(app):
@@ -99,20 +99,16 @@ def make_report(session, start_time, end_time):
 
     query = get_data_interval(session, 'c_call', start_time, end_time)
 
-    # Create report for interval
+    # Collate data for interval
 
-    # Pyexcel sheet
     output_headers = [
         'I/C Presented',
         'I/C Live Answered',
         'I/C Abandoned',
         'Voice Mails',
-        'Incoming Live Answered (%)',
-        'Incoming Received (%)',
-        'Incoming Abandoned (%)',
-        'Average Incoming Duration',
-        'Average Wait Answered',
-        'Average Wait Lost',
+        'Answered Incoming Duration',
+        'Answered Wait Duration',
+        'Lost Wait Duration',
         'Calls Ans Within 15',
         'Calls Ans Within 30',
         'Calls Ans Within 45',
@@ -128,12 +124,9 @@ def make_report(session, start_time, end_time):
         0,      # 'I/C Live Answered'
         0,      # 'I/C Abandoned'
         0,      # 'Voice Mails'
-        1.0,    # 'Incoming Live Answered (%)',
-        1.0,    # 'Incoming Received (%)',
-        0.0,    # 'Incoming Abandoned (%)'
-        timedelta(0),  # 'Average Incoming Duration'
-        timedelta(0),  # 'Average Wait Answered'
-        timedelta(0),  # 'Average Wait Lost'
+        timedelta(0),  # Answered Incoming Duration
+        timedelta(0),  # Answered Wait Duration
+        timedelta(0),  # Lost Wait Duration
         0,      # 'Calls Ans Within 15'
         0,      # 'Calls Ans Within 30'
         0,      # 'Calls Ans Within 45'
@@ -141,7 +134,7 @@ def make_report(session, start_time, end_time):
         0,      # 'Calls Ans Within 999'
         0,      # 'Call Ans + 999'
         timedelta(0),  # 'Longest Waiting Answered'
-        1.0     # 'PCA'
+        1.0
     ]
 
     report_draft = {}
@@ -175,8 +168,8 @@ def make_report(session, start_time, end_time):
             print('live answered call')
             row['I/C Presented'] += 1
             row['I/C Live Answered'] += 1
-            row['Average Incoming Duration'] += talking_time
-            row['Average Wait Answered'] += wait_duration
+            row['Answered Incoming Duration'] += talking_time
+            row['Answered Wait Duration'] += wait_duration
 
             # Qualify calls by duration
             if wait_duration <= timedelta(seconds=15):
@@ -201,19 +194,23 @@ def make_report(session, start_time, end_time):
             print('found a vm')
             row['I/C Presented'] += 1
             row['Voice Mails'] += 1
-            row['Average Wait Lost'] += call.length
+            row['Lost Wait Duration'] += call.length
 
         # An abandoned call is not live answered and last longer than 20 seconds
         elif call.length > timedelta(seconds=20):
             print('found a lost call')
             row['I/C Presented'] += 1
             row['I/C Abandoned'] += 1
-            row['Average Wait Lost'] += call.length
+            row['Lost Wait Duration'] += call.length
 
         report_draft[row_name] = row
 
-    print(dumps(report_draft, indent=4, default=str))
-    print(DataFrame.from_dict(report_draft, orient='index'))
+    data = DataFrame.from_dict(report_draft, orient='index')
+    print(data.to_json())
+    new_record = SlaData(start_time=start_time, end_time=end_time, data=data.to_json())
+    print(data)
+    print(new_record)
+    session.add(new_record)
     # try:
     #     session.query(
     #         CallTable,
