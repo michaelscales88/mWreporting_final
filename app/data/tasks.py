@@ -25,13 +25,13 @@ def add_scheduled_tasks(app):
     pass
 
 
-def get_data_interval(session, table_name, start_time, end_time):
+def get_data_interval(session, table_name, start_time, end_time, call_direction=1):
     table = _mmap.get(table_name)
-    print(table)
     return session.query(table).filter(
         and_(
             table.start_time >= start_time,
             table.end_time <= end_time,
+            table.call_direction == call_direction
         )
     )
 

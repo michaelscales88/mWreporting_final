@@ -18,6 +18,7 @@ class CallTable(db.Model):
     system_id = db.Column(db.Integer)
     caller_id = db.Column(db.Text)
     inbound_route = db.Column(db.Text)
+    events = db.relationship("EventTable", lazy="dynamic")
 
     def __init__(self, call_id=None, call_direction=None, calling_party_number='',
                  dialed_party_number='', account_code='', start_time=None,
@@ -57,6 +58,7 @@ class EventTable(db.Model):
     tag = db.Column(db.Text)
     recording_rule = db.Column(db.Integer)
     call_id = db.Column(db.Integer, db.ForeignKey(CallTable.call_id))
+    call = db.relationship("CallTable")
 
     def __init__(self, event_id=None, event_type=None, calling_party='',
                  receiving_party='', hunt_group='', is_conference=None,

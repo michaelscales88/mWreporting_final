@@ -78,8 +78,8 @@ def get_model(model=None):
     return all_map.get(model, None)
 
 
-def get_model_headers(model=None):
-    model = get_model_headers(model)
+def get_model_headers(model_name=None):
+    model = get_model(model_name)
     return model.__repr_attrs__ if model else None
 
 
