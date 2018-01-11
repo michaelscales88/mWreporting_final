@@ -1,3 +1,4 @@
+# app/__init__.py
 from flask_bootstrap import Bootstrap
 from flask_mail import Mail
 from flask_moment import Moment
@@ -5,7 +6,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 
 
 from .database import init_db, get_sql_alchemy
-from .util import Flask, make_celery, AlchemyEncoder, get_nav, add_cdns
+from .util import Flask, make_celery, get_nav, add_cdns, AlchemyJSONEncoder
 
 
 app = Flask(
@@ -34,15 +35,14 @@ health = HealthCheck(app, "/healthcheck")
 # envdump = EnvironmentDump(app, "/environment")
 # envdump.add_section("application", app)
 
+
 # Initialize db and CDNS URI
 init_db(db)
 add_cdns(app)
 
 
 # Set JSON serializer for the application
-from app.util.tasks import serialization_register_json
-
-serialization_register_json()
+app.json_encoder = AlchemyJSONEncoder
 
 
 # Init task stuff

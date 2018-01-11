@@ -3,7 +3,6 @@ from celery.schedules import crontab
 from collections import OrderedDict
 from datetime import timedelta
 from flask import g, abort
-from json import dumps
 from pandas import DataFrame
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_
@@ -205,54 +204,8 @@ def make_report(session, start_time, end_time):
 
         report_draft[row_name] = row
 
-    data = DataFrame.from_dict(report_draft, orient='index')
-    print(data.to_json())
-    new_record = SlaData(start_time=start_time, end_time=end_time, data=data.to_json())
-    print(data)
-    print(new_record)
+    new_record = SlaData(start_time=start_time, end_time=end_time, data=report_draft)
     session.add(new_record)
-    # try:
-    #     session.query(
-    #         CallTable,
-    #         EventTable.event_type,
-    #         EventTable.start_time.label('event_start_time'),
-    #         EventTable.end_time.label('event_end_time')
-    #     ).join(
-    #         EventTable
-    #     ).filter(
-    #         and_(
-    #             CallTable.start_time >= start,
-    #             CallTable.end_time <= end,
-    #             CallTable.call_direction == 1
-    #         )
-    #     )
-    #     record_query = get_records(db_session, start, end)
-    #     record_list = record_query.all()
-    #
-    #     # Index the query. Group columns from EventTable (c_event) to the call from CallTable (c_call)
-    #     cached_results = prepare_records(record_list)
-    #
-    #     # Consume query data
-    #     report = process_report(prepared_report, cached_results)
-    #     report.name = 'sla_report'
-    #
-    #     for rd in current_app.config['sla_row_data']:
-    #         make_programmatic_column(report, **rd)
-    #
-    #     # Stringify each cell
-    #     format_table(report)
-    #
-    #     cache_report(db_session, start, end, report)
-    #
-    # except Exception as e:
-    #     print(e)
-    #     db_session.rollback()
-    # else:
-    #     db_session.commit()
-    #     # Set success flag on commit
-    #     success = True
-    # finally:
-    #     db_session.remove()
 
     return True
 
@@ -263,6 +216,8 @@ def report_task(task_name, start_time=None, end_time=None, id=None):
         if start_time and end_time:
             if task_name == 'get':
                 result = get_report(g.local_session, 'sla_report', start_time, end_time).first()
+                result = DataFrame.from_dict(result.data, orient='index')
+                print(result)
             elif task_name == 'load':
                 result = make_report(g.local_session, start_time, end_time)
 

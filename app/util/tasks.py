@@ -1,7 +1,7 @@
+# util/tasks.py
 import pandas as pd
 from flask import jsonify, current_app
 from dateutil.parser import parse
-from kombu import serialization
 from sqlalchemy.inspection import inspect
 from functools import wraps
 
@@ -104,27 +104,28 @@ def get_foreign_id(query_obj, column_name):
     return getattr(query_obj, column_name, None)
 
 
-def serialization_register_json():
-    """Register a encoder/decoder for JSON serialization."""
+# def serialization_register_json():
+#     """Register a encoder/decoder for JSON serialization."""
 
-    from anyjson import loads as json_loads, dumps as json_dumps
+    # from anyjson import loads as json_loads, dumps as json_dumps
+    #
+    # def _loads(obj):
+    #     if isinstance(obj, serialization.bytes_t):
+    #         obj = obj.decode()
+    #     # Make this the custom loader
+    #     obj = json_loads(obj)
+    #     if hasattr(obj, 'get') and obj.get('traceback') is not None:
+    #         try:
+    #             exc_type = obj['result']['exc_type']
+    #             exc_message = obj['result']['exc_message']
+    #         except KeyError:
+    #             pass
+    #         else:
+    #             exc_type = getattr(obj, exc_type)
+    #             obj['result'] = exc_type(exc_message)
+    #     return obj
 
-    def _loads(obj):
-        if isinstance(obj, serialization.bytes_t):
-            obj = obj.decode()
-        # Make this the custom loader
-        obj = json_loads(obj)
-        if hasattr(obj, 'get') and obj.get('traceback') is not None:
-            try:
-                exc_type = obj['result']['exc_type']
-                exc_message = obj['result']['exc_message']
-            except KeyError:
-                pass
-            else:
-                exc_type = getattr(obj, exc_type)
-                obj['result'] = exc_type(exc_message)
-        return obj
-
-    serialization.registry.register('json', json_dumps, _loads,
-                                    content_type='application/json',
-                                    content_encoding='utf-8')
+    # serialization.registry.register(
+    #     'json', my_dumps, my_loads,
+    #     content_type='application/json'
+    # )

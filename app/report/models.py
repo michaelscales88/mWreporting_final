@@ -11,7 +11,7 @@ class SlaData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
-    data = db.Column(db.JSON)
+    data = db.Column(json_type)
 
 
 _mmap = {
