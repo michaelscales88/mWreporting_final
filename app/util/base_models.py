@@ -1,5 +1,6 @@
 from flask_sqlalchemy.model import BindMetaMixin, Model
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_mixins import AllFeaturesMixin, ReprMixin
 
 
@@ -16,7 +17,10 @@ convention = {
 class ModelBase(Model, AllFeaturesMixin):
     __abstract__ = True
     __repr__ = ReprMixin.__repr__
-    pass
+
+    @hybrid_property
+    def headers(self):
+        return self.__repr_attrs__
 
 
 class NoNameMeta(BindMetaMixin, DeclarativeMeta):

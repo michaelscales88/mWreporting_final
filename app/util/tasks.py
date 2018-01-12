@@ -80,7 +80,7 @@ def get_model(model=None):
 
 def get_model_headers(model_name=None):
     model = get_model(model_name)
-    return model.__repr_attrs__ if model else None
+    return list(model.headers) if model else None
 
 
 def query_to_frame(query, is_report=False):
