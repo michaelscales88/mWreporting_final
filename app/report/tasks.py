@@ -9,7 +9,6 @@ from sqlalchemy.sql import and_
 
 
 from app import celery
-from app.data.tasks import get_data_interval
 from app.util.tasks import get_model
 from .models import SlaData
 
@@ -22,6 +21,17 @@ def add_scheduled_tasks(app):
     #     'args': ('date1', 'date2')
     # }
     pass
+
+
+def get_calls_by_direction(session, table_name, start_time, end_time, call_direction=1):
+    table = get_model(table_name)
+    return session.query(table).filter(
+        and_(
+            table.start_time >= start_time,
+            table.end_time <= end_time,
+            table.call_direction == call_direction
+        )
+    )
 
 
 def get_report(session, table_name, start_time, end_time):
@@ -96,7 +106,7 @@ def test_report(start_date, end_date, report_id=None):
 def make_report(session, start_time, end_time):
     # Check if the data exists and get data for the interval
 
-    query = get_data_interval(session, 'c_call', start_time, end_time)
+    query = get_calls_by_direction(session, 'c_call', start_time, end_time)
 
     # Collate data for interval
 
@@ -164,7 +174,6 @@ def make_report(session, start_time, end_time):
 
         # A live-answered call has > 0 seconds of agent talking time
         if talking_time > timedelta(0):
-            print('live answered call')
             row['I/C Presented'] += 1
             row['I/C Live Answered'] += 1
             row['Answered Incoming Duration'] += talking_time
@@ -190,14 +199,12 @@ def make_report(session, start_time, end_time):
 
         # A voice mail is not live answered and last longer than 20 seconds
         elif voicemail_time > timedelta(seconds=20):
-            print('found a vm')
             row['I/C Presented'] += 1
             row['Voice Mails'] += 1
             row['Lost Wait Duration'] += call.length
 
         # An abandoned call is not live answered and last longer than 20 seconds
         elif call.length > timedelta(seconds=20):
-            print('found a lost call')
             row['I/C Presented'] += 1
             row['I/C Abandoned'] += 1
             row['Lost Wait Duration'] += call.length

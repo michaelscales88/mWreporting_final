@@ -2,9 +2,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, abort, render_template
 
-
 from app.util.tasks import get_model_headers
-
 
 frontend_bp = Blueprint(
     'frontend', __name__
@@ -25,7 +23,24 @@ def serve_pages(page):
             'data/dataDisplay.html',
             title='Reports',
             api='backend.report',
-            columns=get_model_headers('sla_report'),
+            # columns=get_model_headers('sla_report'),
+            columns=[
+                'I/C Presented',
+                'I/C Live Answered',
+                'I/C Abandoned',
+                'Voice Mails',
+                'Answered Incoming Duration',
+                'Answered Wait Duration',
+                'Lost Wait Duration',
+                'Calls Ans Within 15',
+                'Calls Ans Within 30',
+                'Calls Ans Within 45',
+                'Calls Ans Within 60',
+                'Calls Ans Within 999',
+                'Call Ans + 999',
+                'Longest Waiting Answered',
+                'PCA'
+            ],
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
             fallback='data'
