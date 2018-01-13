@@ -6,7 +6,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 
 
 from .database import init_db, get_sql_alchemy
-from .util import Flask, make_celery, get_nav, add_cdns, AlchemyJSONEncoder
+from .util import Flask, make_celery, get_nav, add_cdns, AppJSONEncoder
 
 
 app = Flask(
@@ -42,7 +42,7 @@ add_cdns(app)
 
 
 # Set JSON serializer for the application
-app.json_encoder = AlchemyJSONEncoder
+app.json_encoder = AppJSONEncoder
 
 
 # Init task stuff

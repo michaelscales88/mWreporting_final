@@ -1,33 +1,14 @@
 # util/app_json.py
 from datetime import datetime, timedelta
-from dateutil import parser
 from flask import json
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.mutable import Mutable
-from sqlalchemy.ext.declarative import DeclarativeMeta
-
-CONVERTERS = {
-    '__datetime__': parser.parse
-}
 
 
 class AlchemyJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        # ORM models
-        if isinstance(obj.__class__, DeclarativeMeta):
-            data = {}
-            fields = obj.__json__() if hasattr(obj, '__json__') else dir(obj)
-            for field in [f for f in fields if not f.startswith('_') and f not in ['metadata', 'query', 'query_class']]:
-                value = obj.__getattribute__(field)
-                try:
-                    json.dumps(value)
-                    data[field] = value
-                except TypeError:
-                    data[field] = None
-            return data
-
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return {
                 '__type__': 'datetime',
                 'year': obj.year,
@@ -48,13 +29,13 @@ class AlchemyJSONEncoder(json.JSONEncoder):
             }
 
         else:
-            return json.JSONEncoder.default(self, obj)
+            return super().default(obj)
 
 
 class AlchemyJSONDecoder(json.JSONDecoder):
     """
     Converts a json string, where datetime and timedelta objects were converted
-    into objects using the DateTimeAwareJSONEncoder, back into a python object.
+    into objects using the AlchemyJSONEncoder, back into a python object.
     """
 
     def __init__(self):
@@ -75,18 +56,6 @@ class AlchemyJSONDecoder(json.JSONDecoder):
             return d
 
 
-# Encoder function
-def my_dumps(obj):
-    print('dumping')
-    return json.dumps(obj, cls=AlchemyJSONEncoder)
-
-
-# Decoder function
-def my_loads(obj):
-    print('loading')
-    return json.loads(obj, cls=AlchemyJSONDecoder)
-
-
 class JSONEncodedDict(TypeDecorator):
     """Represents an immutable structure as a json-encoded string.
 
@@ -95,18 +64,24 @@ class JSONEncodedDict(TypeDecorator):
         JSONEncodedDict(255)
 
     """
-
     impl = VARCHAR
+
+    @property
+    def python_type(self):
+        pass
+
+    def process_literal_param(self, value, dialect):
+        pass
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            value = my_dumps(value)
+            value = json.dumps(value, cls=AlchemyJSONEncoder)
 
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            value = my_loads(value)
+            value = json.loads(value, cls=AlchemyJSONDecoder)
         return value
 
 
@@ -139,3 +114,21 @@ class MutableDict(Mutable, dict):
 
 
 json_type = MutableDict.as_mutable(JSONEncodedDict)
+
+
+def strfdelta(tdelta, fmt):
+    d = {"days": tdelta.days}
+    d["hours"], rem = divmod(tdelta.seconds, 3600)
+    d["minutes"], d["seconds"] = divmod(rem, 60)
+    return fmt.format(**d)
+
+
+class AppJSONEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.strftime("%B %m %Y %X")
+        elif isinstance(o, timedelta):
+            return strfdelta(o, "{hours}:{minutes}:{seconds}")
+        else:
+            return o

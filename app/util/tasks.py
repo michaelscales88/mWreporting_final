@@ -83,12 +83,24 @@ def get_model_headers(model_name=None):
     return list(model.headers) if model else None
 
 
+def display_columns(model_name=None):
+    headers = get_model_headers(model_name)
+    if headers:
+        if model_name == 'sla_report':
+            return ['Client'] + headers
+        else:
+            return headers
+    else:
+        return headers
+
+
 def query_to_frame(query, is_report=False):
     if is_report:
-        # convert the json_type from report into a frame
-        # frame =
-        frame = None
-        pass
+        # Set the DF column order to match the column order in the view
+        # columns = get_model_headers('sla_report')
+        frame = pd.DataFrame.from_dict(query.data, orient='index')
+        # Show the clients as row names
+        frame.insert(0, "Client", list(frame.index))
     else:
         q_entity = query.column_descriptions[0]['type']
         frame = pd.read_sql(query.statement, query.session.bind)
@@ -102,30 +114,3 @@ def get_pk(table):
 
 def get_foreign_id(query_obj, column_name):
     return getattr(query_obj, column_name, None)
-
-
-# def serialization_register_json():
-#     """Register a encoder/decoder for JSON serialization."""
-
-    # from anyjson import loads as json_loads, dumps as json_dumps
-    #
-    # def _loads(obj):
-    #     if isinstance(obj, serialization.bytes_t):
-    #         obj = obj.decode()
-    #     # Make this the custom loader
-    #     obj = json_loads(obj)
-    #     if hasattr(obj, 'get') and obj.get('traceback') is not None:
-    #         try:
-    #             exc_type = obj['result']['exc_type']
-    #             exc_message = obj['result']['exc_message']
-    #         except KeyError:
-    #             pass
-    #         else:
-    #             exc_type = getattr(obj, exc_type)
-    #             obj['result'] = exc_type(exc_message)
-    #     return obj
-
-    # serialization.registry.register(
-    #     'json', my_dumps, my_loads,
-    #     content_type='application/json'
-    # )

@@ -30,8 +30,7 @@ class SlaData(db.Model):
             'Calls Ans Within 60',
             'Calls Ans Within 999',
             'Call Ans + 999',
-            'Longest Waiting Answered',
-            'PCA'
+            'Longest Waiting Answered'
         ]
 
 

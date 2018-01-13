@@ -1,15 +1,16 @@
 # report/tasks.py
 from celery.schedules import crontab
+import pandas as pd
+import numpy as np
 from collections import OrderedDict
 from datetime import timedelta
 from flask import g, abort
-from pandas import DataFrame
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_
 
 
 from app import celery
-from app.util.tasks import get_model
+from app.util.tasks import get_model, query_to_frame, get_model_headers
 from .models import SlaData
 
 
@@ -34,6 +35,10 @@ def get_calls_by_direction(session, table_name, start_time, end_time, call_direc
     )
 
 
+def report_exists(session, table_name, start_time, end_time):
+    return False if get_report(session, table_name, start_time, end_time) is None else True
+
+
 def get_report(session, table_name, start_time, end_time):
     table = get_model(table_name)
     return session.query(table).filter(
@@ -41,7 +46,7 @@ def get_report(session, table_name, start_time, end_time):
             table.start_time == start_time,
             table.end_time == end_time,
         )
-    )
+    ).first()
 
 
 class SqlAlchemyTask(celery.Task):
@@ -104,8 +109,13 @@ def test_report(start_date, end_date, report_id=None):
 
 
 def make_report(session, start_time, end_time):
-    # Check if the data exists and get data for the interval
+    # Check if report already exists
+    if report_exists(session, 'sla_report', start_time, end_time):
+        print('found a completed report')
+        return True
 
+    # Check if the data exists and get data for the interval
+    print('creating report')
     query = get_calls_by_direction(session, 'c_call', start_time, end_time)
 
     # Collate data for interval
@@ -124,26 +134,24 @@ def make_report(session, start_time, end_time):
         'Calls Ans Within 60',
         'Calls Ans Within 999',
         'Call Ans + 999',
-        'Longest Waiting Answered',
-        'PCA'
+        'Longest Waiting Answered'
     ]
 
     default_row = [
-        0,      # 'I/C Presented'
-        0,      # 'I/C Live Answered'
-        0,      # 'I/C Abandoned'
-        0,      # 'Voice Mails'
-        timedelta(0),  # Answered Incoming Duration
-        timedelta(0),  # Answered Wait Duration
-        timedelta(0),  # Lost Wait Duration
-        0,      # 'Calls Ans Within 15'
-        0,      # 'Calls Ans Within 30'
-        0,      # 'Calls Ans Within 45'
-        0,      # 'Calls Ans Within 60'
-        0,      # 'Calls Ans Within 999'
-        0,      # 'Call Ans + 999'
-        timedelta(0),  # 'Longest Waiting Answered'
-        1.0
+        0,              # 'I/C Presented'
+        0,              # 'I/C Live Answered'
+        0,              # 'I/C Abandoned'
+        0,              # 'Voice Mails'
+        timedelta(0),   # Answered Incoming Duration
+        timedelta(0),   # Answered Wait Duration
+        timedelta(0),   # Lost Wait Duration
+        0,              # 'Calls Ans Within 15'
+        0,              # 'Calls Ans Within 30'
+        0,              # 'Calls Ans Within 45'
+        0,              # 'Calls Ans Within 60'
+        0,              # 'Calls Ans Within 999'
+        0,              # 'Call Ans + 999'
+        timedelta(0)    # 'Longest Waiting Answered'
     ]
 
     report_draft = {}
@@ -214,7 +222,77 @@ def make_report(session, start_time, end_time):
     new_record = SlaData(start_time=start_time, end_time=end_time, data=report_draft)
     session.add(new_record)
 
+    print('completed report')
     return True
+
+
+def make_summary(df):
+    # Create row of sums
+    sum_cols = [
+        'I/C Presented',
+        'I/C Live Answered',
+        'I/C Abandoned',
+        'Voice Mails',
+        'Answered Incoming Duration',
+        'Answered Wait Duration',
+        'Lost Wait Duration',
+        'Calls Ans Within 15',
+        'Calls Ans Within 30',
+        'Calls Ans Within 45',
+        'Calls Ans Within 60',
+        'Calls Ans Within 999',
+        'Call Ans + 999'
+    ]
+    summary_frame = pd.DataFrame(
+        [df[sum_cols].sum()], columns=sum_cols, index=['Summary']
+    )
+    summary_frame.insert(0, 'Client', ['Summary'])
+
+    # Append column with max timedelta
+    summary_frame['Longest Waiting Answered'] = pd.Series(
+        df['Longest Waiting Answered'].max(), index=summary_frame.index
+    )
+    return df.append(summary_frame)
+
+
+def compute_avgs(df):
+    df['Incoming Live Answered (%)'] = np.where(
+        df['I/C Live Answered'] < 1,
+        df['I/C Live Answered'],
+        df['I/C Live Answered'] / df['I/C Presented']
+    )
+    df['Incoming Received (%)'] = np.where(
+        (df['I/C Live Answered'] + df['Voice Mails']) < 1,
+        df['I/C Live Answered'],
+        (df['I/C Live Answered'] + df['Voice Mails']) / df['I/C Presented']
+    )
+    df['Incoming Abandoned (%)'] = np.where(
+        df['I/C Abandoned'] < 1,
+        df['I/C Abandoned'],
+        df['I/C Abandoned'] / df['I/C Presented']
+    )
+    df['Average Incoming Duration'] = np.where(
+        df['I/C Live Answered'] < 1,
+        df['Answered Incoming Duration'],
+        df['Answered Incoming Duration'] / df['I/C Live Answered']
+    )
+    df['Average Wait Answered'] = np.where(
+        df['I/C Live Answered'] < 1,
+        df['Answered Wait Duration'],
+        df['Answered Wait Duration'] / df['I/C Live Answered']
+    )
+    df['Average Wait Lost'] = np.where(
+        (df['I/C Abandoned'] + df['Voice Mails']) < 1,
+        df['Lost Wait Duration'],
+        df['Lost Wait Duration'] / (df['I/C Abandoned'] + df['Voice Mails'])
+    )
+    df['PCA'] = np.where(
+        df['I/C Presented'] < 1,
+        df['I/C Presented'],
+        (df['Calls Ans Within 15'] + df['Calls Ans Within 30']) / df['I/C Presented']
+    )
+    print(df)
+    return df
 
 
 def report_task(task_name, start_time=None, end_time=None, id=None):
@@ -222,10 +300,14 @@ def report_task(task_name, start_time=None, end_time=None, id=None):
         result = None
         if start_time and end_time:
             if task_name == 'get':
-                result = get_report(g.local_session, 'sla_report', start_time, end_time).first()
-                result = DataFrame.from_dict(result.data, orient='index')
-                print(result)
+                query = get_report(g.local_session, 'sla_report', start_time, end_time)
+                result = query_to_frame(query, is_report=True)
+                result = make_summary(result)
+                result = compute_avgs(result)
+                columns = get_model_headers('sla_report')
+                result = result[columns]
             elif task_name == 'load':
+                print('trying to make a report')
                 result = make_report(g.local_session, start_time, end_time)
 
         if result is None:

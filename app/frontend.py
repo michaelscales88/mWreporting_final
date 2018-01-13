@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, abort, render_template
 
-from app.util.tasks import get_model_headers
+from app.util.tasks import display_columns
 
 frontend_bp = Blueprint(
     'frontend', __name__
@@ -23,7 +23,7 @@ def serve_pages(page):
             'data/dataDisplay.html',
             title='Reports',
             api='backend.report',
-            columns=get_model_headers('sla_report'),
+            columns=display_columns('sla_report'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
             fallback='data'
@@ -33,7 +33,7 @@ def serve_pages(page):
             'data/dataDisplay.html',
             title='Data',
             api='backend.data',
-            columns=get_model_headers('c_call'),
+            columns=display_columns('c_call'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
         )
@@ -42,7 +42,7 @@ def serve_pages(page):
             'clients/clientsDisplay.html',
             title='Clients',
             api='backend.client',
-            columns=get_model_headers('client_table'),
+            columns=display_columns('client_table'),
             start_date=None,
             end_date=None
         )
