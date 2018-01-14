@@ -14,7 +14,7 @@ function getDataTable(startName, endName, config) {
             url: config['api'],
             data: ajax_data,
         },
-        dom: 'Bfrtip',
+        dom: 'Bfrtlip',
         buttons: [
             'copy', 'csv', 'excel', 'pdf', 'print'
         ]
