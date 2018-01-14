@@ -3,7 +3,9 @@
 {%- block styles %}
     {{ super() }}
     <link href="{{ bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp') }}" rel="stylesheet">
-    <link href="{{ bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTables', use_minified=true) }}"
+    <link href="{{ bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTable', use_minified=true) }}"
+          rel="stylesheet">
+    <link href="{{ bootstrap_find_resource('css/buttons.dataTables.css', cdn='dataTableBtns', use_minified=true) }}"
           rel="stylesheet">
 {% endblock %}
 
@@ -57,7 +59,21 @@
     {{ moment.include_moment() }}
     <script src="{{ bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true) }}"
             rel="stylesheet"></script>
-    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTables', use_minified=true) }}"
+    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTable', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/dataTables.buttons.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.flash.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.html5.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.print.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('jszip/3.1.3/jszip.js', cdn='saveJs', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/pdfmake.js', cdn='saveJs', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"
             rel="stylesheet"></script>
     <script type="text/javascript">
     $(document).ready(function () {
