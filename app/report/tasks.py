@@ -10,7 +10,7 @@ from sqlalchemy.sql import and_
 
 
 from app import celery
-from app.util.tasks import get_model, query_to_frame, get_model_headers
+from app.util.tasks import get_model, query_to_frame, display_columns
 from .models import SlaData
 
 
@@ -291,8 +291,14 @@ def compute_avgs(df):
         df['I/C Presented'],
         (df['Calls Ans Within 15'] + df['Calls Ans Within 30']) / df['I/C Presented']
     )
-    print(df)
     return df
+
+
+def format_df(cell):
+    if isinstance(cell, float):
+        return "{:.0%}".format(cell)
+    else:
+        return cell
 
 
 def report_task(task_name, start_time=None, end_time=None, id=None):
@@ -304,8 +310,9 @@ def report_task(task_name, start_time=None, end_time=None, id=None):
                 result = query_to_frame(query, is_report=True)
                 result = make_summary(result)
                 result = compute_avgs(result)
-                columns = get_model_headers('sla_report')
+                columns = display_columns('sla_report')
                 result = result[columns]
+                result = result.applymap(format_df)
             elif task_name == 'load':
                 print('trying to make a report')
                 result = make_report(g.local_session, start_time, end_time)

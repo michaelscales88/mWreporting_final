@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from flask import json
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.mutable import Mutable
+from string import Template
 
 
 class AlchemyJSONEncoder(json.JSONEncoder):
@@ -116,11 +117,17 @@ class MutableDict(Mutable, dict):
 json_type = MutableDict.as_mutable(JSONEncodedDict)
 
 
+class DeltaTemplate(Template):
+    delimiter = "%"
+
+
 def strfdelta(tdelta, fmt):
-    d = {"days": tdelta.days}
-    d["hours"], rem = divmod(tdelta.seconds, 3600)
-    d["minutes"], d["seconds"] = divmod(rem, 60)
-    return fmt.format(**d)
+    d = {"D": tdelta.days}
+    d["H"], rem = divmod(tdelta.seconds, 3600)
+    d["M"], d["S"] = divmod(rem, 60)
+    d = {k: '{0:02d}'.format(v) for k, v in d.items()}
+    t = DeltaTemplate(fmt)
+    return t.substitute(**d)
 
 
 class AppJSONEncoder(json.JSONEncoder):
@@ -129,6 +136,6 @@ class AppJSONEncoder(json.JSONEncoder):
         if isinstance(o, datetime):
             return o.strftime("%B %m %Y %X")
         elif isinstance(o, timedelta):
-            return strfdelta(o, "{hours}:{minutes}:{seconds}")
+            return strfdelta(o, '%D days %H:%M:%S' if o > timedelta(days=1) else '%H:%M:%S')
         else:
             return o

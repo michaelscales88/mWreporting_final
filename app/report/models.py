@@ -21,8 +21,12 @@ class SlaData(db.Model):
             'I/C Live Answered',
             'I/C Abandoned',
             'Voice Mails',
-            'Answered Incoming Duration',
-            'Answered Wait Duration',
+            'Incoming Live Answered (%)',
+            'Incoming Received (%)',
+            'Incoming Abandoned (%)',
+            'Average Incoming Duration',
+            'Average Wait Answered',
+            'Average Wait Lost',
             'Lost Wait Duration',
             'Calls Ans Within 15',
             'Calls Ans Within 30',
@@ -30,7 +34,8 @@ class SlaData(db.Model):
             'Calls Ans Within 60',
             'Calls Ans Within 999',
             'Call Ans + 999',
-            'Longest Waiting Answered'
+            'Longest Waiting Answered',
+            'PCA'
         ]
 
 

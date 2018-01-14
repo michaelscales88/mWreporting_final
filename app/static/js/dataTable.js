@@ -13,6 +13,10 @@ function getDataTable(startName, endName, config) {
         ajax: {
             url: config['api'],
             data: ajax_data,
-        }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
     });
 }
