@@ -14,9 +14,10 @@ function getDataTable(startName, endName, config) {
             url: config['api'],
             data: ajax_data,
         },
-        dom: 'Bfrtlip',
+        dom: '<<B>lf<t>ip>',
         buttons: [
             'copy', 'csv', 'excel', 'pdf', 'print'
-        ]
+        ],
+        scrollX: true
     });
 }
