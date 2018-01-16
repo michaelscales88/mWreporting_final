@@ -1,10 +1,9 @@
 # util/app_handlers
-from flask import render_template, request, g
+from flask import render_template, g
 from flask_restful.reqparse import RequestParser
 from sqlalchemy.exc import DatabaseError
 
 from app import app, mail
-from app.database import get_session
 
 
 # Configuration for APP
@@ -19,44 +18,11 @@ def startup_setup():
 # Configuration for API
 @app.before_request
 def before_request():
-    from .tasks import to_datetime
-
     # Default parser arguments
     g.parser = RequestParser()
     g.parser.add_argument(
-        'task', dest='task', help='A task to complete.'
+        'task', help='A task to complete.'
     )
-
-    # Parser configuration
-    if request.endpoint in ("backend.client",):
-        # Client API arguments
-        g.parser.add_argument(
-            'client_name', dest='client_name', location='form',
-            help='A client to change.'
-        )
-        g.parser.add_argument(
-            'client_ext', dest='client_ext', location='form',
-            type=int, help='The client number to change.'
-        )
-    elif request.endpoint in ("backend.report",  "backend.data"):
-        # Data API arguments
-        g.parser.add_argument(
-            'start_time', dest='start_time', type=to_datetime,
-            help='Start time for data interval.'
-        )
-        g.parser.add_argument(
-            'end_time', dest='end_time', type=to_datetime,
-            help='End time for data interval.'
-        )
-    else:
-        pass
-
-    # Session configuration
-    if request.endpoint in ("backend.report", "backend.client", "backend.data"):
-        g.local_session = get_session(app.config['SQLALCHEMY_DATABASE_URI'])
-
-    if request.endpoint in ("backend.data",):
-        g.ext_session = get_session(app.config['EXTERNAL_DATABASE_URI'], readonly=True)
 
 
 def commit_sessions():

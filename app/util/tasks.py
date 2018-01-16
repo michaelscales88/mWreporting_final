@@ -2,6 +2,7 @@
 import pandas as pd
 from flask import jsonify, current_app
 from dateutil.parser import parse
+from json import loads
 from sqlalchemy.inspection import inspect
 from functools import wraps
 
@@ -61,6 +62,10 @@ def to_datetime(value, name):
             "You gave the value: {val}".format(param=name, val=value)
         )
     return dt
+
+
+def to_list(value):
+    return loads(value)
 
 
 def get_model(model=None):

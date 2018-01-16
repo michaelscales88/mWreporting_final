@@ -1,0 +1,61 @@
+<!-- Display data used for report -->
+{% extends 'dataGrid.html' %}
+
+{% block jumbotron %}
+    <div class="row">
+        <div class='col-md-6'>
+            {% include'client/clientModal.html' %}
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#clientModal">
+                Add/Remove
+            </button>
+        </div>
+        <div class='col-md-6'>
+            <p>Something else here</p>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // configure DataTable
+            let tableConfig = {
+                api: "{{ url_for(api) }}",
+                tableName: 'table#displayTable',
+                gridLength: {{ grid_length }}
+            };
+
+            $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function() {
+                function ajaxFn() {
+                    return {
+                        task: 'get'
+                    }
+                }
+                let table = getDataTable(ajaxFn, tableConfig);
+                $('button#tableButton').on('click', function() {
+                    table.ajax.reload();
+                });
+            });
+
+            // configure the modal to add/remove clients
+            let modalConfig = {
+                api: "{{ url_for(api) }}",
+                form: "form#clientForm",
+                callback: "button#tableButton"
+            };
+
+            $.getScript("{{ url_for('static', filename='js/modalForm.js') }}", function( data, textStatus, jqxhr ) {
+                let modalForm = getModalForm(modalConfig);
+                $('button#addButton').on('click', function() {
+                    modalForm.submit({action: "add"});
+                });
+                $('button#removeButton').on('click', function() {
+                    modalForm.submit({action: "remove"});
+                });
+            });
+        });
+    </script>
+{% endblock %}

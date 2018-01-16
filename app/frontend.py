@@ -20,13 +20,14 @@ def serve_pages(page):
         )
     elif page in ("sla_report.html", "sla_report"):
         return render_template(
-            'data/dataDisplay.html',
+            'report/reportDisplay.html',
             title='Reports',
             api='backend.report',
             columns=display_columns('sla_report'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
-            fallback='data'
+            grid_length=50,
+            client_api="backend.client"
         )
     elif page in ("data.html", "data"):
         return render_template(
@@ -36,16 +37,16 @@ def serve_pages(page):
             client_api='backend.client',
             columns=display_columns('c_call'),
             end_time=zero_hour.isoformat(' '),
-            start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
+            start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
+            grid_length=50
         )
-    elif page in ("clientsDisplay.html", "clients"):
+    elif page in ("clientDisplay.html", "client"):
         return render_template(
-            'clients/clientsDisplay.html',
+            'client/clientDisplay.html',
             title='Clients',
             api='backend.client',
             columns=display_columns('client_table'),
-            start_date=None,
-            end_date=None
+            grid_length=50
         )
     else:
         return abort(404)

@@ -1,18 +1,10 @@
-function getDataTable(startName, endName, config) {
-    function ajax_data() {
-        return {
-            start_time: $(startName).val(),
-            end_time: $(endName).val(),
-            task: 'get'
-        };
-    }
-
+function getDataTable(ajaxFn, config) {
     return $(config['tableName']).DataTable({
         processing: true,
-        pageLength: 50,
+        pageLength: config['gridLength'],
         ajax: {
             url: config['api'],
-            data: ajax_data,
+            data: ajaxFn,
         },
         dom: '<<B>lf<t>ip>',
         buttons: [

@@ -2,20 +2,19 @@ class ModalForm {
     constructor(config) {
         this.form = config['form'];
         this.api = config['api'];
-        this.scb = config['successTrigger'];
-        this.ecb = config['successCB'];
+        this.cb = config['callback'];
     }
 
     process(){
-        let button = this.scb;
+        let button = this.cb;
         $.ajax({
             url: this.api,
             type: 'PUT',
             contentType: 'application/x-www-form-urlencoded',
             data: $(this.form).serialize(),
             success: function( data, textStatus, jqxhr ) {
-                if (parseInt(textStatus) === 200) {
-                    $(button).trigger( "click" );
+                if (textStatus === 'success') {
+                    $(button).click();
                 }
             }
         });

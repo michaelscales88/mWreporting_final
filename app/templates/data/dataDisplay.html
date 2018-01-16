@@ -1,69 +1,46 @@
-<!-- Index to blueprint index pages -->
-{% extends 'base.html' %}
+<!-- Display data used for report -->
+{% extends 'dataGrid.html' %}
 {%- block styles %}
     {{ super() }}
     <link href="{{ bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp') }}" rel="stylesheet">
-    <link href="{{ bootstrap_find_resource('css/jquery.dataTables.css', cdn='dataTable', use_minified=true) }}"
-          rel="stylesheet">
     <link href="{{ bootstrap_find_resource('css/buttons.dataTables.css', cdn='dataTableBtns', use_minified=true) }}"
           rel="stylesheet">
 {% endblock %}
 
-{% block content %}
-    <div class="container">
-        <div class="jumbotron">
-            <div class="row">
-                <div class='col-md-4'>
-                    <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
-                </div>
-                <div class='col-md-4'>
-                    {% include'data/dataModal.html' %}
-                    <button type="button" class="btn btn-primary" data-toggle="modal"
-                               data-target="#dataModal">Change</button>
-                    <select id="client-select" title="Clients">
-                        <option>I'm a sample</option>
-                    </select>
-                </div>
-
-                <div class='col-md-4'>
-                    <form id="dateRange">
-                    <div class="input-group input-group-lg date">
-                        <input type="text" id="dtSelectStart" class="form-control" placeholder="Start from..."
-                               aria-describedby="sizing-addon1" name="start_time">
-                        <span class="input-group-addon" id="sizing-addon1">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                    </div>
-                    <div class="input-group input-group-lg date">
-                        <input type="text" id="dtSelectEnd" class="form-control" placeholder="Go to..."
-                               aria-describedby="sizing-addon1" name="end_time">
-                        <span class="input-group-addon" id="sizing-addon1">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                    </div>
-                    </form>
-                    <button type="button" class="btn btn-primary" id="dataTableButton">Run</button>
-                </div>
-            </div>
+{% block jumbotron %}
+    <div class="row">
+        <div class='col-md-6'>
+            {% include'data/dataModal.html' %}
+            <button type="button" class="btn btn-primary" data-toggle="modal"
+                    data-target="#dataModal">Change</button>
+            <select id="client-select" title="Clients">
+                <option>I'm a sample</option>
+            </select>
         </div>
-        <table id="displayTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
-            <!-- Configure the headers for the ajax call-->
-            <thead>
-                <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
-            </thead>
-            <tfoot>
-                <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
-            </tfoot>
-        </table>
-    </div>  <!-- /.container -->
+        <div class='col-md-6'>
+            <form id="dateRange">
+                <div class="input-group input-group-lg date">
+                    <input type="text" id="dtSelectStart" class="form-control" placeholder="Start from..."
+                           aria-describedby="sizing-addon1" name="start_time">
+                    <span class="input-group-addon" id="sizing-addon1">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                </div>
+                <div class="input-group input-group-lg date">
+                    <input type="text" id="dtSelectEnd" class="form-control" placeholder="Go to..."
+                           aria-describedby="sizing-addon1" name="end_time">
+                    <span class="input-group-addon" id="sizing-addon1">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    {{ moment.include_moment() }}
     <script src="{{ bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true) }}"
-            rel="stylesheet"></script>
-    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTable', use_minified=true) }}"
             rel="stylesheet"></script>
     <script src="{{ bootstrap_find_resource('js/dataTables.buttons.js', cdn='dataTableBtns', use_minified=true) }}"
             rel="stylesheet"></script>
@@ -80,75 +57,75 @@
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"
             rel="stylesheet"></script>
     <script type="text/javascript">
-    $(document).ready(function () {
-        // DateTimePicker config
-        let dtpConfig = {
-            startTime: "{{ start_time }}",
-            endTime: "{{ end_time }}"
-        };
+        $(document).ready(function () {
+            // DateTimePicker config
+            let dtpConfig = {
+                startTime: "{{ start_time }}",
+                endTime: "{{ end_time }}"
+            };
 
-        // DataTable config
-        let dtConfig = {
-            api: "{{ url_for(api) }}",
-            triggerEvent: 'button#submitButton',
-            tableName: '#displayTable'
-        };
+            // DataTable config
+            let dtConfig = {
+                api: "{{ url_for(api) }}",
+                triggerEvent: 'button#submitButton',
+                tableName: '#displayTable'
+            };
 
-        // Modal config
-        let modalConfig = {
-            api: "{{ url_for(api) }}",
-            successTrigger: "button#dataTableButton",
-            errorCB: "",
-            form: "#dataForm"
-        };
+            // Modal config
+            let modalConfig = {
+                api: "{{ url_for(api) }}",
+                successTrigger: "button#dataTableButton",
+                errorCB: "",
+                form: "#dataForm"
+            };
 
-        // dateTimePicker for dtSelectStart & dtSelectEnd
-        $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
-            dtSelector('#dtSelectStart', '#dtSelectEnd', dtpConfig);
-        });
+            // dateTimePicker for dtSelectStart & dtSelectEnd
+            $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
+                dtSelector('#dtSelectStart', '#dtSelectEnd', dtpConfig);
+            });
 
-        // dateTimePicker for dtLoadStart & dtLoadEnd
-        $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
-            dtSelector('#dtLoadStart', '#dtLoadEnd', dtpConfig);
-        });
+            // dateTimePicker for dtLoadStart & dtLoadEnd
+            $.getScript("{{ url_for('static', filename='js/dtSelector.js') }}", function( data, textStatus, jqxhr ) {
+                dtSelector('#dtLoadStart', '#dtLoadEnd', dtpConfig);
+            });
 
-        // configure the data grid
-        $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function( data, textStatus, jqxhr ) {
-            let table = getDataTable('#dtSelectStart', '#dtSelectEnd', dtConfig);
-            $('button#dataTableButton').on('click', function() {
-                console.log('reloading ajax');
-                table.ajax.reload();
+            // configure the data grid
+            $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function( data, textStatus, jqxhr ) {
+                let table = getDataTable('#dtSelectStart', '#dtSelectEnd', dtConfig);
+                $('button#dataTableButton').on('click', function() {
+                    console.log('reloading ajax');
+                    table.ajax.reload();
+                });
+            });
+
+            // configure the modalForm
+            $.getScript("{{ url_for('static', filename='js/modalForm.js') }}", function( data, textStatus, jqxhr ) {
+                let modalForm = getModalForm(modalConfig);
+                $('button#submitButton').on('click', function() {
+                    modalForm.submit({action: "load"});
+                });
+            });
+
+            $( window ).load(function() {
+                // Run code
+                alert("loading client");
+                let options = '';
+                $.ajax({
+                    url: '{{ url_for(client_api) }}',
+                    type: 'GET',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: '',
+                    success: function( data, textStatus, jqxhr ) {
+                        console.log(data);
+                        options += '<option value="' + 'something' + '">' + 'something something' + '</option>';
+                        options += '<option value="' + 'something2' + '">' + 'something2something' + '</option>';
+                        {#for (var i = 0; i < j.length; i++) {#}
+                        {#    options += '<option value="' + j[i].optionValue + '">' + j[i].optionDisplay + '</option>';#}
+                        {# } #}
+                        $("select#client-select").html(options);
+                    }
+                });
             });
         });
-
-        // configure the modalForm
-        $.getScript("{{ url_for('static', filename='js/modalForm.js') }}", function( data, textStatus, jqxhr ) {
-            let modalForm = getModalForm(modalConfig);
-            $('button#submitButton').on('click', function() {
-                modalForm.submit({action: "load"});
-            });
-        });
-
-        $( window ).load(function() {
-            // Run code
-            alert("loading clients");
-            let options = '';
-            $.ajax({
-                url: '{{ url_for(client_api) }}',
-                type: 'GET',
-                contentType: 'application/x-www-form-urlencoded',
-                data: '',
-                success: function( data, textStatus, jqxhr ) {
-                    console.log(data);
-                    options += '<option value="' + 'something' + '">' + 'something something' + '</option>';
-                    options += '<option value="' + 'something2' + '">' + 'something2something' + '</option>';
-                    {#for (var i = 0; i < j.length; i++) {#}
-                    {#    options += '<option value="' + j[i].optionValue + '">' + j[i].optionDisplay + '</option>';#}
-                    {# } #}
-                    $("select#client-select").html(options);
-                }
-            });
-        });
-    });
     </script>
 {% endblock %}
