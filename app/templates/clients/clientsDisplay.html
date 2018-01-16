@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 {%- block styles %}
     {{ super() }}
-    <link href="{{ bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTables', use_minified=true) }}"
+    <link href="{{ bootstrap_find_resource('css/dataTables.bootstrap.css', cdn='dataTable', use_minified=true) }}"
           rel="stylesheet">
 {% endblock %}
 
@@ -44,7 +44,7 @@
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
-    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTables', use_minified=true) }}"
+    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTable', use_minified=true) }}"
             rel="stylesheet"></script>
     <script type="text/javascript">
         $(document).ready(function () {

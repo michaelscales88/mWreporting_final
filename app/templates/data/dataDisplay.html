@@ -20,7 +20,11 @@
                     {% include'data/dataModal.html' %}
                     <button type="button" class="btn btn-primary" data-toggle="modal"
                                data-target="#dataModal">Change</button>
+                    <select id="client-select" title="Clients">
+                        <option>I'm a sample</option>
+                    </select>
                 </div>
+
                 <div class='col-md-4'>
                     <form id="dateRange">
                     <div class="input-group input-group-lg date">
@@ -122,6 +126,27 @@
             let modalForm = getModalForm(modalConfig);
             $('button#submitButton').on('click', function() {
                 modalForm.submit({action: "load"});
+            });
+        });
+
+        $( window ).load(function() {
+            // Run code
+            alert("loading clients");
+            let options = '';
+            $.ajax({
+                url: '{{ url_for(client_api) }}',
+                type: 'GET',
+                contentType: 'application/x-www-form-urlencoded',
+                data: '',
+                success: function( data, textStatus, jqxhr ) {
+                    console.log(data);
+                    options += '<option value="' + 'something' + '">' + 'something something' + '</option>';
+                    options += '<option value="' + 'something2' + '">' + 'something2something' + '</option>';
+                    {#for (var i = 0; i < j.length; i++) {#}
+                    {#    options += '<option value="' + j[i].optionValue + '">' + j[i].optionDisplay + '</option>';#}
+                    {# } #}
+                    $("select#client-select").html(options);
+                }
             });
         });
     });

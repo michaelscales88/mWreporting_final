@@ -33,6 +33,7 @@ def serve_pages(page):
             'data/dataDisplay.html',
             title='Data',
             api='backend.data',
+            client_api='backend.client',
             columns=display_columns('c_call'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' ')
