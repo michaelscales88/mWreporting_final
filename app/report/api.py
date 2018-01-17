@@ -32,13 +32,11 @@ class Report(Resource):
         print('Hit GET Report API')
         args = g.parser.parse_args()
         print(args)
-        print(type(args['clients']))
-        for c in args['clients']:
-            print(c)
         return report_task(
             args['task'],
             start_time=args['start_time'],
-            end_time=args['end_time']
+            end_time=args['end_time'],
+            clients=args['clients']
         )
 
     def put(self):

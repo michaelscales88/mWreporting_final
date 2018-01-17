@@ -11,6 +11,7 @@ from sqlalchemy.sql import and_
 
 from app import celery
 from app.util.tasks import get_model, query_to_frame, display_columns
+from app.client.tasks import add_client_alias
 from .models import SlaData
 
 
@@ -301,21 +302,37 @@ def format_df(cell):
         return cell
 
 
-def report_task(task_name, start_time=None, end_time=None, id=None):
+def report_task(task_name, start_time=None, end_time=None, clients=None, id=None):
     try:
         result = None
-        if start_time and end_time:
-            if task_name == 'get':
-                query = get_report(g.local_session, 'sla_report', start_time, end_time)
-                result = query_to_frame(query, is_report=True)
-                result = make_summary(result)
-                result = compute_avgs(result)
-                columns = display_columns('sla_report')
-                result = result[columns]
-                result = result.applymap(format_df)
-            elif task_name == 'load':
-                print('trying to make a report')
-                result = make_report(g.local_session, start_time, end_time)
+        if task_name == 'get' and start_time and end_time:
+
+            # Get the stored report for the date interval.
+            # This report is the aggregated raw data indexed by DID Extension.
+            query = get_report(g.local_session, 'sla_report', start_time, end_time)
+            frame = query_to_frame(query, is_report=True)
+
+            # Filter the report to only include desired clients
+            if clients:
+                frame = frame.filter(items=clients, axis=0)
+
+            # Make the visible index the DID extension + client name,
+            # or just DID extension if no name exists
+            frame = add_client_alias(frame)
+
+            # Create programmatic columns and rows
+            frame = make_summary(frame)
+            frame = compute_avgs(frame)
+
+            # Filter out columns containing raw data
+            columns = display_columns('sla_report')
+            frame = frame[columns]
+
+            # Prettify percentages
+            result = frame.applymap(format_df)
+        elif task_name == 'load':
+            print('trying to make a report')
+            result = make_report(g.local_session, start_time, end_time)
 
         if result is None:
             raise NoResultFound()

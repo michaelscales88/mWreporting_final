@@ -101,16 +101,13 @@ def display_columns(model_name=None):
 
 def query_to_frame(query, is_report=False):
     if is_report:
-        # Set the DF column order to match the column order in the view
-        # columns = get_model_headers('sla_report')
-        frame = pd.DataFrame.from_dict(query.data, orient='index')
-        # Show the clients as row names
-        frame.insert(0, "Client", list(frame.index))
+        # Convert JSON report to DataFrame
+        return pd.DataFrame.from_dict(query.data, orient='index')
     else:
+        # Convert ORM model to DataFrame
         q_entity = query.column_descriptions[0]['type']
         frame = pd.read_sql(query.statement, query.session.bind)
-        frame = frame[get_model_headers(q_entity.__tablename__)]
-    return frame
+        return frame[get_model_headers(q_entity.__tablename__)]
 
 
 def get_pk(table):
