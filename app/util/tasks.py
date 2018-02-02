@@ -30,6 +30,7 @@ def return_task(fn):
             else:
                 # Transform data for AJAX
                 data = frame.to_dict(orient='split')
+                print(data['data'])
                 key_words = {
                     "data": data['data']
                 }

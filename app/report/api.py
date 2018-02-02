@@ -31,7 +31,6 @@ class Report(Resource):
     def get(self):
         print('Hit GET Report API')
         args = g.parser.parse_args()
-        print(args)
         return report_task(
             args['task'],
             start_time=args['start_time'],

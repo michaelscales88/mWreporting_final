@@ -15,31 +15,33 @@
 {% import "bootstrap/fixes.html" as fixes %}
 
 {% block head %}
-{{ super() }}
-{{ fixes.ie8() }}
-<link rel="shortcut icon"
-      href="{{ url_for('static', filename='img/favicon.ico') }}">
+    {{ super() }}
+    {{ fixes.ie8() }}
+    <link rel="shortcut icon"
+          href="{{ url_for('static', filename='img/favicon.ico') }}">
 {%- endblock %}
 
 {% block styles -%}
-{{ super() }}
-<link rel="stylesheet" type="text/css"
-      href="{{ url_for('static', filename='css/style.css') }}">
+    {{ super() }}
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block navbar %}
-{{nav.main_nav.render()}}
+    {{ super() }}
+    {{ nav.main_nav.render() }}
 {% endblock %}
 
-{% block scripts %}
-    {{ super() }}
-    <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
-{% endblock %}
+{#{% block scripts %}#}
+{#    {{ super() }}#}
+{#    <script type=text/javascript>#}
+{#        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};#}
+{#    </script>#}
+{#{% endblock %}#}
 
 {% block footer %}
+    {{ super() }}
     <div class="container">
-    {% include 'message.html' %}
+        {% include 'message.html' %}
     </div>
 {% endblock %}

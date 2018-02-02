@@ -70,45 +70,6 @@ class SqlAlchemyTask(celery.Task):
         pass
 
 
-def test_report(start_date, end_date, report_id=None):
-    """
-    Get report from id if it exists or make the report for the interval
-    """
-    # Add report model stuff here
-    print('for sure i did this')
-    return [{
-        'id': 'Test Successful',
-        'date': start_date,
-        'report': end_date,
-        'notes': report_id
-    }], None, 200
-
-
-# @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
-# def fetch_or_make_report(start_time, end_time):
-#     """
-#     Get report from id if it exists or make the report for the interval
-#     """
-#     from datetime import timedelta
-#     report_id = SLAReport.query.filter(
-#         and_(
-#             SLAReport.start_time == start_time,
-#             SLAReport.end_time == end_time,
-#         )
-#     )
-#     report = SLAReport.query.get_or(report_id)
-#     if report:
-#         pass
-#     # Add report model stuff here
-#     print('for sure i did this')
-#     return [{
-#         'id': 'Test Successful',
-#         'date': start_time,
-#         'report': end_time,
-#         'notes': report
-#     }]
-
-
 def make_report(session, start_time, end_time):
     # Check if report already exists
     if report_exists(session, 'sla_report', start_time, end_time):
@@ -303,6 +264,7 @@ def format_df(cell):
 
 
 def report_task(task_name, start_time=None, end_time=None, clients=None, id=None):
+    print('starting a task')
     try:
         result = None
         if task_name == 'get' and start_time and end_time:
@@ -313,8 +275,8 @@ def report_task(task_name, start_time=None, end_time=None, clients=None, id=None
             frame = query_to_frame(query, is_report=True)
 
             # Filter the report to only include desired clients
-            if clients:
-                frame = frame.filter(items=clients, axis=0)
+            # if clients:
+            #     frame = frame.filter(items=clients, axis=0)
 
             # Make the visible index the DID extension + client name,
             # or just DID extension if no name exists
@@ -335,12 +297,17 @@ def report_task(task_name, start_time=None, end_time=None, clients=None, id=None
             result = make_report(g.local_session, start_time, end_time)
 
         if result is None:
-            raise NoResultFound()
-    except NoResultFound:
+            print(
+                "i'm raising no result found"
+            )
+            # raise NoResultFound()
+    except Exception as e:
         result = None
         status = 404
+        print("i'm aborting ", e)
         abort(status)
     else:
+        print("i'm returning a good error code")
         status = 200
-
+    print("returning with result: ", result, status, flush=True)
     return result, status
