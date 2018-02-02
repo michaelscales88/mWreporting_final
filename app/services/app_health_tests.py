@@ -1,5 +1,6 @@
+# services/app_health_tests.py
 from flask import current_app
-from app.database import get_session
+from .custom_db import get_session
 
 
 def health_database_status(db_session, session_name):

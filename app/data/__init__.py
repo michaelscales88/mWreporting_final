@@ -1,1 +1,1 @@
-from .api import Data
+from .api import DataAPI

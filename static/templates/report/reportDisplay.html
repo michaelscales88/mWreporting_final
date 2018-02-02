@@ -109,29 +109,29 @@
                 $("button#uncheckAllBtn").click(function() {
                     clientSelect.multipleSelect("uncheckAll");
                 });
-                $.ajax({
-                    url: '{{ url_for(client_api) }}',
-                    type: 'GET',
-                    contentType: 'application/x-www-form-urlencoded',
-                    data: {
-                        task: 'get'
-                    },
-                    success: function( data, textStatus, jqxhr ) {
-                        if (textStatus === 'success') {
-                            let options = '';
-                            let clientInfo = data.data;
-                            console.log(clientInfo);
-                            for (let i = 0; i < clientInfo.length; i++) {
-                                options += '<option selected value="' + clientInfo[i][2] + '">' +
-                                            clientInfo[i][1]
-                                            + '</option>';
-                            }
-                            clientSelect.html(options);
-                            clientSelect.multipleSelect("refresh");
-                        }
-
-                    }
-                 });
+                {#$.ajax({#}
+                {#    url: '{{ url_for(client_api) }}',#}
+                {#    type: 'GET',#}
+                {#    contentType: 'application/x-www-form-urlencoded',#}
+                {#    data: {#}
+                {#        task: 'get'#}
+                {#    },#}
+                {#    success: function( data, textStatus, jqxhr ) {#}
+                {#        if (textStatus === 'success') {#}
+                {#            let options = '';#}
+                {#            let clientInfo = data.data;#}
+                {#            console.log(clientInfo);#}
+                {#            for (let i = 0; i < clientInfo.length; i++) {#}
+                {#                options += '<option selected value="' + clientInfo[i][2] + '">' +#}
+                {#                            clientInfo[i][1]#}
+                {#                            + '</option>';#}
+                {#            }#}
+                {#            clientSelect.html(options);#}
+                {#            clientSelect.multipleSelect("refresh");#}
+                {#        }#}
+                {##}
+                {#    }#}
+                {# });#}
 
                 $.getScript("{{ url_for('static', filename='js/dataTable.js') }}", function() {
                     // configure DataTable
@@ -155,7 +155,7 @@
                         return {
                             start_time: $("input#dtSelectStart").val(),
                             end_time: $("input#dtSelectEnd").val(),
-                            task: 'get',
+                            task: 'sla_report',
                             clients: JSON.stringify(getSelectOptions('client-select'))
                         }
                     }

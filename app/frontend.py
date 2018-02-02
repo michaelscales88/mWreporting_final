@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, abort, render_template
 
-from app.util.tasks import display_columns
+from app.services.app_tasks import display_columns
 
 frontend_bp = Blueprint(
     'frontend', __name__
@@ -22,19 +22,19 @@ def serve_pages(page):
         return render_template(
             'report/reportDisplay.html',
             title='Reports',
-            api='backend.report',
+            api='backend.reportapi',
             columns=display_columns('sla_report'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
             grid_length=50,
-            client_api="backend.client"
+            client_api="backend.clientapi"
         )
     elif page in ("data.html", "data"):
         return render_template(
             'data/dataDisplay.html',
             title='Data',
-            api='backend.data',
-            client_api='backend.client',
+            api='backend.dataapi',
+            client_api='backend.clientapi',
             columns=display_columns('c_call'),
             end_time=zero_hour.isoformat(' '),
             start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
@@ -44,7 +44,7 @@ def serve_pages(page):
         return render_template(
             'client/clientDisplay.html',
             title='Clients',
-            api='backend.client',
+            api='backend.clientapi',
             columns=display_columns('client_table'),
             grid_length=50
         )

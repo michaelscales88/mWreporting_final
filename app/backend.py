@@ -7,13 +7,13 @@ api_bp = Blueprint('backend', __name__)
 api = Api(api_bp)
 
 
-from .client.api import Client
-from .data.api import Data
-from .report.api import Report
+from .client.api import ClientAPI
+from .data.api import DataAPI
+from .report.api import ReportAPI
 
 
 # Register the endpoint to the api
-api.add_resource(Client, '/client-api')
-api.add_resource(Data, '/data-api')
-api.add_resource(Report, '/report-api')
+api.add_resource(ClientAPI, '/client-api')
+api.add_resource(DataAPI, '/data-api')
+api.add_resource(ReportAPI, '/report-api')
 

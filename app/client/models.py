@@ -2,7 +2,7 @@
 from app import db
 
 
-class Client(db.Model):
+class ClientModel(db.Model):
 
     __tablename__ = 'client_table'
     __repr_attrs__ = ['id', 'client_name', 'ext', 'active']

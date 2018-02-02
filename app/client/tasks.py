@@ -4,24 +4,24 @@ from sqlalchemy.sql import and_
 from sqlalchemy.dialects import postgresql
 
 
-from app.util.tasks import query_to_frame
-from .models import Client
+from app.services.app_tasks import query_to_frame
+from .models import ClientModel
 
 
 _mmap = {
-    "client_table": Client
+    "client_table": ClientModel
 }
 
 
 def get_clients():
-    return g.local_session.query(Client).filter(Client.active == 1)
+    return g.local_session.query(ClientModel).filter(ClientModel.active == 1)
 
 
 def find_client(client_name, client_ext):
-    return g.local_session.query(Client).filter(
+    return g.local_session.query(ClientModel).filter(
         and_(
-            Client.client_name == client_name,
-            Client.ext == client_ext
+            ClientModel.client_name == client_name,
+            ClientModel.ext == client_ext
         )
     ).first()
 
@@ -39,7 +39,7 @@ def add_client(client_name, client_ext):
     if client:
         client.active = True
     else:
-        new_client = Client(client_name=client_name, ext=client_ext)
+        new_client = ClientModel(client_name=client_name, ext=client_ext)
         g.local_session.add(new_client)
     return True
 
@@ -70,4 +70,4 @@ def client_task(task_name, client_name=None, client_ext=None):
         status = 404
         abort(status)
 
-    return result, status
+    return result

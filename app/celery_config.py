@@ -33,7 +33,7 @@ class Config(object):
         'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
     )
 
-    IMPORTS = ('app.report.tasks', 'app.util.tasks', 'app.data.tasks')
+    IMPORTS = ('app.report.tasks', 'app.services.tasks', 'app.data.tasks')
 
     """
     Scheduler

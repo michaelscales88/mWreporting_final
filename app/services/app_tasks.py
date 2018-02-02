@@ -1,4 +1,5 @@
-# util/tasks.py
+# services/tasks.py
+import os
 import pandas as pd
 from flask import jsonify, current_app
 from dateutil.parser import parse
@@ -7,23 +8,13 @@ from sqlalchemy.inspection import inspect
 from functools import wraps
 
 
-from app import celery, mail
-
-
-# Celery Tasks
-@celery.task
-def send_async_email(msg):
-    """Background task to send an email with Flask-Mail."""
-    mail.send(msg)
-
-
 # Other Tasks
 def return_task(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwds):
         try:
-            frame, status = fn(*args, **kwds)
+            frame = fn(*args, **kwds)
             if isinstance(frame, bool):
                 # Boolean frame for model updates
                 key_words = {}
@@ -47,7 +38,6 @@ def return_task(fn):
             )
         else:
             return jsonify(
-                status=status,
                 **key_words
             )
 
@@ -71,7 +61,7 @@ def to_list(value):
 
 def get_model(model=None):
     from app.client.tasks import _mmap as client_map
-    from app.data.tasks import _mmap as model_map
+    from app.data.models import _mmap as model_map
     from app.report.models import _mmap as report_map
 
     # Access models from any module by name
@@ -97,7 +87,7 @@ def display_columns(model_name=None):
         else:
             return headers
     else:
-        return headers
+        return []
 
 
 def query_to_frame(query, is_report=False):
@@ -117,3 +107,7 @@ def get_pk(table):
 
 def get_foreign_id(query_obj, column_name):
     return getattr(query_obj, column_name, None)
+
+
+def make_dir(directory):
+    os.makedirs(directory, exist_ok=True)

@@ -1,11 +1,11 @@
 # report/models.py
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from app.util import json_type
+from app.services import json_type
 from app import db
 
 
-class SlaData(db.Model):
+class SlaReportModel(db.Model):
     __tablename__ = 'sla_report'
     __repr_attrs__ = ['id', 'start_time', 'end_time', 'data']
 
@@ -40,5 +40,5 @@ class SlaData(db.Model):
 
 
 _mmap = {
-    "sla_report": SlaData
+    "sla_report": SlaReportModel
 }

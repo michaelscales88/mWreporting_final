@@ -1,3 +1,4 @@
+# services/app_loggers.py
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -48,7 +49,7 @@ def get_mail_handler(mailer):
     <pre>%(message)s</pre>'''
 
     import logging
-    from .flask_mail import FlaskMailHandler
+    from .app_mail import FlaskMailHandler
     mail_handler = FlaskMailHandler(mailer, subject_template)
     mail_handler.setLevel(logging.ERROR)
     mail_handler.setFormatter(text_template, html_template)

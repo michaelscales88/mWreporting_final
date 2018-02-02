@@ -1,47 +1,56 @@
 # data/api.py
-from flask import g, current_app
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+from sqlalchemy.exc import DatabaseError
 
 
-from app.database import get_session
-from app.util.tasks import return_task, to_datetime
+from app.services.app_tasks import return_task, to_datetime, to_list
 from .tasks import data_task
+from .models import CallTableModel
 
 
-class Data(Resource):
+class DataAPI(Resource):
 
     decorators = [return_task]
 
     def __init__(self):
-        g.local_session = get_session(current_app.config['SQLALCHEMY_DATABASE_URI'])
-        g.ext_session = get_session(current_app.config['EXTERNAL_DATABASE_URI'], readonly=True)
-        g.parser.add_argument(
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'task', dest='task', help='A task to complete.'
+        )
+        parser.add_argument(
             'start_time', type=to_datetime,
             help='Start time for data interval.'
         )
-        g.parser.add_argument(
+        parser.add_argument(
             'end_time', type=to_datetime,
             help='End time for data interval.'
         )
-        g.parser.add_argument(
-            'clients', type=str, action='append'
+        parser.add_argument(
+            'clients', type=to_list,
+            help='List of clients to be row values.'
         )
+        self.args = parser.parse_args()
         super().__init__()
+
+    def __del__(self):
+        try:
+            CallTableModel.session.commit()
+        # Rollback a bad session
+        except DatabaseError:
+            CallTableModel.session.rollback()
 
     def get(self):
         print('Hit GET Data API')
-        args = g.parser.parse_args()
         return data_task(
-            args['task'],
-            start_time=args['start_time'],
-            end_time=args['end_time']
+            self.args['task'],
+            start_time=self.args['start_time'],
+            end_time=self.args['end_time']
         )
 
     def put(self):
         print('Hit PUT Data API')
-        args = g.parser.parse_args()
         return data_task(
-            args['task'],
-            start_time=args['start_time'],
-            end_time=args['end_time']
+            self.args['task'],
+            start_time=self.args['start_time'],
+            end_time=self.args['end_time']
         )

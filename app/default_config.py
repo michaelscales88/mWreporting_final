@@ -8,6 +8,7 @@ class Config(object):
 
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     PACKAGEDIR = os.path.dirname(BASEDIR)
+    TMP_DIR = os.path.join(PACKAGEDIR, 'tmp')
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
     ROWS_PER_PAGE = 50

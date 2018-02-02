@@ -1,7 +1,8 @@
+# services/app_mail.py
 # Credit to Doekman https://gist.github.com/doekman/d24e233035c0a193d4890eaf9703e220
 # Added async email integration with celery
 import logging
-from .tasks import send_async_email
+from app import send_async_email
 
 
 def _has_newline(line):
@@ -15,7 +16,7 @@ def _has_newline(line):
 
 def _is_bad_subject(subject):
     """
-    Copied from: flask_mail.py class Message def has_bad_headers
+    Copied from: app_mail.py class Message def has_bad_headers
     """
     if _has_newline(subject):
         for linenum, line in enumerate(subject.split('\r\n')):
