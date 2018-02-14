@@ -1,7 +1,7 @@
 # report/tasks.py
 from flask import abort
 
-from app.report.services import get_sla_report
+from backend.report.services import get_sla_report
 
 # class SqlAlchemyTask(celery.Task):
 #     """An abstract Celery Task that ensures that the connection the the

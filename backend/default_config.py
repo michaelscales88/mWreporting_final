@@ -1,3 +1,4 @@
+# backend/celery_config.py
 import os
 
 

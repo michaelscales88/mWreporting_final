@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
 
 
-from app.services.app_tasks import return_task, to_datetime, to_list
+from backend.services.app_tasks import return_task, to_datetime, to_list
 from .tasks import data_task
 from .models import CallTableModel
 

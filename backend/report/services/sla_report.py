@@ -5,8 +5,8 @@ from collections import OrderedDict
 from datetime import timedelta
 
 
-from app.services.app_tasks import query_to_frame, display_columns
-from app.report.models import SlaReportModel
+from backend.services.app_tasks import query_to_frame, display_columns
+from backend.report.models import SlaReportModel
 from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 
 

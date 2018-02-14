@@ -1,8 +1,8 @@
-# app/frontend.py
+# backend/frontend.py
 from datetime import datetime, timedelta
 from flask import Blueprint, abort, render_template
 
-from app.services.app_tasks import display_columns
+from backend.services.app_tasks import display_columns
 
 frontend_bp = Blueprint(
     'frontend', __name__

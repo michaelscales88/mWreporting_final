@@ -62,9 +62,9 @@ def to_bool(value):
 
 
 def get_model(model=None):
-    from app.client.models import _mmap as client_map
-    from app.data.models import _mmap as model_map
-    from app.report.models import _mmap as report_map
+    from backend.client.models import _mmap as client_map
+    from backend.data.models import _mmap as model_map
+    from backend.report.models import _mmap as report_map
 
     # Access models from any module by name
     all_map = {

@@ -1,7 +1,7 @@
 # data/models.py
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from app import db
+from backend import db
 
 
 class CallTableModel(db.Model):

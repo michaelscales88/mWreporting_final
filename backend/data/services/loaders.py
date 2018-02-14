@@ -3,8 +3,8 @@ from flask import current_app
 from sqlalchemy.sql import and_
 
 
-from app.services import get_session
-from app.services.app_tasks import get_model, get_pk, get_foreign_id
+from backend.services import get_session
+from backend.services.app_tasks import get_model, get_pk, get_foreign_id
 
 
 def load_data_for_table(table_name, start_time, end_time):

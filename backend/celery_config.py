@@ -1,3 +1,4 @@
+# backend/config.py
 import os
 
 
@@ -33,7 +34,7 @@ class Config(object):
         'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
     )
 
-    IMPORTS = ('app.report.tasks', 'app.services.tasks', 'app.data.tasks')
+    IMPORTS = ('backend.report.tasks', 'backend.services.tasks', 'backend.data.tasks')
 
     """
     Scheduler

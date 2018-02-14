@@ -1,4 +1,4 @@
-# app/server.py
+# backend/server.py
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_mail import Mail
@@ -23,8 +23,8 @@ app.json_encoder = AppJSONEncoder
 
 
 # Settings
-app.config.from_object('app.celery_config.Config')
-app.config.from_object('app.default_config.DevelopmentConfig')
+app.config.from_object('backend.celery_config.Config')
+app.config.from_object('backend.default_config.DevelopmentConfig')
 
 
 # Database manager
@@ -40,9 +40,9 @@ def init_db():
     # Must import Models before calling create_all to ensure
     # tables and metadata are created
 
-    from app.client.models import ClientModel
-    from app.data.models import EventTableModel, CallTableModel
-    from app.report.models import SlaReportModel
+    from backend.client.models import ClientModel
+    from backend.data.models import EventTableModel, CallTableModel
+    from backend.report.models import SlaReportModel
 
     db.create_all()
 

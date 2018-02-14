@@ -1,7 +1,7 @@
 # data/services/data.py
 from sqlalchemy.sql import and_
 
-from app.services.app_tasks import get_model, query_to_frame
+from backend.services.app_tasks import get_model, query_to_frame
 
 
 def get_data_for_table(table_name, start_time, end_time):

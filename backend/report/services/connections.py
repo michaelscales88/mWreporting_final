@@ -1,5 +1,5 @@
 # report/services/connections.py
-from app.services.app_tasks import get_model
+from backend.services.app_tasks import get_model
 from sqlalchemy.sql import and_
 
 

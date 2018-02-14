@@ -1,8 +1,8 @@
 # report/models.py
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from app.services import json_type
-from app import db
+from backend.services import json_type
+from backend import db
 
 
 class SlaReportModel(db.Model):

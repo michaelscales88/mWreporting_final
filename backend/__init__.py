@@ -1,4 +1,4 @@
-# app/__init__.py
+# backend/__init__.py
 from flask import render_template
 
 
@@ -40,7 +40,7 @@ def startup_setup():
     BaseModel.set_session(db.session)
 
     if not app.debug:
-        app.config.from_object('app.default_config.ProductionConfig')
+        app.config.from_object('backend.default_config.ProductionConfig')
         init_logging(app, mail)
 
     # Init tasks for application
