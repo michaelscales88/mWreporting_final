@@ -57,8 +57,12 @@ def to_list(value):
     return loads(value)
 
 
+def to_bool(value):
+    return loads(value) is True
+
+
 def get_model(model=None):
-    from app.client.tasks import _mmap as client_map
+    from app.client.models import _mmap as client_map
     from app.data.models import _mmap as model_map
     from app.report.models import _mmap as report_map
 
