@@ -51,7 +51,8 @@ def init_db():
 mail = Mail(app)
 celery = make_celery(app)
 Bootstrap(app)
-nav = get_nav(app)
+nav = get_nav()
+nav.init_app(app)
 moment = Moment(app)
 health = HealthCheck(app, "/healthcheck")
 

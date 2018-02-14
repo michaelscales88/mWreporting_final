@@ -19,9 +19,7 @@ def return_task(fn):
                 # Boolean frame for model updates
                 key_words = {}
             else:
-                # Transform data for AJAX
                 data = frame.to_dict(orient='split')
-                print(data['data'])
                 key_words = {
                     "data": data['data']
                 }

@@ -5,10 +5,9 @@ from collections import OrderedDict
 from datetime import timedelta
 
 
-from app.client.tasks import add_client_alias
 from app.services.app_tasks import query_to_frame, display_columns
 from app.report.models import SlaReportModel
-from .connections import get_report_model, report_exists_by_name, get_calls_by_direction
+from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 
 
 def check_sla_report_model(start_time, end_time):
@@ -213,15 +212,16 @@ def get_sla_report(start_time, end_time, clients=None):
 
         # Make the visible index the DID extension + client name,
         # or just DID extension if no name exists
-        report_frame = add_client_alias(report_frame)
+        report_frame = add_frame_alias("client_table", report_frame)
 
-        # Create programmatic columns and rows
-        report_frame = make_summary(report_frame)
-        report_frame = compute_avgs(report_frame)
+        if not report_frame.empty:
+            # Create programmatic columns and rows
+            report_frame = make_summary(report_frame)
+            report_frame = compute_avgs(report_frame)
 
-        # Filter out columns containing raw data
-        columns = display_columns('sla_report')
-        report_frame = report_frame[columns]
+            # Filter out columns containing raw data
+            columns = display_columns('sla_report')
+            report_frame = report_frame[columns]
 
         # Prettify percentages
         return report_frame.applymap(format_df)

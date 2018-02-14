@@ -26,3 +26,14 @@ def get_calls_by_direction(table_name, start_time, end_time, call_direction=1):
             table.call_direction == call_direction
         )
     )
+
+
+def add_frame_alias(table_name, frame):
+    # Show the clients as row names
+    table = get_model(table_name)
+    aliases = None
+    if not frame.empty and hasattr(table, "client_name"):
+        aliases = table.query.filter(table.client_name.in_(list(frame.index))).all()
+        print(aliases)
+    frame.insert(0, "Client", aliases if aliases else list(frame.index))
+    return frame

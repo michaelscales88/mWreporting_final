@@ -26,12 +26,6 @@ def find_client(client_name, client_ext):
     ).first()
 
 
-def add_client_alias(frame):
-    # Show the clients as row names
-    frame.insert(0, "Client", list(frame.index))
-    return frame
-
-
 def add_client(client_name, client_ext):
     # See if client already exists
     client = find_client(client_name, client_ext)
