@@ -11,3 +11,8 @@ class ClientModel(db.Model):
     client_name = db.Column(db.Text, nullable=False)
     ext = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean(create_constraint=False), default=True)
+
+
+_mmap = {
+    "client_table": ClientModel
+}

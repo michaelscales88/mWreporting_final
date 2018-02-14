@@ -3,8 +3,8 @@ from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
 
 
-from app.services.app_tasks import return_task
-from .tasks import client_task
+from app.services.app_tasks import return_task, query_to_frame, to_bool
+from .tasks import add_client, disable_client, get_clients
 from .models import ClientModel
 
 
@@ -15,15 +15,16 @@ class ClientAPI(Resource):
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'task', dest='task', help='A task to complete.'
-        )
-        parser.add_argument(
             'client_name', location='form',
             help='A client to change.'
         )
         parser.add_argument(
             'client_ext', location='form',
             type=int, help='The client number to change.'
+        )
+        parser.add_argument(
+            'active', location='form',
+            type=to_bool, help='Active clients.'
         )
         self.args = parser.parse_args()
         super().__init__()
@@ -37,17 +38,12 @@ class ClientAPI(Resource):
 
     def get(self):
         print('Hit GET Client API')
-        return client_task(
-            self.args['task'],
-            client_name=self.args['client_name'],
-            client_ext=self.args['client_ext']
-        )
+        return query_to_frame(get_clients(self.args['active']))
 
     def put(self):
         print('hit PUT Client API')
-        return client_task(
-            self.args['task'],
-            client_name=self.args['client_name'],
-            client_ext=self.args['client_ext']
-        )
+        return add_client(self.args['client_name'], self.args['client_ext'])
 
+    def delete(self):
+        print('hit DELETE Client API')
+        return disable_client(self.args['client_name'], self.args['client_ext'])
