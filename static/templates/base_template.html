@@ -1,6 +1,6 @@
 {# Use bootstrap page scaffolding
 #}
-{%- extends "bootstrap/base.html" %}
+{%- extends "bootstrap/base_template.html" %}
 {% block html_attribs %} lang="en"{% endblock %}
 {% block title %}
 {% if title %}
@@ -31,13 +31,6 @@
     {{ super() }}
     {{ nav.main_nav.render() }}
 {% endblock %}
-
-{#{% block scripts %}#}
-{#    {{ super() }}#}
-{#    <script type=text/javascript>#}
-{#        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};#}
-{#    </script>#}
-{#{% endblock %}#}
 
 {% block footer %}
     {{ super() }}
