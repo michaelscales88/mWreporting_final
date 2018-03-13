@@ -5,7 +5,7 @@ from sqlalchemy.exc import DatabaseError
 
 from backend.services.app_tasks import return_task, to_datetime, to_list
 from .tasks import data_task
-from .models import CallTableModel
+from .models import CallTableModel, EventTableModel, TablesLoaded
 
 
 class DataAPI(Resource):
@@ -13,6 +13,7 @@ class DataAPI(Resource):
     decorators = [return_task]
 
     def __init__(self):
+        self._models = (CallTableModel, EventTableModel, TablesLoaded)
         parser = reqparse.RequestParser()
         parser.add_argument(
             'task', dest='task', help='A task to complete.'
@@ -33,11 +34,12 @@ class DataAPI(Resource):
         super().__init__()
 
     def __del__(self):
-        try:
-            CallTableModel.session.commit()
-        # Rollback a bad session
-        except DatabaseError:
-            CallTableModel.session.rollback()
+        for model in self._models:
+            try:
+                model.session.commit()
+            # Rollback a bad session
+            except DatabaseError:
+                model.session.rollback()
 
     def get(self):
         print('Hit GET Data API')
@@ -49,6 +51,7 @@ class DataAPI(Resource):
 
     def put(self):
         print('Hit PUT Data API')
+
         return data_task(
             self.args['task'],
             start_time=self.args['start_time'],

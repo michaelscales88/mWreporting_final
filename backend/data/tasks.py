@@ -2,7 +2,7 @@
 from flask import abort
 
 
-from .services import get_data, load_data_for_table
+from .services import get_data, load_data_for_date_range
 
 # class SqlAlchemyTask(celery.Task):
 #     """An abstract Celery Task that ensures that the connection the the
@@ -49,8 +49,10 @@ def data_task(task_name, start_time=None, end_time=None):
         if task_name == 'get':
             result = get_data('c_call', start_time, end_time)
         elif task_name == 'load':
-            result1 = load_data_for_table('c_call', start_time, end_time)
-            result2 = load_data_for_table('c_event', start_time, end_time)
+            print('loading data')
+            result1 = load_data_for_date_range('c_call', start_time, end_time)
+            result2 = load_data_for_date_range('c_event', start_time, end_time)
+            # result2 = True
             result = result1 and result2
         return result
     else:

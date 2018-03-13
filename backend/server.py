@@ -41,7 +41,7 @@ def init_db():
     # tables and metadata are created
 
     from backend.client.models import ClientModel
-    from backend.data.models import EventTableModel, CallTableModel
+    from backend.data.models import EventTableModel, CallTableModel, TablesLoaded
     from backend.report.models import SlaReportModel
 
     db.create_all()

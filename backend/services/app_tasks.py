@@ -4,6 +4,7 @@ import pandas as pd
 from flask import jsonify, current_app
 from dateutil.parser import parse
 from json import loads
+from flask_sqlalchemy import Model
 from sqlalchemy.inspection import inspect
 from functools import wraps
 
@@ -13,6 +14,8 @@ def return_task(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwds):
+        print(args)
+        print(kwds)
         try:
             frame = fn(*args, **kwds)
             if isinstance(frame, bool):
@@ -108,7 +111,10 @@ def get_pk(table):
 
 
 def get_foreign_id(query_obj, column_name):
-    return getattr(query_obj, column_name, None)
+    if isinstance(query_obj, Model):
+        return getattr(query_obj, column_name, None)
+    if isinstance(query_obj, dict):
+        return query_obj.get(column_name)
 
 
 def make_dir(directory):

@@ -1,5 +1,8 @@
 # data/models.py
+from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import and_
+
 
 from backend import db
 
@@ -51,7 +54,28 @@ class EventTableModel(db.Model):
         return self.end_time - self.start_time
 
 
+class TablesLoaded(db.Model):
+
+    __tablename__ = 'tables_loaded'
+    __repr_attrs__ = ['date_loaded', 'dt_downloaded']
+
+    id = db.Column(db.Integer, primary_key=True)
+    date_loaded = db.Column(db.Date, nullable=False)
+    table = db.Column(db.String, nullable=False)
+    dt_downloaded = db.Column(db.DateTime, default=datetime.now())
+
+    @classmethod
+    def check_date_set(cls, date, table_name):
+        return cls.query.filter(
+            and_(
+                cls.date_loaded == date,
+                cls.table == table_name
+            )
+        ).first()
+
+
 _mmap = {
     'c_call': CallTableModel,
-    'c_event': EventTableModel
+    'c_event': EventTableModel,
+    'tables_loaded': TablesLoaded
 }
