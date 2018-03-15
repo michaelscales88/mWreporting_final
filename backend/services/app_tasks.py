@@ -1,8 +1,9 @@
 # services/tasks.py
 import os
 import pandas as pd
-from flask import jsonify, current_app
+from datetime import datetime
 from dateutil.parser import parse
+from flask import jsonify, current_app
 from json import loads
 from flask_sqlalchemy import Model
 from sqlalchemy.inspection import inspect
@@ -119,3 +120,11 @@ def get_foreign_id(query_obj, column_name):
 
 def make_dir(directory):
     os.makedirs(directory, exist_ok=True)
+
+
+def parse_time(s):
+    try:
+        ret = parse(s)
+    except ValueError:
+        ret = datetime.utcfromtimestamp(s)
+    return ret

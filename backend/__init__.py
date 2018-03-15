@@ -1,7 +1,6 @@
 # backend/__init__.py
 from flask import render_template
 
-
 from .server import (
     app, db, init_db, health,
     moment, celery, nav, mail,
@@ -16,12 +15,22 @@ from .services import (
 from .backend import api_bp
 from .frontend import frontend_bp
 
+# Tasks
+from .data.tasks import add_scheduled_tasks
+
 
 app.register_blueprint(api_bp)
 app.register_blueprint(frontend_bp)
 
 health.add_check(get_local_healthcheck)
 health.add_check(get_data_healthcheck)
+
+if not app.debug:
+    app.config.from_object('backend.default_config.ProductionConfig')
+    init_logging(app, mail)
+
+# Init tasks for application
+add_scheduled_tasks(app)
 
 
 # Configuration for APP
@@ -38,12 +47,7 @@ def startup_setup():
 
     # Inject session to be used by Models
     BaseModel.set_session(db.session)
-
-    if not app.debug:
-        app.config.from_object('backend.default_config.ProductionConfig')
-        init_logging(app, mail)
-
-    # Init tasks for application
+    print('setting session', db.session)
 
 
 # Error pages

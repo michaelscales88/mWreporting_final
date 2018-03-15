@@ -1,8 +1,11 @@
 # data/tasks.py
+import logging
+from celery.schedules import crontab
 from flask import abort
 
 
 from .services import get_data, load_data_for_date_range
+
 
 # class SqlAlchemyTask(celery.Task):
 #     """An abstract Celery Task that ensures that the connection the the
@@ -25,22 +28,15 @@ from .services import get_data, load_data_for_date_range
 #         pass
 #
 #
-# def add_scheduled_tasks(app):
-#     app.config['CELERYBEAT_SCHEDULE']['test'] = {
-#         'task': 'app.data.tasks.load_data',
-#         'schedule': crontab(minute='*/15'),
-#         'args': ('date1', 'date2')
-#     }
-#     pass
-
-# @celery.task(base=SqlAlchemyTask, max_retries=10, default_retry_delay=60)
-# def get_data(start_time=None, end_time=None, event_id=None):
-#     return CallTableModel.query.filter(
-#         and_(
-#             CallTableModel.start_time >= start_time,
-#             CallTableModel.end_time <= end_time,
-#         )
-#     )
+def add_scheduled_tasks(app):
+    # logging.info("Updating scheduled tasks:")
+    app.config['CELERYBEAT_SCHEDULE']['test'] = {
+        'task': 'backend.data.services.loaders.data_loader',
+        'schedule': crontab(minute='*/1'),
+        'args': (100,)
+    }
+    # logging.info(app.config['CELERYBEAT_SCHEDULE']['test'])
+    print("ran schedule tasks")
 
 
 def data_task(task_name, start_time=None, end_time=None):
@@ -52,6 +48,12 @@ def data_task(task_name, start_time=None, end_time=None):
             print('loading data')
             result1 = load_data_for_date_range('c_call', start_time, end_time)
             result2 = load_data_for_date_range('c_event', start_time, end_time)
+
+            # result1 = load_data_for_date_range.delay('c_call', start_time, end_time)
+            # result1 = test_load_data_for_date_range.delay('c_call', start_time, end_time)
+            # print('about to wait')
+            # result1.wait()
+            # print('done waiting')
             # result2 = True
             result = result1 and result2
         return result
