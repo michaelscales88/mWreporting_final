@@ -25,7 +25,7 @@ from backend.report.services import get_sla_report
 #
 # def add_scheduled_tasks(app):
 #     # TODO automatically make yesterdays report at 12:01 AM
-#     app.config['CELERYBEAT_SCHEDULE']['test'] = {
+#     app.config['CELERYBEAT_SCHEDULE']['tests'] = {
 #         'task': 'app.data.tasks.load_data',
 #         'schedule': crontab(minute='*/15'),
 #         'args': ('date1', 'date2')

@@ -64,6 +64,7 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     USE_DEBUGGER = True
+    TEST_MODE = os.getenv('TEST_MODE', False)
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_URI',
                                                             os.path.join(Config.PACKAGEDIR, 'tmp/local_app.db'))

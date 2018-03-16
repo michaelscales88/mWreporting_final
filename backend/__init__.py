@@ -53,3 +53,7 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html', title='Resource Error'), 500
+
+
+if app.config['TEST_MODE']:
+    raise RuntimeError("Server going down")
