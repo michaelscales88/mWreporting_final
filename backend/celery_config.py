@@ -1,5 +1,6 @@
 # backend/config.py
 import os
+from celery.schedules import crontab
 
 
 class Config(object):
@@ -41,4 +42,12 @@ class Config(object):
     """
     Scheduler
     """
-    CELERYBEAT_SCHEDULE = {}
+    CELERYBEAT_SCHEDULE = {
+        'loading_task': {
+            'task': 'backend.data.services.loaders.data_loader',
+            'schedule': crontab(
+                **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/30')}
+            ),
+            'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
+        }
+    }

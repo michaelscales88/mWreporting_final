@@ -2,9 +2,9 @@
 from flask import render_template
 
 from .server import (
-    app, db, init_db, health,
-    moment, celery, nav, mail,
-    BaseModel, send_async_email
+    app, celery, db, init_db,
+    health, moment, mail, nav,
+    send_async_email, bind_model_session
 )
 from .services import (
     add_cdns, make_dir, get_local_healthcheck,
@@ -14,9 +14,6 @@ from .services import (
 # Modules
 from .backend import api_bp
 from .frontend import frontend_bp
-
-# Tasks
-from .data.tasks import add_scheduled_tasks
 
 
 app.register_blueprint(api_bp)
@@ -29,8 +26,9 @@ if not app.debug:
     app.config.from_object('backend.default_config.ProductionConfig')
     init_logging(app, mail)
 
-# Init tasks for application
-add_scheduled_tasks(app)
+
+# Set up the session for all app models
+bind_model_session()
 
 
 # Configuration for APP
@@ -44,10 +42,6 @@ def startup_setup():
 
     # Add CDNs for frontend
     add_cdns(app)
-
-    # Inject session to be used by Models
-    BaseModel.set_session(db.session)
-    print('setting session', db.session)
 
 
 # Error pages
