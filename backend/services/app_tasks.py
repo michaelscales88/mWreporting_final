@@ -1,9 +1,11 @@
 # services/tasks.py
 import os
 import pandas as pd
-from flask import jsonify, current_app
+from datetime import datetime
 from dateutil.parser import parse
+from flask import jsonify, current_app
 from json import loads
+from flask_sqlalchemy import Model
 from sqlalchemy.inspection import inspect
 from functools import wraps
 
@@ -13,6 +15,8 @@ def return_task(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwds):
+        print(args)
+        print(kwds)
         try:
             frame = fn(*args, **kwds)
             if isinstance(frame, bool):
@@ -108,8 +112,19 @@ def get_pk(table):
 
 
 def get_foreign_id(query_obj, column_name):
-    return getattr(query_obj, column_name, None)
+    if isinstance(query_obj, Model):
+        return getattr(query_obj, column_name, None)
+    if isinstance(query_obj, dict):
+        return query_obj.get(column_name)
 
 
 def make_dir(directory):
     os.makedirs(directory, exist_ok=True)
+
+
+def parse_time(s):
+    try:
+        ret = parse(s)
+    except ValueError:
+        ret = datetime.utcfromtimestamp(s)
+    return ret

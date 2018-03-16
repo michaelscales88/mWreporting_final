@@ -1,11 +1,9 @@
 # data/api.py
 from flask_restful import Resource, reqparse
-from sqlalchemy.exc import DatabaseError
 
 
 from backend.services.app_tasks import return_task, to_datetime, to_list
 from .tasks import data_task
-from .models import CallTableModel
 
 
 class DataAPI(Resource):
@@ -33,11 +31,7 @@ class DataAPI(Resource):
         super().__init__()
 
     def __del__(self):
-        try:
-            CallTableModel.session.commit()
-        # Rollback a bad session
-        except DatabaseError:
-            CallTableModel.session.rollback()
+        pass
 
     def get(self):
         print('Hit GET Data API')
@@ -49,6 +43,7 @@ class DataAPI(Resource):
 
     def put(self):
         print('Hit PUT Data API')
+
         return data_task(
             self.args['task'],
             start_time=self.args['start_time'],

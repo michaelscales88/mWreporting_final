@@ -25,7 +25,7 @@ app.json_encoder = AppJSONEncoder
 # Settings
 app.config.from_object('backend.celery_config.Config')
 app.config.from_object('backend.default_config.DevelopmentConfig')
-
+app.config.from_pyfile('app.cfg', silent=True)
 
 # Database manager
 db = SQLAlchemy(
@@ -41,10 +41,15 @@ def init_db():
     # tables and metadata are created
 
     from backend.client.models import ClientModel
-    from backend.data.models import EventTableModel, CallTableModel
+    from backend.data.models import EventTableModel, CallTableModel, TablesLoaded
     from backend.report.models import SlaReportModel
 
     db.create_all()
+
+
+def bind_model_session():
+    # Inject session to be used by Models
+    BaseModel.set_session(db.session)
 
 
 # Services

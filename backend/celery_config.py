@@ -1,5 +1,6 @@
 # backend/config.py
 import os
+from celery.schedules import crontab
 
 
 class Config(object):
@@ -10,6 +11,7 @@ class Config(object):
     AMQP_PASSWORD = os.getenv('AMQP_PASSWORD', 'password')
     AMQP_HOST = os.getenv('AMQP_HOST', 'localhost')
     AMQP_PORT = int(os.getenv('AMQP_PORT', '5672'))
+    DISCOVER_RABBITMQ = bool(os.getenv("DISCOVER_RABBITMQ", True))
 
     DEFAULT_BROKER_URL = 'amqp://{user}:{pw}@{host}:{port}'.format(
         user=AMQP_USERNAME,
@@ -28,6 +30,7 @@ class Config(object):
     CELERY_BROKER_URL = os.getenv('BROKER_URL', DEFAULT_BROKER_URL)
     CELERY_RESULT_BACKEND = os.getenv('BACKEND_URL', DEFAULT_CELERY_BACKEND)
 
+    CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
 
     CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
@@ -39,4 +42,12 @@ class Config(object):
     """
     Scheduler
     """
-    CELERYBEAT_SCHEDULE = {}
+    CELERYBEAT_SCHEDULE = {
+        'loading_task': {
+            'task': 'backend.data.services.loaders.data_loader',
+            'schedule': crontab(
+                **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/30')}
+            ),
+            'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
+        }
+    }

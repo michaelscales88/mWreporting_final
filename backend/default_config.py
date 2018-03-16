@@ -41,7 +41,6 @@ class Config(object):
     )
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
                                              os.path.join(PACKAGEDIR, 'tmp/db_repository'))
-    SQLALCHEMY_TRACK_MODIFICATIONS = False  # Keep this off to reduce overhead
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'
@@ -54,6 +53,9 @@ class Config(object):
     # administrator list
     ADMINS = ['mindwirelessreporting@gmail.com', 'michael.scales@g.austincc.edu']
 
+    # settings for data source loader
+    MAX_INTERVAL = 2
+
 
 class ProductionConfig(Config):
     pass
@@ -62,7 +64,6 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     USE_DEBUGGER = True
-    SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_URI',
                                                             os.path.join(Config.PACKAGEDIR, 'tmp/local_app.db'))

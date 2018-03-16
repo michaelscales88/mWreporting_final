@@ -1,11 +1,10 @@
 # backend/__init__.py
 from flask import render_template
 
-
 from .server import (
-    app, db, init_db, health,
-    moment, celery, nav, mail,
-    BaseModel, send_async_email
+    app, celery, db, init_db,
+    health, moment, mail, nav,
+    send_async_email, bind_model_session
 )
 from .services import (
     add_cdns, make_dir, get_local_healthcheck,
@@ -23,6 +22,14 @@ app.register_blueprint(frontend_bp)
 health.add_check(get_local_healthcheck)
 health.add_check(get_data_healthcheck)
 
+if not app.debug:
+    app.config.from_object('backend.default_config.ProductionConfig')
+    init_logging(app, mail)
+
+
+# Set up the session for all app models
+bind_model_session()
+
 
 # Configuration for APP
 @app.before_first_request
@@ -35,15 +42,6 @@ def startup_setup():
 
     # Add CDNs for frontend
     add_cdns(app)
-
-    # Inject session to be used by Models
-    BaseModel.set_session(db.session)
-
-    if not app.debug:
-        app.config.from_object('backend.default_config.ProductionConfig')
-        init_logging(app, mail)
-
-    # Init tasks for application
 
 
 # Error pages
