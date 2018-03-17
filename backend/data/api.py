@@ -23,10 +23,7 @@ class DataAPI(Resource):
             'end_time', type=to_datetime,
             help='End time for data interval.'
         )
-        parser.add_argument(
-            'clients', type=to_list,
-            help='List of clients to be row values.'
-        )
+        parser.add_argument('tables', type=to_list)
         self.args = parser.parse_args()
         super().__init__()
 
@@ -43,7 +40,6 @@ class DataAPI(Resource):
 
     def put(self):
         print('Hit PUT Data API')
-
         return data_task(
             self.args['task'],
             start_time=self.args['start_time'],

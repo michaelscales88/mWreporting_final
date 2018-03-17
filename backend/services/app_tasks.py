@@ -15,15 +15,15 @@ def return_task(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwds):
-        print(args)
-        print(kwds)
         try:
             frame = fn(*args, **kwds)
+            print("exited frame")
             if isinstance(frame, bool):
                 # Boolean frame for model updates
                 key_words = {}
             else:
                 data = frame.to_dict(orient='split')
+                print("hit to_dict")
                 key_words = {
                     "data": data['data']
                 }

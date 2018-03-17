@@ -10,7 +10,7 @@ from backend.report.models import SlaReportModel
 from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 
 
-def check_sla_report_model(start_time, end_time):
+def make_sla_report_model(start_time, end_time):
     # Check if report already exists
     if report_exists_by_name('sla_report', start_time, end_time):
         return True
@@ -198,11 +198,23 @@ def format_df(cell):
         return cell
 
 
-def get_sla_report(start_time, end_time, clients=None):
-    # Check the report model exists or make one if it does not
-    report_exists = check_sla_report_model(start_time, end_time)
+def empty_report():
+    empty_model = get_report_model('sla_report')
+    frame = query_to_frame(empty_model, is_report=True)
+    print(frame)
+    return frame
 
-    if report_exists:
+
+def get_sla_report(start_time, end_time, clients=None):
+    # Check the report model exists
+    report_exists = report_exists_by_name('sla_report', start_time, end_time)
+
+    try:
+        # If the report does not exist make a report.
+        # Raise AssertionError if a report is not made.
+        if not report_exists and not make_sla_report_model(start_time, end_time):
+            raise AssertionError("Report not made.")
+
         report_query = get_report_model('sla_report', start_time, end_time)
         report_frame = query_to_frame(report_query, is_report=True)
 
@@ -223,5 +235,11 @@ def get_sla_report(start_time, end_time, clients=None):
             columns = display_columns('sla_report')
             report_frame = report_frame[columns]
 
+    except AssertionError as e:
+        if e == "Report not made.":
+            pass
+        return empty_report()
+    else:
         # Prettify percentages
         return report_frame.applymap(format_df)
+

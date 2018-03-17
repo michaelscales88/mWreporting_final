@@ -1,5 +1,7 @@
 # report/models.py
+from datetime import date as DATETYPE
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import and_
 
 from backend.services import json_type
 from backend import db
@@ -37,6 +39,25 @@ class SlaReportModel(db.Model):
             'Longest Waiting Answered',
             'PCA'
         ]
+
+    @classmethod
+    def get(cls, start_time, end_time):
+        if isinstance(start_time, DATETYPE) and isinstance(end_time, DATETYPE):
+            return cls.query.filter(
+                and_(
+                    cls.start_time == start_time,
+                    cls.end_time == end_time
+                )
+            ).first()
+        else:
+            return None
+
+    @classmethod
+    def exists(cls, start_time, end_time):
+        return cls.get(start_time, end_time) is not None
+
+    def empty_data(self):
+        return
 
 
 _mmap = {
