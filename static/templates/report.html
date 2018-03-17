@@ -30,6 +30,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
+                loadMultiSelect("{{ url_for(api) }}", "#report-select", "{{ task }}");
+            });
+
             function getSelectOptions(id) {
                 let select = $('#' + id);
                 let obj = [];
@@ -49,13 +53,13 @@
                 }
             }
 
+            console.log(ajaxFn());
             $.getScript("{{ url_for("static", filename="js/report.js") }}", function () {
+                let end_time = moment().hour(0).minute(0).second(0),
+                    start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
                 configReportPage(
-                    "{{ url_for(api) }}", "{{ start_time }}", "{{ end_time }}", "{{ grid_length }}", ajaxFn
+                    "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", ajaxFn
                 );
-            });
-            $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
-                loadMultiSelect("{{ url_for(api) }}", "#report-select", "{{ task }}");
             });
             $("button#loadButton").on("click", function () {
                 $.ajax({

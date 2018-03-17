@@ -39,8 +39,10 @@
                 }
             }
             $.getScript("{{ url_for("static", filename="js/data.js") }}", function () {
+                let end_time = moment().hour(0).minute(0).second(0),
+                    start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
                 configDataPage(
-                    "{{ url_for(api) }}", "{{ start_time }}", "{{ end_time }}", "{{ grid_length }}", ajaxFn
+                    "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", ajaxFn
                 );
             });
             $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {

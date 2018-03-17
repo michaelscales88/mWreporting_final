@@ -22,10 +22,8 @@ def serve_pages(page):
         return render_template(
             'report.html',
             title='Reports',
-            api='backend.reportapi',
+            api='backend.slareportapi',
             columns=display_columns('sla_report'),
-            end_time=zero_hour.isoformat(' '),
-            start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
             grid_length=50,
             client_api="backend.clientapi",
             task="sla_report"
@@ -35,10 +33,8 @@ def serve_pages(page):
             'data.html',
             title='Data',
             api='backend.dataapi',
-            client_api='backend.clientapi',
+            data_api='backend.clientapi',
             columns=display_columns('c_call'),
-            end_time=zero_hour.isoformat(' '),
-            start_time=(zero_hour - timedelta(days=1)).isoformat(' '),
             grid_length=50,
             task="get"
         )
