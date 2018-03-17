@@ -13,17 +13,17 @@ class DataAPI(Resource):
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'task', dest='task', help='A task to complete.'
+            'task', location='form', help='A task to complete.'
         )
         parser.add_argument(
-            'start_time', type=to_datetime,
+            'start_time', location='form', type=to_datetime,
             help='Start time for data interval.'
         )
         parser.add_argument(
-            'end_time', type=to_datetime,
+            'end_time', location='form', type=to_datetime,
             help='End time for data interval.'
         )
-        parser.add_argument('tables', type=to_list)
+        parser.add_argument('tables', location='form', type=to_list)
         self.args = parser.parse_args()
         super().__init__()
 
@@ -31,17 +31,14 @@ class DataAPI(Resource):
         pass
 
     def get(self):
-        print('Hit GET Data API')
-        return data_task(
-            self.args['task'],
-            start_time=self.args['start_time'],
-            end_time=self.args['end_time']
-        )
+        print('Hit GET Data API', self.args)
+        return "c_call", "c_event"
 
     def put(self):
-        print('Hit PUT Data API')
+        print('Hit PUT Data API', self.args)
         return data_task(
             self.args['task'],
             start_time=self.args['start_time'],
-            end_time=self.args['end_time']
+            end_time=self.args['end_time'],
+            tables=self.args['tables']
         )
