@@ -10,7 +10,7 @@ class ClientModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.Text, nullable=False)
     ext = db.Column(db.Integer, nullable=False)
-    active = db.Column(db.Boolean(create_constraint=False), default=True)
+    active = db.Column(db.Boolean, default=True)
 
 
 _mmap = {

@@ -3,11 +3,12 @@ from sqlalchemy.sql import and_
 from sqlalchemy.dialects import postgresql
 
 
+from backend.services.app_tasks import query_to_frame
 from .models import ClientModel
 
 
-def get_clients(active=True):
-    return ClientModel.query.filter(ClientModel.active == active).all()
+def get_clients(status=True):
+    return query_to_frame(ClientModel.query.filter(ClientModel.active == status))
 
 
 def find_client(client_name, client_ext, active=True):

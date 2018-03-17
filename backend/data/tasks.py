@@ -9,7 +9,7 @@ def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_ev
     if start_time and end_time:
         result = None
         if task_name == 'get':
-            result = get_data('c_call', start_time, end_time)
+            result = get_data(tables[0], start_time, end_time)
         elif task_name == 'load':
             # Load data for selected tables
             load_job = group(

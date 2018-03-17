@@ -1,21 +1,21 @@
-function dtSelector(startName, endName, config) {
-    let dtStart = $(startName).datetimepicker({
+function dtSelector(first_selector, second_selector, config) {
+    let dtStart = $(first_selector).datetimepicker({
         sideBySide: true,
         useCurrent: false,
         toolbarPlacement: "top",
         showClear: true,
-        maxDate: config['endTime'],
-        defaultDate: config['startTime'],
-
+        defaultDate: config['start_time'],
+        maxDate: moment()
     });
-    let dtEnd = $(endName).datetimepicker({
+    let dtEnd = $(second_selector).datetimepicker({
         sideBySide: true,
         useCurrent: false, //Important! See issue #1075
         toolbarPlacement: "top",
         showClear: true,
         showTodayButton: true,
-        minDate: config['startTime'],
-        defaultDate: config['endTime'],
+        minDate: config['start_time'],
+        defaultDate: config['end_time'],
+        maxDate: moment()
     });
     dtEnd.on("dp.change", function (e) {
         dtStart.data("DateTimePicker").maxDate(e.date);

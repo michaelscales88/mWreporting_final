@@ -38,7 +38,7 @@ class ClientAPI(Resource):
 
     def get(self):
         print('Hit GET Client API')
-        return query_to_frame(get_clients(self.args['active']))
+        return get_clients()
 
     def put(self):
         print('hit PUT Client API')
