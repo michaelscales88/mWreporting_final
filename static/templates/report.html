@@ -32,42 +32,16 @@
 
             $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
                 loadMultiSelect("{{ url_for(api) }}", "#report-select", "{{ task }}");
-            });
 
-            function getSelectOptions(id) {
-                let select = $('#' + id);
-                let obj = [];
-                $('option', select).each(function () {
-                    let $this = $(this);
-                    obj.push($this.val());
+                $.getScript("{{ url_for("static", filename="js/report.js") }}", function () {
+                    let end_time = moment().hour(0).minute(0).second(0),
+                        start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
+                    configReportPage(
+                        "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", "{{ task }}"
+                    );
                 });
-                return obj;
-            }
 
-            function ajaxFn() {
-                return {
-                    start_time: $("input#start-selector").val(),
-                    end_time: $("input#end-selector").val(),
-                    task: "{{ task }}",
-                    clients: JSON.stringify(getSelectOptions('report-select'))
-                }
-            }
-
-            console.log(ajaxFn());
-            $.getScript("{{ url_for("static", filename="js/report.js") }}", function () {
-                let end_time = moment().hour(0).minute(0).second(0),
-                    start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
-                configReportPage(
-                    "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", ajaxFn
-                );
             });
-            $("button#loadButton").on("click", function () {
-                $.ajax({
-                    method: "PUT",
-                    url: "{{ url_for(api) }}",
-                    data: ajaxFn
-                });
-            })
         });
     </script>
 {% endblock %}

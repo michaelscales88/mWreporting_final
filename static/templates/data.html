@@ -31,22 +31,11 @@
             $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
                 loadMultiSelect("{{ url_for(api) }}", "#data-select");
 
-                function ajaxFn() {
-                    console.log("making ajax call");
-                    let val = {
-                        start_time: $("input#start-selector").val(),
-                        end_time: $("input#end-selector").val(),
-                        task: "{{ get_task }}",
-                        tables: JSON.stringify($("#data-select").multipleSelect("getSelects"))
-                    };
-                    console.log(val);
-                    return val
-                }
                 $.getScript("{{ url_for("static", filename="js/data.js") }}", function () {
                     let end_time = moment().hour(0).minute(0).second(0),
                         start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
                     configDataPage(
-                        "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", ajaxFn
+                        "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}"
                     );
                 });
             });

@@ -49,5 +49,12 @@ class Config(object):
                 **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
             ),
             'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
+        },
+        'daily_report_task': {
+            'task': 'backend.report.services.loaders.data_loader',
+            'schedule': crontab(
+                **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
+            ),
+            'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
         }
     }

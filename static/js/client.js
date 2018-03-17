@@ -1,7 +1,7 @@
 function configClientPage(api, num_rows, ajaxFn) {
 
     // configure DataTable
-    $.getScript("/static/js/dataTable.js", function () {
+    $.getScript("/static/js/data-table.js", function () {
         let tableConfig = {
             api: api,
             table_name: 'table#displayTable',

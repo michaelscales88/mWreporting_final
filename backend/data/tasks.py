@@ -8,9 +8,9 @@ from .services import get_data, load_data_for_date_range
 def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_event')):
     if start_time and end_time:
         result = None
-        if task_name == 'get':
+        if task_name == 'GET':
             result = get_data(tables[0], start_time, end_time)
-        elif task_name == 'load':
+        elif task_name == 'LOAD':
             # Load data for selected tables
             load_job = group(
                 [load_data_for_date_range.s(table, start_time, end_time) for table in tables]

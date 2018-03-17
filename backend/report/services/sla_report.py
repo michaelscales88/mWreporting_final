@@ -208,7 +208,7 @@ def empty_report():
 def get_sla_report(start_time, end_time, clients=None):
     # Check the report model exists
     report_exists = report_exists_by_name('sla_report', start_time, end_time)
-
+    print("get_sla_report")
     try:
         # If the report does not exist make a report.
         # Raise AssertionError if a report is not made.
