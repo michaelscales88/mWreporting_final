@@ -10,6 +10,21 @@ from .tasks import report_task
 
 class ReportAPI(Resource):
 
+    def __init__(self):
+        parser = reqparse.RequestParser()
+        self.args = parser.parse_args()
+        super().__init__()
+
+    def __del__(self):
+        pass
+
+    def get(self):
+        print('Hit GET Report API', self.args)
+        return []
+
+
+class SlaReportAPI(Resource):
+
     decorators = [return_task]
 
     def __init__(self):
@@ -40,7 +55,7 @@ class ReportAPI(Resource):
             SlaReportModel.session.rollback()
 
     def get(self):
-        print('Hit GET Report API')
+        print('Hit GET Report API', self.args)
         return report_task(
             self.args['task'],
             start_time=self.args['start_time'],
@@ -49,7 +64,7 @@ class ReportAPI(Resource):
         )
 
     def put(self):
-        print('Hit PUTS Report API')
+        print('Hit PUTS Report API', self.args)
         return report_task(
             self.args['task'],
             start_time=self.args['start_time'],

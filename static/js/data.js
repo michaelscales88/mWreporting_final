@@ -1,4 +1,4 @@
-function configDataPage(api, start_time, end_time, num_rows, ajaxFn) {
+function configDataPage(api, start_time, end_time, num_rows, ajaxFn, method="PUT") {
 
     // dateTimePicker for dtSelectStart & dtSelectEnd
     $.getScript("/static/js/dtSelector.js", function () {
@@ -17,7 +17,10 @@ function configDataPage(api, start_time, end_time, num_rows, ajaxFn) {
             num_rows: num_rows
         };
 
-        let table = getDataTable(ajaxFn, tableConfig);
-        $('button#refreshButton').on('click', table.ajax.reload());
+        let table = getDataTable(ajaxFn, tableConfig, method);
+        $('button#refreshButton').on('click', function() {
+            console.log("clicked refresh");
+            table.ajax.reload()
+        });
     });
 }

@@ -1,10 +1,11 @@
-function getDataTable(ajaxFn, config) {
+function getDataTable(ajaxFn, config, method="GET") {
     return $(config['table_name']).DataTable({
         processing: true,
         pageLength: config['num_rows'],
         ajax: {
             url: config['api'],
-            data: ajaxFn
+            data: ajaxFn,
+            method: method
         },
         dom: '<<B>lf<t>ip>',
         buttons: [

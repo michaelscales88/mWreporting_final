@@ -1,4 +1,4 @@
-function configReportPage(api, start_time, end_time, num_rows, task, ajaxFn) {
+function configReportPage(api, start_time, end_time, num_rows, task, ajaxFn, method="PUT") {
 
     // dateTimePicker for start-selector & end-selector
     $.getScript("/static/js/dtSelector.js", function () {
@@ -17,7 +17,7 @@ function configReportPage(api, start_time, end_time, num_rows, task, ajaxFn) {
             num_rows: num_rows
         };
 
-        let table = getDataTable(ajaxFn, tableConfig);
+        let table = getDataTable(ajaxFn, tableConfig, method);
         $('button#refreshButton').on('click', table.ajax.reload());
     });
 }

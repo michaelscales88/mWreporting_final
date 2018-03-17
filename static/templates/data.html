@@ -7,9 +7,7 @@
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
         </div>
         <div class="col-lg-4">
-            <p><select id="data-select" title="Data Tables" multiple="multiple" style="width: 100%">
-                <option value="test">Test Option</option>
-            </select></p>
+            <p><select id="data-select" title="Data Tables" multiple="multiple" style="width: 100%"></select></p>
         </div>
         <div class="col-lg-5">{% include "partials/calendars.html" %}</div>
     </div>
@@ -30,21 +28,27 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            function ajaxFn() {
-                return {
-                    start_time: $("input#start-selector").val(),
-                    end_time: $("input#end-selector").val(),
-                    task: "{{ task }}",
-                    tables: ["c_call"]
-                }
-            }
-            $.getScript("{{ url_for("static", filename="js/data.js") }}", function () {
-                configDataPage(
-                    "{{ url_for(api) }}", "{{ start_time }}", "{{ end_time }}", "{{ grid_length }}", ajaxFn
-                );
-            });
             $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
-                loadMultiSelect("{{ url_for(api) }}", "#data-select", "{{ task }}");
+                loadMultiSelect("{{ url_for(api) }}", "#data-select");
+
+                function ajaxFn() {
+                    console.log("making ajax call");
+                    let val = {
+                        start_time: $("input#start-selector").val(),
+                        end_time: $("input#end-selector").val(),
+                        task: "{{ get_task }}",
+                        tables: JSON.stringify($("#data-select").multipleSelect("getSelects"))
+                    };
+                    console.log(val);
+                    return val
+                }
+                $.getScript("{{ url_for("static", filename="js/data.js") }}", function () {
+                    let end_time = moment().hour(0).minute(0).second(0),
+                        start_time = moment().subtract(1, "days").hour(0).minute(0).second(0);
+                    configDataPage(
+                        "{{ url_for(api) }}", start_time, end_time, "{{ grid_length }}", ajaxFn
+                    );
+                });
             });
         });
     </script>

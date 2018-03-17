@@ -16,13 +16,16 @@ def return_task(fn):
     @wraps(fn)
     def wrapper(*args, **kwds):
         try:
-            frame = fn(*args, **kwds)
-            print("exited frame")
-            if isinstance(frame, bool):
-                # Boolean frame for model updates
+            result = fn(*args, **kwds)
+            if isinstance(result, bool):
+                # Boolean result for model updates
                 key_words = {}
+            elif isinstance(result, tuple):
+                key_words = {
+                    "data": result
+                }
             else:
-                data = frame.to_dict(orient='split')
+                data = result.to_dict(orient='split')
                 print("hit to_dict")
                 key_words = {
                     "data": data['data']
