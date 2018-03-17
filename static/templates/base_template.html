@@ -1,0 +1,85 @@
+{# Use bootstrap page scaffolding
+#}
+{%- extends "bootstrap/base.html" %}
+{% block html_attribs %} lang="en"{% endblock %}
+{% block title %}
+    {% if title %}
+        {{ title }} - mW Reporting
+    {% else %}
+        mW Reporting
+    {% endif %}
+{% endblock %}
+
+{# IE compatibility
+#}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block head %}
+    {{ super() }}
+    {{ fixes.ie8() }}
+    <link rel="shortcut icon"
+          href="{{ url_for('static', filename='img/favicon.ico') }}">
+{%- endblock %}
+
+{% block styles -%}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='css/multiple-select.css') }}">
+    <link href="{{ bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp') }}" rel="stylesheet">
+    <link href="{{ bootstrap_find_resource('css/buttons.dataTables.css', cdn='dataTableBtns', use_minified=true) }}"
+          rel="stylesheet">
+    <link href="{{ bootstrap_find_resource('css/jquery.dataTables.css', cdn='dataTable', use_minified=true) }}"
+          rel="stylesheet">
+{% endblock %}
+
+{% block navbar %}
+    {{ super() }}
+    {{ nav.main_nav.render() }}
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    {% import "bootstrap/utils.html" as utils %}
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <!-- Alert area -->
+            {%- with messages = get_flashed_messages(with_categories=True) %}
+                {%- if messages %}
+                    <div class="row">
+                        <div class="col-md-12">{{ utils.flashed_messages(messages) }}</div>
+                    </div>
+                {%- endif %}
+            {%- endwith %}
+            <!-- Page specific controls -->
+            <div class="jumbotron" style="background-color: white">{% block controlarea %}{% endblock %}</div>
+            <!-- Content area -->
+            <div class="jumbotron" style="background-color: white">{% block data_area %}{% endblock %}</div>
+        </div>
+    </div>  <!-- /.container -->
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTable', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/dataTables.buttons.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.flash.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.html5.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('js/buttons.print.js', cdn='dataTableBtns', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('jszip/3.1.3/jszip.js', cdn='saveJs', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/pdfmake.js', cdn='saveJs', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"
+            rel="stylesheet"></script>
+    <script src="{{url_for('static', filename='js/multiple-select.js')}}"></script>
+{% endblock %}

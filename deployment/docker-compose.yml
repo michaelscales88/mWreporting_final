@@ -7,7 +7,7 @@ services:
       dockerfile: ./flask/Dockerfile
     env_file: app.env
     volumes:
-      - ../app:/var/www/app
+      - ../backend:/var/www/backend
       - ../tmp:/var/www/tmp
     ports:
       - "5000:5000"

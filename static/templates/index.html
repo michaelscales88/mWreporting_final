@@ -1,9 +1,11 @@
-<!-- Index to blueprint index pages -->
-{% extends 'base.html' %}
+<!-- index page: index.html -->
+{% extends 'base_template.html' %}
 
 
 {% block content %}
+    {{ super() }}
     <div class="container-fluid padded">
         <h2 class="padded">mW Reporting</h2>
+        <p>This is where Health Checks will go.</p>
     </div>  <!-- /.container-fluid -->
 {% endblock %}
