@@ -9,14 +9,6 @@ function configReportPage(api, start_time, end_time, num_rows, task) {
         };
     }
 
-    $("button#loadButton").on("click", function () {
-        $.ajax({
-            method: "PUT",
-            url: api,
-            data: ajaxFn
-        });
-    });
-
     $.getScript("/static/js/dt-selector.js", function () {
         let pickerConfig = {
             start_time: start_time,
@@ -34,6 +26,17 @@ function configReportPage(api, start_time, end_time, num_rows, task) {
         };
 
         let table = getDataTable(ajaxFn, tableConfig, "PUT");
-        $('button#refreshButton').on('click', table.ajax.reload());
+        $('button#refreshButton').on('click', function() {
+            table.ajax.reload();
+        });
+
+        $("button#loadButton").on("click", function () {
+            $.ajax({
+                url: api,
+                data: ajaxFn,
+                method: "PUT"
+            });
+            table.ajax.reload();
+        });
     });
 }

@@ -3,123 +3,174 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from datetime import timedelta
+from sqlalchemy.exc import DatabaseError
 
 
-from backend.services.app_tasks import query_to_frame, display_columns
+from backend import celery
+from backend.services.app_tasks import query_to_frame, display_columns, get_model
 from backend.report.models import SlaReportModel
 from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 
 
+class SqlAlchemyTask(celery.Task):
+    """An abstract Celery Task that ensures that the connection the the
+    database is closed on task completion"""
+    abstract = True
+
+    def __call__(self, *args, **kwargs):
+        try:
+            return super().__call__(*args, **kwargs)
+        except DatabaseError:
+            SlaReportModel.session.rollback()
+        finally:
+            SlaReportModel.session.commit()
+
+
+@celery.task(base=SqlAlchemyTask)
 def make_sla_report_model(start_time, end_time):
     # Check if report already exists
-    if report_exists_by_name('sla_report', start_time, end_time):
+    try:
+        if report_exists_by_name('sla_report', start_time, end_time):
+            raise AssertionError("Report is already made.")
+
+        # Check that the data has been loaded for the report date
+        if not check_src_data_loaded(start_time, end_time):
+            # TODO: Have this provide the tables and dates not loaded or
+            # TODO: manage loading those tables and dates...
+            print("Cannot make report. Src data is not loaded.")
+            raise AssertionError("Data not loaded.")
+
+        # Check if the data exists and get data for the interval
+        query = get_calls_by_direction('c_call', start_time, end_time)
+
+        # Collate data for interval
+
+        output_headers = [
+            'I/C Presented',
+            'I/C Live Answered',
+            'I/C Abandoned',
+            'Voice Mails',
+            'Answered Incoming Duration',
+            'Answered Wait Duration',
+            'Lost Wait Duration',
+            'Calls Ans Within 15',
+            'Calls Ans Within 30',
+            'Calls Ans Within 45',
+            'Calls Ans Within 60',
+            'Calls Ans Within 999',
+            'Call Ans + 999',
+            'Longest Waiting Answered'
+        ]
+
+        default_row = [
+            0,  # 'I/C Presented'
+            0,  # 'I/C Live Answered'
+            0,  # 'I/C Abandoned'
+            0,  # 'Voice Mails'
+            timedelta(0),  # Answered Incoming Duration
+            timedelta(0),  # Answered Wait Duration
+            timedelta(0),  # Lost Wait Duration
+            0,  # 'Calls Ans Within 15'
+            0,  # 'Calls Ans Within 30'
+            0,  # 'Calls Ans Within 45'
+            0,  # 'Calls Ans Within 60'
+            0,  # 'Calls Ans Within 999'
+            0,  # 'Call Ans + 999'
+            timedelta(0)  # 'Longest Waiting Answered'
+        ]
+
+        report_draft = {}
+
+        for call in query:
+
+            # Index on dialed party number
+            row_name = str(call.dialed_party_number)
+            row = report_draft.get(row_name, OrderedDict(zip(output_headers, default_row)))
+
+            event_dict = {}
+            # Caching events by type makes report comparisons easier
+            for ev in call.events:
+                event_dict[ev.event_type] = event_dict.get(ev.event_type, timedelta(seconds=0)) + ev.length
+
+            # Event type 4 represents talking time with an agent
+            talking_time = event_dict.get(4, timedelta(0))
+
+            # Event type 10 represents a switch to voice mail
+            voicemail_time = event_dict.get(10, timedelta(0))
+
+            # Event type 5 = , 6 = , 7 =
+            hold_time = sum(
+                [event_dict.get(event_type, timedelta(0)) for event_type in (5, 6, 7)],
+                timedelta(0)
+            )
+            wait_duration = call.length - talking_time - hold_time
+
+            # A live-answered call has > 0 seconds of agent talking time
+            if talking_time > timedelta(0):
+                row['I/C Presented'] += 1
+                row['I/C Live Answered'] += 1
+                row['Answered Incoming Duration'] += talking_time
+                row['Answered Wait Duration'] += wait_duration
+
+                # Qualify calls by duration
+                if wait_duration <= timedelta(seconds=15):
+                    row['Calls Ans Within 15'] += 1
+                elif wait_duration <= timedelta(seconds=30):
+                    row['Calls Ans Within 30'] += 1
+                elif wait_duration <= timedelta(seconds=45):
+                    row['Calls Ans Within 45'] += 1
+                elif wait_duration <= timedelta(seconds=60):
+                    row['Calls Ans Within 60'] += 1
+                elif wait_duration <= timedelta(seconds=999):
+                    row['Calls Ans Within 999'] += 1
+                else:
+                    row['Call Ans + 999'] += 1
+
+                # Update longest answered call
+                if wait_duration > row['Longest Waiting Answered']:
+                    row['Longest Waiting Answered'] = wait_duration
+
+            # A voice mail is not live answered and last longer than 20 seconds
+            elif voicemail_time > timedelta(seconds=20):
+                row['I/C Presented'] += 1
+                row['Voice Mails'] += 1
+                row['Lost Wait Duration'] += call.length
+
+            # An abandoned call is not live answered and last longer than 20 seconds
+            elif call.length > timedelta(seconds=20):
+                row['I/C Presented'] += 1
+                row['I/C Abandoned'] += 1
+                row['Lost Wait Duration'] += call.length
+
+            report_draft[row_name] = row
+
+        SlaReportModel.create(start_time=start_time, end_time=end_time, data=report_draft)
+    except AssertionError as e:
+        if e == "Data not loaded.":
+            print("Data is not loaded.")
+        if e == "Report is already made.":
+            print("Report already created.")
+        return False
+    else:
+        try:
+            SlaReportModel.session.commit()
+        # Rollback a bad session
+        except DatabaseError:
+            SlaReportModel.session.rollback()
         return True
 
-    # Check if the data exists and get data for the interval
-    query = get_calls_by_direction('c_call', start_time, end_time)
 
-    # Collate data for interval
-
-    output_headers = [
-        'I/C Presented',
-        'I/C Live Answered',
-        'I/C Abandoned',
-        'Voice Mails',
-        'Answered Incoming Duration',
-        'Answered Wait Duration',
-        'Lost Wait Duration',
-        'Calls Ans Within 15',
-        'Calls Ans Within 30',
-        'Calls Ans Within 45',
-        'Calls Ans Within 60',
-        'Calls Ans Within 999',
-        'Call Ans + 999',
-        'Longest Waiting Answered'
-    ]
-
-    default_row = [
-        0,              # 'I/C Presented'
-        0,              # 'I/C Live Answered'
-        0,              # 'I/C Abandoned'
-        0,              # 'Voice Mails'
-        timedelta(0),   # Answered Incoming Duration
-        timedelta(0),   # Answered Wait Duration
-        timedelta(0),   # Lost Wait Duration
-        0,              # 'Calls Ans Within 15'
-        0,              # 'Calls Ans Within 30'
-        0,              # 'Calls Ans Within 45'
-        0,              # 'Calls Ans Within 60'
-        0,              # 'Calls Ans Within 999'
-        0,              # 'Call Ans + 999'
-        timedelta(0)    # 'Longest Waiting Answered'
-    ]
-
-    report_draft = {}
-
-    for call in query:
-
-        # Index on dialed party number
-        row_name = str(call.dialed_party_number)
-        row = report_draft.get(row_name, OrderedDict(zip(output_headers, default_row)))
-
-        event_dict = {}
-        # Caching events by type makes report comparisons easier
-        for ev in call.events:
-            event_dict[ev.event_type] = event_dict.get(ev.event_type, timedelta(seconds=0)) + ev.length
-
-        # Event type 4 represents talking time with an agent
-        talking_time = event_dict.get(4, timedelta(0))
-
-        # Event type 10 represents a switch to voice mail
-        voicemail_time = event_dict.get(10, timedelta(0))
-
-        # Event type 5 = , 6 = , 7 =
-        hold_time = sum(
-            [event_dict.get(event_type, timedelta(0)) for event_type in (5, 6, 7)],
-            timedelta(0)
-        )
-        wait_duration = call.length - talking_time - hold_time
-
-        # A live-answered call has > 0 seconds of agent talking time
-        if talking_time > timedelta(0):
-            row['I/C Presented'] += 1
-            row['I/C Live Answered'] += 1
-            row['Answered Incoming Duration'] += talking_time
-            row['Answered Wait Duration'] += wait_duration
-
-            # Qualify calls by duration
-            if wait_duration <= timedelta(seconds=15):
-                row['Calls Ans Within 15'] += 1
-            elif wait_duration <= timedelta(seconds=30):
-                row['Calls Ans Within 30'] += 1
-            elif wait_duration <= timedelta(seconds=45):
-                row['Calls Ans Within 45'] += 1
-            elif wait_duration <= timedelta(seconds=60):
-                row['Calls Ans Within 60'] += 1
-            elif wait_duration <= timedelta(seconds=999):
-                row['Calls Ans Within 999'] += 1
-            else:
-                row['Call Ans + 999'] += 1
-
-            # Update longest answered call
-            if wait_duration > row['Longest Waiting Answered']:
-                row['Longest Waiting Answered'] = wait_duration
-
-        # A voice mail is not live answered and last longer than 20 seconds
-        elif voicemail_time > timedelta(seconds=20):
-            row['I/C Presented'] += 1
-            row['Voice Mails'] += 1
-            row['Lost Wait Duration'] += call.length
-
-        # An abandoned call is not live answered and last longer than 20 seconds
-        elif call.length > timedelta(seconds=20):
-            row['I/C Presented'] += 1
-            row['I/C Abandoned'] += 1
-            row['Lost Wait Duration'] += call.length
-
-        report_draft[row_name] = row
-
-    SlaReportModel.create(start_time=start_time, end_time=end_time, data=report_draft)
+def check_src_data_loaded(start_time, end_time, tables=("c_call", "c_event")):
+    """
+    Return True if the data is loaded for the date interval for all tables. Return False
+    if not.
+    :return:
+    """
+    table_loader = get_model("tables_loaded")
+    for table_name in tables:
+        if not table_loader.check_date_interval(start_time, end_time, table_name):
+            print("Data not loaded:", start_time, end_time, table_name)
+            return False
     return True
 
 
@@ -200,9 +251,7 @@ def format_df(cell):
 
 def empty_report():
     empty_model = get_report_model('sla_report')
-    frame = query_to_frame(empty_model, is_report=True)
-    print(frame)
-    return frame
+    return query_to_frame(empty_model, is_report=True)
 
 
 def get_sla_report(start_time, end_time, clients=None):
@@ -212,10 +261,17 @@ def get_sla_report(start_time, end_time, clients=None):
     try:
         # If the report does not exist make a report.
         # Raise AssertionError if a report is not made.
-        if not report_exists and not make_sla_report_model(start_time, end_time):
-            raise AssertionError("Report not made.")
+        if not report_exists:
+            report_made = make_sla_report_model(start_time, end_time)
+            print("made report:", report_made)
+            if not report_made:
+                raise AssertionError("Report not made.")
 
         report_query = get_report_model('sla_report', start_time, end_time)
+
+        if not report_query:
+            raise AssertionError("Report not found.")
+
         report_frame = query_to_frame(report_query, is_report=True)
 
         # Filter the report to only include desired clients
@@ -237,7 +293,10 @@ def get_sla_report(start_time, end_time, clients=None):
 
     except AssertionError as e:
         if e == "Report not made.":
-            pass
+            print("Error: report not made")
+        if e == "Report not found.":
+            print("Error: report not found.")
+
         return empty_report()
     else:
         # Prettify percentages

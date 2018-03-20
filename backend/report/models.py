@@ -56,8 +56,10 @@ class SlaReportModel(db.Model):
     def exists(cls, start_time, end_time):
         return cls.get(start_time, end_time) is not None
 
-    def empty_data(self):
-        return
+    @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
 
 
 _mmap = {

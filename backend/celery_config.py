@@ -1,5 +1,6 @@
 # backend/config.py
 import os
+import datetime
 from celery.schedules import crontab
 
 
@@ -42,6 +43,8 @@ class Config(object):
     """
     Scheduler
     """
+    end_time = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    start_time = end_time - datetime.timedelta(days=1)
     CELERYBEAT_SCHEDULE = {
         'loading_task': {
             'task': 'backend.data.services.loaders.data_loader',
@@ -50,11 +53,11 @@ class Config(object):
             ),
             'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
         },
-        'daily_report_task': {
-            'task': 'backend.report.services.loaders.data_loader',
-            'schedule': crontab(
-                **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
-            ),
-            'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
-        }
+        # 'daily_report_task': {
+        #     'task': 'backend.report.services.sla_report.make_sla_report_model',
+        #     'schedule': crontab(
+        #         **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
+        #     ),
+        #     'args': (start_time, end_time)
+        # }
     }

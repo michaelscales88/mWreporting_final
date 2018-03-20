@@ -27,9 +27,24 @@ function configDataPage(api, start_time, end_time, num_rows) {
         };
 
         let table = getDataTable(ajaxFn, tableConfig, "PUT");
-        $('button#refreshButton').on('click', function() {
+        $('button#refreshButton').on('click', function () {
             console.log("clicked refresh");
             table.ajax.reload()
+        });
+
+        $('button#loadButton').on('click', function () {
+            console.log("clicked load");
+            $.ajax({
+                url: api,
+                data: {
+                    start_time: $("input#start-selector").val(),
+                    end_time: $("input#end-selector").val(),
+                    task: "LOAD",
+                    tables: JSON.stringify($("#data-select").multipleSelect("getSelects"))
+                },
+                method: "PUT"
+            });
+            table.ajax.reload();
         });
     });
 }

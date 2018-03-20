@@ -32,9 +32,7 @@ def serve_pages(page):
             title='Data',
             api='backend.dataapi',
             columns=display_columns('c_call'),
-            grid_length=50,
-            get_task="get",
-            load_task="load"
+            grid_length=50
         )
     elif page in ("clientDisplay.html", "client"):
         return render_template(

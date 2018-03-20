@@ -1,7 +1,7 @@
 # data/models.py
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, func
 
 
 from backend import db
@@ -72,6 +72,23 @@ class TablesLoaded(db.Model):
                 cls.table == table_name
             )
         ).first()
+
+    @classmethod
+    def check_date_interval(cls, start_time, end_time, table_name):
+        """
+        Return True if the data is loaded for the interval, or False
+        if any day is not loaded.
+        """
+        while start_time < end_time:
+            if cls.query.filter(
+                and_(
+                    cls.date_loaded == func.DATE(start_time),
+                    cls.table == table_name
+                )
+            ).first() is None:
+                return False
+            start_time += timedelta(days=1)
+        return True
 
 
 _mmap = {

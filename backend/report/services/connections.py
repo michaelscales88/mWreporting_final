@@ -13,8 +13,8 @@ def get_report_model(table_name, start_time=None, end_time=None):
     if start_time and end_time and hasattr(report_table, "get"):
         return report_table.get(start_time, end_time)
     else:
-        table = report_table()
-        table.data = {}
+        table = report_table.set_empty(report_table())
+        print(table)
         return table
 
 

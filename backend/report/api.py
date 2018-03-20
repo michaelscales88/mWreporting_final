@@ -48,11 +48,7 @@ class SlaReportAPI(Resource):
         super().__init__()
 
     def __del__(self):
-        try:
-            SlaReportModel.session.commit()
-        # Rollback a bad session
-        except DatabaseError:
-            SlaReportModel.session.rollback()
+        pass
 
     def get(self):
         print('Hit GET Report API', self.args)
