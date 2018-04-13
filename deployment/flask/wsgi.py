@@ -1,5 +1,5 @@
-from backend import app
+from backend import server
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    server.run(host='0.0.0.0')

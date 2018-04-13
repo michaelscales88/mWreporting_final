@@ -1,7 +1,5 @@
 # backend/config.py
 import os
-import datetime
-from celery.schedules import crontab
 
 
 class Config(object):
@@ -34,30 +32,17 @@ class Config(object):
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
 
-    CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
-        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
-    )
-
     IMPORTS = ('backend.report.tasks', 'backend.services.tasks', 'backend.data.tasks')
+
+    # App specific settings
+    DAYS_TO_LOAD = 5
 
     """
     Scheduler
     """
-    end_time = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    start_time = end_time - datetime.timedelta(days=1)
-    CELERYBEAT_SCHEDULE = {
-        'loading_task': {
-            'task': 'backend.data.services.loaders.data_loader',
-            'schedule': crontab(
-                **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
-            ),
-            'args': (os.getenv('DATA_LOAD_PERIOD', 5),)
-        },
-        # 'daily_report_task': {
-        #     'task': 'backend.report.services.sla_report.make_sla_report_model',
-        #     'schedule': crontab(
-        #         **{os.getenv('BEAT_PERIOD', 'minute'): os.getenv('BEAT_RATE', '*/1')}
-        #     ),
-        #     'args': (start_time, end_time)
-        # }
-    }
+    CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
+        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
+    )
+    CELERYBEAT_SCHEDULE = {}
+    BEAT_PERIOD = os.getenv('BEAT_PERIOD', 'minute')
+    BEAT_RATE = os.getenv('BEAT_RATE', '*/1')

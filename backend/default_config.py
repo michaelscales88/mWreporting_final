@@ -62,7 +62,7 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
+    DEBUG = os.getenv('DEBUG', True)
     USE_DEBUGGER = True
     TEST_MODE = os.getenv('TEST_MODE', False)
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead

@@ -3,11 +3,18 @@ import os
 import pandas as pd
 from datetime import datetime
 from dateutil.parser import parse
-from flask import jsonify, current_app
+from flask import jsonify, current_app, request
 from json import loads
 from flask_sqlalchemy import Model
 from sqlalchemy.inspection import inspect
 from functools import wraps
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 
 # Other Tasks

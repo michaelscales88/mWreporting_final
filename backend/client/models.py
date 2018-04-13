@@ -12,6 +12,10 @@ class ClientModel(db.Model):
     ext = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, default=True)
 
+    @classmethod
+    def get(cls, ext):
+        return cls.query.filter(cls.ext == int(ext)).first()
+
 
 _mmap = {
     "client_table": ClientModel

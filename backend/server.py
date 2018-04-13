@@ -10,7 +10,7 @@ from healthcheck import HealthCheck
 from .services import make_celery, get_nav, AppJSONEncoder, migration_meta, BaseModel
 
 
-app = Flask(
+server = Flask(
     __name__,
     instance_relative_config=True,
     instance_path='/tmp',
@@ -19,17 +19,17 @@ app = Flask(
 )
 
 # Set JSON serializer for the application
-app.json_encoder = AppJSONEncoder
+server.json_encoder = AppJSONEncoder
 
 
 # Settings
-app.config.from_object('backend.celery_config.Config')
-app.config.from_object('backend.default_config.DevelopmentConfig')
-app.config.from_pyfile('app.cfg', silent=True)
+server.config.from_object('backend.celery_config.Config')
+server.config.from_object('backend.default_config.DevelopmentConfig')
+server.config.from_pyfile('app.cfg', silent=True)
 
 # Database manager
 db = SQLAlchemy(
-    app,
+    server,
     metadata=migration_meta(),
     model_class=BaseModel
 )
@@ -53,13 +53,13 @@ def bind_model_session():
 
 
 # Services
-mail = Mail(app)
-celery = make_celery(app)
-Bootstrap(app)
+mail = Mail(server)
+celery = make_celery(server)
+Bootstrap(server)
 nav = get_nav()
-nav.init_app(app)
-moment = Moment(app)
-health = HealthCheck(app, "/healthcheck")
+nav.init_app(server)
+moment = Moment(server)
+health = HealthCheck(server, "/healthcheck")
 
 
 @celery.task
