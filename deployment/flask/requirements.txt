@@ -10,6 +10,8 @@ flask_sqlalchemy
 flower
 healthcheck
 kombu
+requests
+pandas
 psycopg2
 pyexcel
 pyyaml

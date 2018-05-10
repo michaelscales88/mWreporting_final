@@ -1,6 +1,28 @@
 version: '2'
 
 services:
+  # Reverse proxy LB
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    links:
+      - website
+      - flower
+    volumes_from:
+      - website:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    command: nginx -c nginx.conf
+    restart: always
+
+  # Task Broker
+  rabbit:
+    image: rabbitmq:latest
+    env_file: app.env
+
+  # Flask Images/Controller/View/Worker Layers
   website:
     build:
       context: .
@@ -9,59 +31,37 @@ services:
     volumes:
       - ../backend:/var/www/backend
       - ../tmp:/var/www/tmp
-    ports:
-      - "5000:5000"
     depends_on:
       - postgres
-#    command: uwsgi --ini uwsgi.ini
-    command: sh /var/www/run.sh
+    command: python wsgi.py --ini uwsgi.ini
     restart: always
-
-#  nginx:
-#    build:
-#      context: .
-#      dockerfile: ./nginx/Dockerfile
-#    links:
-#      - website
-#      - flower
-#    volumes_from:
-#      - website:ro
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    command: nginx -c nginx.conf
-#    restart: always
-
-  rabbit:
-    image: rabbitmq:latest
-    env_file: app.env
 
   celeryworker:
     build:
       context: .
-      dockerfile: ./celery/Dockerfile
+      dockerfile: ./flask/Dockerfile
     env_file: app.env
     volumes_from:
       - website
     depends_on:
       - rabbit
-    command: sh /var/www/run_worker.sh
+    command: celery -A backend.celery worker -l info
 
   celerybeat:
     build:
       context: .
-      dockerfile: ./celery/Dockerfile
+      dockerfile: ./flask/Dockerfile
     env_file: app.env
     volumes_from:
       - website
     depends_on:
       - rabbit
-    command: sh /var/www/run_beat.sh
+    command: celery -A backend.celery beat -l info
 
   flower:
     build:
       context: .
-      dockerfile: ./celery/Dockerfile
+      dockerfile: ./flask/Dockerfile
     env_file: app.env
     volumes_from:
       - website
@@ -69,8 +69,9 @@ services:
       - rabbit
     ports:
       - "5555:5555"
-    command: sh /var/www/run_flower.sh
+    command: celery -A backend.celery flower
 
+  # Data Layer
   dbdata:
     build:
       context: .
@@ -86,4 +87,4 @@ services:
     volumes_from:
       - dbdata
     ports:
-      - "5432:5432"
+      - "5432"
