@@ -13,7 +13,7 @@ from .services import make_celery, get_nav, AppJSONEncoder, migration_meta, Base
 server = Flask(
     __name__,
     instance_relative_config=True,
-    instance_path='/tmp',
+    # instance_path='/instance',
     template_folder='../static/templates',
     static_folder='../static'
 )
@@ -22,15 +22,16 @@ server = Flask(
 server.json_encoder = AppJSONEncoder
 
 
-# Settings
+# Settings - cfg settings override environment and default
 server.config.from_object('backend.celery_config.Config')
 server.config.from_object('backend.default_config.DevelopmentConfig')
-server.config.from_pyfile('app.cfg', silent=True)
+server.config.from_pyfile('app.cfg', silent=False)
+
 
 # Database manager
 db = SQLAlchemy(
     server,
-    metadata=migration_meta(),
+    # metadata=migration_meta(),
     model_class=BaseModel
 )
 

@@ -36,7 +36,7 @@ bind_model_session()
 @server.before_first_request
 def startup_setup():
     print("Starting server setup.")
-    # Ensure the tmp directory exists
+    # Ensure the instance directory exists
     make_dir(server.config['TMP_DIR'])
 
     # Make database and tables

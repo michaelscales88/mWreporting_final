@@ -9,7 +9,7 @@ class Config(object):
 
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     PACKAGEDIR = os.path.dirname(BASEDIR)
-    TMP_DIR = os.path.join(PACKAGEDIR, 'tmp')
+    TMP_DIR = os.path.join(PACKAGEDIR, 'instance')
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
 
     ROWS_PER_PAGE = 50
@@ -40,7 +40,7 @@ class Config(object):
         name=os.environ.get('DBNAME', '')
     )
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
-                                             os.path.join(PACKAGEDIR, 'tmp/db_repository'))
+                                             os.path.join(PACKAGEDIR, 'instance/db_repository'))
 
     # email server
     MAIL_SERVER = 'smtp.googlemail.com'
@@ -62,9 +62,9 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = os.getenv('DEBUG', True)
+    DEBUG = os.getenv('DEBUG_APP', False)
     USE_DEBUGGER = True
     TEST_MODE = os.getenv('TEST_MODE', False)
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                                            os.path.join(Config.PACKAGEDIR, 'tmp/local_app.db'))
+                                                            os.path.join(Config.PACKAGEDIR, 'instance/local_app.db'))
