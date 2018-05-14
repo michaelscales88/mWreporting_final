@@ -19,6 +19,6 @@ sqlalchemy
 SQLAlchemy-utils
 sqlalchemy-migrate
 sqlalchemy_mixins
-
+uwsgi
 
 

@@ -13,7 +13,6 @@ from .services import make_celery, get_nav, AppJSONEncoder, migration_meta, Base
 server = Flask(
     __name__,
     instance_relative_config=True,
-    # instance_path='/instance',
     template_folder='../static/templates',
     static_folder='../static'
 )
