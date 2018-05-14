@@ -5,7 +5,7 @@ from backend import celery
 
 
 @celery.task()
-def start_runner(host="127.0.0.1", port=8080, max_retries=5):
+def start_runner(host="0.0.0.0", port=8080, max_retries=5):
     print("start running")
 
     def start_loop(retries_remaining):

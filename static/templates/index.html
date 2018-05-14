@@ -1,11 +1,16 @@
 <!-- index page: index.html -->
 {% extends 'base_template.html' %}
 
-
-{% block content %}
+{% block control_area %}
     {{ super() }}
-    <div class="container-fluid padded">
-        <h2 class="padded">mW Reporting</h2>
-        <p>This is where Health Checks will go.</p>
-    </div>  <!-- /.container-fluid -->
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="display-3">{{ title if title else 'mW Reporting' }}</h1>
+        </div>
+    </div>
+{% endblock control_area %}
+
+{% block data_area %}
+    {{ super() }}
+    <p>This is where Health Checks will go.</p>
 {% endblock %}

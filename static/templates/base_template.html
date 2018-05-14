@@ -10,8 +10,7 @@
     {% endif %}
 {% endblock %}
 
-{# IE compatibility
-#}
+{# IE compatibility #}
 {% import "bootstrap/fixes.html" as fixes %}
 
 {% block head %}
@@ -44,16 +43,18 @@
     {% import "bootstrap/utils.html" as utils %}
     <div class="container-fluid">
         <div class="jumbotron">
-            <!-- Alert area -->
-            {%- with messages = get_flashed_messages(with_categories=True) %}
-                {%- if messages %}
-                    <div class="row">
-                        <div class="col-md-12">{{ utils.flashed_messages(messages) }}</div>
-                    </div>
-                {%- endif %}
-            {%- endwith %}
             <!-- Page specific controls -->
-            <div class="jumbotron" style="background-color: white">{% block controlarea %}{% endblock %}</div>
+            <div class="jumbotron" style="background-color: white">
+                <!-- Alert area -->
+                {%- with messages = get_flashed_messages(with_categories=True) %}
+                    {%- if messages %}
+                        <div class="row">
+                            <div class="col-md-12">{{ utils.flashed_messages(messages) }}</div>
+                        </div>
+                    {%- endif %}
+                {%- endwith %}
+                {% block control_area %}{% endblock %}
+            </div>
             <!-- Content area -->
             <div class="jumbotron" style="background-color: white">{% block data_area %}{% endblock %}</div>
         </div>
