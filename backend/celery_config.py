@@ -41,7 +41,7 @@ class Config(object):
     Scheduler
     """
     CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
-        'CELERYBEAT_SCHEDULE_FILENAME', 'tmp/celerybeat-schedule'
+        'CELERYBEAT_SCHEDULE_FILENAME', 'instance/celerybeat-schedule.db'
     )
     CELERYBEAT_SCHEDULE = {}
     BEAT_PERIOD = os.getenv('BEAT_PERIOD', 'minute')

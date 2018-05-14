@@ -10,6 +10,8 @@ flask_sqlalchemy
 flower
 healthcheck
 kombu
+requests
+pandas
 psycopg2
 pyexcel
 pyyaml
@@ -17,6 +19,6 @@ sqlalchemy
 SQLAlchemy-utils
 sqlalchemy-migrate
 sqlalchemy_mixins
-
+uwsgi
 
 
