@@ -1,0 +1,12 @@
+<!-- report module page: sla_report.html -->
+{% extends 'my_base.html' %}
+
+{% block controlarea %}
+    <div class="row">
+        <div class="col-lg-3">
+            <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
+        </div>
+    </div>
+{% endblock %}
+
+{% block data_area %}User-Client Area{% endblock %}

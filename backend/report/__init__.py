@@ -1,1 +1,1 @@
-from .api import SlaReportAPI, ReportAPI
+from .controllers import SlaReportAPI, ReportAPI

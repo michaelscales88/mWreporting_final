@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import and_, func
 
 
-from backend import db
+from backend.services.extensions import db
 
 
 class CallTableModel(db.Model):

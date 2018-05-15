@@ -5,9 +5,14 @@ from datetime import date as DATETYPE, datetime, timedelta
 from flask import current_app
 from sqlalchemy.sql import and_, func
 
-from backend import celery
+
 from backend.services import get_session
 from backend.services.app_tasks import get_model, get_pk, get_foreign_id, parse_time
+from backend.factories import create_application
+from backend.factories import create_celery
+
+
+celery = create_celery(create_application())
 
 
 def check_loaded(table_name, date):
@@ -31,7 +36,7 @@ def filter_loaded(table_name, date_range):
                 yield date
 
 
-@celery.task()
+@celery.task(name='data.tasks.data_loader')
 def data_loader(periods=60, table_names=('c_call', 'c_event')):
     """
     Maintains the invariant of whole day record loads to ensure that all
@@ -66,7 +71,7 @@ def data_loader(periods=60, table_names=('c_call', 'c_event')):
     return True
 
 
-@celery.task()
+@celery.task(name='data.tasks.load_data_for_date_range')
 def load_data_for_date_range(table_name, start_date=None, end_date=None, periods=()):
     """
     Add data in whole day increments.
@@ -152,7 +157,7 @@ def load_data_for_date_range(table_name, start_date=None, end_date=None, periods
     return False
 
 
-@celery.task()
+@celery.task(name='data.tasks.test_load_data_for_date_range')
 def test_load_data_for_date_range(table_name, start_date, end_date):
     logging.info(table_name)
     logging.info(parse_time(start_date))

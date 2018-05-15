@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
 
 
-from backend.services.app_tasks import return_task, query_to_frame, to_bool
+from backend.services.app_tasks import return_task, to_bool
 from .tasks import add_client, disable_client, get_clients
 from .models import ClientModel
 

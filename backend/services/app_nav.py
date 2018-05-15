@@ -16,6 +16,10 @@ def get_nav():
             Subgroup(
                 'Clients',
                 View('Clients', 'frontend.serve_pages', page='client'),
+            ),
+            Subgroup(
+                'User',
+                View('User', 'frontend.serve_pages', page='user'),
             )
         )
     )

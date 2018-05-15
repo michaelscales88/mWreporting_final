@@ -1,6 +1,7 @@
 anyjson
 celery
 flask
+flask_babel
 flask_bootstrap
 flask_mail
 flask_moment

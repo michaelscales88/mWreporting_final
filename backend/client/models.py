@@ -1,5 +1,5 @@
 # client/models.py
-from backend import db
+from backend.services.extensions import db
 
 
 class ClientModel(db.Model):
