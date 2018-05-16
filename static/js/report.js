@@ -1,10 +1,10 @@
-function configReportPage(api, start_time, end_time, num_rows, task) {
+function configReportPage(start_time, end_time) {
 
     function ajaxFn() {
         return {
             start_time: $("input#start-selector").val(),
             end_time: $("input#end-selector").val(),
-            task: task,
+            task: "sla_report",
             clients: JSON.stringify($("#report-select").multipleSelect("getSelects"))
         };
     }
@@ -17,22 +17,20 @@ function configReportPage(api, start_time, end_time, num_rows, task) {
         dtSelector('#start-selector', '#end-selector', pickerConfig);
     });
 
-    $.getScript("/static/js/data-table.js", function () {
+    $.getScript("/static/js/grid-area.js", function () {
         // configure DataTable
         let tableConfig = {
-            api: api,
+            api: "/api/sla-report",
             table_name: 'table#displayTable',
-            num_rows: num_rows
+            num_rows: 50
         };
 
-        let table = getDataTable(ajaxFn, tableConfig, "PUT");
-        $('button#refreshButton').on('click', function() {
-            table.ajax.reload();
-        });
+        let table = getGridArea(ajaxFn, tableConfig, "PUT");
+        $('button#refreshButton').on('click', function() { table.ajax.reload(); });
 
         $("button#loadButton").on("click", function () {
             $.ajax({
-                url: api,
+                url: "/api/sla-report",
                 data: ajaxFn,
                 method: "PUT"
             });

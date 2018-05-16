@@ -29,6 +29,11 @@ class CallTableModel(db.Model):
     def length(self):
         return self.end_time - self.start_time
 
+    @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
+
 
 class EventTableModel(db.Model):
 
@@ -52,6 +57,11 @@ class EventTableModel(db.Model):
     @hybrid_property
     def length(self):
         return self.end_time - self.start_time
+
+    @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
 
 
 class TablesLoaded(db.Model):

@@ -1,5 +1,6 @@
 # backend/frontend.py
 from flask import Blueprint, abort, render_template, redirect, url_for
+from flask_user import login_required
 
 from backend.services.app_tasks import display_columns
 
@@ -24,33 +25,31 @@ def serve_pages(page):
         return render_template(
             'sla_report.html',
             title='Reports',
-            api='backend.slareportapi',
-            columns=display_columns('sla_report'),
-            grid_length=50,
-            task="sla_report",
-            client_api="backend.clientapi",
+            columns=display_columns('sla_report')
         )
     elif page in ("data.html", "data"):
         return render_template(
             'data.html',
             title='Data',
-            api='backend.dataapi',
-            columns=display_columns('c_call'),
-            grid_length=50
+            columns=display_columns('c_call')
         )
     elif page in ("client.html", "client"):
-        return render_template(
+        return restricted_page(
             'client.html',
             title='Clients',
-            api='backend.clientapi',
-            columns=display_columns('client_table'),
-            grid_length=50,
-            task="get"
+            columns=display_columns('client_table')
         )
     elif page in ("user.html", "user"):
-        return render_template(
+        return restricted_page(
             'user.html',
             title='User Page'
         )
     else:
         return abort(404)
+
+
+@login_required
+def restricted_page(*args, **kwargs):
+    return render_template(
+        *args, **kwargs
+    )

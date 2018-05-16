@@ -1,4 +1,4 @@
-function getDataTable(ajaxFn, config, method="GET") {
+function getGridArea(ajaxFn, config, method="GET") {
     return $(config['table_name']).DataTable({
         processing: true,
         pageLength: config['num_rows'],

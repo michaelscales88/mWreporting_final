@@ -1,14 +1,19 @@
-function configClientPage(api, num_rows, ajaxFn) {
+function configClientPage() {
 
     // configure DataTable
-    $.getScript("/static/js/data-table.js", function () {
+    $.getScript("/static/js/grid-area.js", function () {
+        function ajaxFn() {
+            return {
+                task: "GET"
+            }
+        }
         let tableConfig = {
-            api: api,
-            table_name: 'table#displayTable',
-            num_rows: num_rows
+            api: "/api/client",
+            table_name: "table#displayTable",
+            num_rows: 50
         };
 
-        let table = getDataTable(ajaxFn, tableConfig);
-        $('button#refreshButton').on('click', table.ajax.reload());
+        let table = getGridArea(ajaxFn, tableConfig);
+        $('button#refreshTableButton').on('click', function () { table.ajax.reload() });
     });
 }

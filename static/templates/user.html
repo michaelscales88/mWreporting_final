@@ -1,12 +1,77 @@
 <!-- report module page: sla_report.html -->
 {% extends 'my_base.html' %}
 
-{% block controlarea %}
+{% block control_area %}
     <div class="row">
         <div class="col-lg-3">
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
         </div>
     </div>
-{% endblock %}
+{% endblock control_area %}
 
-{% block data_area %}User-Client Area{% endblock %}
+{% block data_area %}
+    <div class="row">
+        <!-- Left side select -->
+        <div class="col-xs-5 col-md-5 col-sm-5">
+            <label for="userClientSelector">All Clients</label>
+            <select name="from[]" id="userClientSelector" class="form-control" size="8" multiple="multiple"></select>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="col-xs-2 col-md-2 col-sm-2">
+            <button type="button" id="userClientSelector_rightAll" class="btn btn-block"><i
+                    class="glyphicon glyphicon-forward"></i></button>
+            <button type="button" id="userClientSelector_rightSelected" class="btn btn-block"><i
+                    class="glyphicon glyphicon-chevron-right"></i></button>
+            <button type="button" id="userClientSelector_leftSelected" class="btn btn-block"><i
+                    class="glyphicon glyphicon-chevron-left"></i></button>
+            <button type="button" id="userClientSelector_leftAll" class="btn btn-block"><i
+                    class="glyphicon glyphicon-backward"></i></button>
+        </div>
+
+        <!-- Right side select -->
+        <div class="col-xs-5 col-md-5 col-sm-5">
+            <label for="userClientSelector_to">Your Clients</label>
+            <select name="to[]" id="userClientSelector_to" class="form-control" size="8" multiple="multiple"></select>
+        </div>
+    </div>
+{% endblock data_area %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ bootstrap_find_resource('2.2.9/js/multiselect.js', cdn='multiselect', use_minified=true) }}"
+            rel="stylesheet"></script>
+    <script>
+        $(document).ready(function () {
+            // Apply plugins
+            let $select = $('#userClientSelector').multiselect();
+            let $select_to = $('#userClientSelector_to').multiselect();
+            // Disable during INIT
+            $select.multiselect('disable');
+            $select_to.multiselect('disable');
+            $.ajax({
+                url: "/api/client",
+                success: function OnPopulateControl(data, textStatus) {
+                    if (data && (textStatus === 'success')) {
+                        let option_info = data.data;
+                        console.log(option_info);
+                        if (option_info.length > 0) {
+                            // Enable if we have options
+                            $select.multiselect('enable');
+                            $select_to.multiselect('enable');
+                            $.each(option_info, function () {
+                                $select.append($("<option></option>").val(this[2]).html(this[1] + ' (' + this[2] + ')'));
+                            });
+                        }
+                    }
+                    // Update the multiselects after populating
+                    $select.multiselect('refresh');
+                    $select.multiselect('refresh');
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        });
+    </script>
+{% endblock scripts %}

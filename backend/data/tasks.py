@@ -1,10 +1,7 @@
 # data/tasks.py
-from flask import abort
-from celery import group, result as cr
 from celery.schedules import crontab
 
-
-from .services import get_data, load_data_for_date_range
+from .services import get_data, load_data_for_date_range, empty_data
 
 
 def register_tasks(server):
@@ -18,15 +15,10 @@ def register_tasks(server):
 
 
 def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_event')):
-    if start_time and end_time:
-        result = None
-        if task_name == 'GET':
-            result = get_data(tables[0], start_time, end_time)
-        elif task_name == 'LOAD':
+    if start_time and end_time and isinstance(tables, (list, tuple)):
+        if task_name == 'LOAD':
             print("trying to load")
-            # Load data for selected tables
             [load_data_for_date_range(table, start_time, end_time) for table in tables]
-            print("passed loading")
             # Load data for selected tables - Celery
             # load_job = group(
             #     [load_data_for_date_range.s(table, start_time, end_time) for table in tables]
@@ -38,6 +30,10 @@ def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_ev
             # for status in cr.GroupResult(results=result):
             #     print(status)
             return True
-        return result
+        elif task_name == 'GET':
+            print("start get", tables)
+            return get_data(tables[0], start_time, end_time)
+        else:
+            return empty_data(tables[0])
     else:
-        return abort(404)
+        return empty_data(tables[0] if isinstance(tables, (list, tuple)) else tables)

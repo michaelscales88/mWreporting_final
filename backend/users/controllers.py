@@ -2,9 +2,8 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
-from flask_user import login_required, current_user
+from flask_user import login_required
 
-from backend.services.extensions import user_manager
 from .models import User
 
 
@@ -25,7 +24,4 @@ class UserAPI(Resource):
             User.session.rollback()
 
     def get(self):
-        if current_user and current_user.is_authenticated:
-            return jsonify(
-                api_key=user_manager.generate_token(int(current_user.get_id()))
-            )
+        return ''

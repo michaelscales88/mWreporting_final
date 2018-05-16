@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from datetime import date as DATETYPE, datetime, timedelta
 from flask import current_app
-from sqlalchemy.sql import and_, func
+from sqlalchemy.sql import and_, func, false
 
 
 from backend.services import get_session
@@ -13,6 +13,12 @@ from backend.factories import create_celery
 
 
 celery = create_celery(create_application())
+
+
+def empty_data(table_name):
+    loader_model = get_model(table_name)
+    print("found table", loader_model)
+    return loader_model.query.filter(false)
 
 
 def check_loaded(table_name, date):

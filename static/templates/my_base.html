@@ -8,7 +8,7 @@
     {% else %}
         mW Reporting
     {% endif %}
-{% endblock %}
+{% endblock title %}
 
 {# IE compatibility #}
 {% import "bootstrap/fixes.html" as fixes %}
@@ -18,7 +18,7 @@
     {{ fixes.ie8() }}
     <link rel="shortcut icon"
           href="{{ url_for('static', filename='img/favicon.ico') }}">
-{%- endblock %}
+{%- endblock head %}
 
 {% block styles -%}
     {{ super() }}
@@ -31,12 +31,12 @@
           rel="stylesheet">
     <link href="{{ bootstrap_find_resource('css/jquery.dataTables.css', cdn='dataTable', use_minified=true) }}"
           rel="stylesheet">
-{% endblock %}
+{% endblock styles %}
 
 {% block navbar %}
     {{ super() }}
-    {{ nav.main_nav.render() }}
-{% endblock %}
+    {{nav.secnavbar.render()}}
+{% endblock navbar %}
 
 {% block content %}
     {{ super() }}
@@ -59,7 +59,7 @@
             <div class="jumbotron" style="background-color: white">{% block data_area %}{% endblock %}</div>
         </div>
     </div>  <!-- /.container -->
-{% endblock %}
+{% endblock content %}
 
 {% block scripts %}
     {{ super() }}
@@ -83,4 +83,17 @@
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"
             rel="stylesheet"></script>
     <script src="{{url_for('static', filename='js/multiple-select.js')}}"></script>
-{% endblock %}
+
+    <!-- This section manages all the login stuff -->
+    <script>
+        $(document).ready(function () {
+            // Set all our ajax calls to have the necessary headers for the server.
+            $.ajaxSetup({
+                beforeSend: function (xhr) {
+                    // xhr.setRequestHeader('Authorization', sessionStorage.getItem('access_key'));
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=utf-8");
+                }
+            });
+        });
+    </script>
+{% endblock scripts %}

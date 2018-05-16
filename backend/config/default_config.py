@@ -3,6 +3,7 @@ import os
 
 
 class Config(object):
+    SITE_NAME = "mW Reporting"
     SECRET_KEY = os.urandom(24)  # Generate a random session key
     CSRF_ENABLED = True
 

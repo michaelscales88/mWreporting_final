@@ -1,8 +1,7 @@
 # backend/server.py
-from flask import render_template
+from flask import render_template, redirect, url_for
 from flask_user import SQLAlchemyAdapter
-from werkzeug.security import safe_str_cmp
-
+from flask_login.utils import logout_user
 
 from backend.services import (
     add_cdns, make_dir, get_local_healthcheck,
@@ -12,7 +11,7 @@ from backend.services import (
 from backend.services.extensions import (
     bootstrap, nav, mail,
     moment, health, babel,
-    user_manager, jwt
+    user_manager
 )
 
 # Modules
@@ -75,18 +74,10 @@ def create_server(server_instance):
             register_form=MyRegisterForm
         )  # Initialize Flask-User
 
-        @user_manager.login_manager.request_loader
-        def load_user_from_request(request):
-            # first, try to login using the api_key url arg
-            api_key = request.args.get('api_key')
-            if api_key:
-                is_valid, has_expired, user_id = user_manager.verify_token(api_key, 300)
-                # TODO: Update this to current_app
-                if not has_expired and is_valid:
-                    user = user_manager.get_user_by_id(user_id)
-                    if user:
-                        return user
-            return None
+        @server_instance.route("/logout")
+        def logout():
+            logout_user()
+            return redirect(url_for("frontend.serve_pages", page="index"))
 
         # Error pages
         @server_instance.errorhandler(404)
@@ -98,8 +89,11 @@ def create_server(server_instance):
             return render_template('500.html', title='Resource Error'), 500
 
         # Register API rules with the server
-        server_instance.register_blueprint(api_bp)
         server_instance.register_blueprint(frontend_bp)
+        server_instance.register_blueprint(
+            api_bp,
+            url_prefix="/api"
+        )
 
         # Register persistent celery tasks
         from backend.data.tasks import register_tasks as register_data_tasks
