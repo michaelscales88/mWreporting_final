@@ -1,7 +1,8 @@
 # data/tasks.py
+from datetime import datetime
 from celery.schedules import crontab
 
-from .services import get_data, load_data_for_date_range, empty_data
+from .services import get_data, load_data_for_date_range
 
 
 def register_tasks(server):
@@ -14,11 +15,16 @@ def register_tasks(server):
     }
 
 
-def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_event')):
-    if start_time and end_time and isinstance(tables, (list, tuple)):
+def data_task(task_name, start_time=None, end_time=None, table=None):
+    # Valid table
+    if start_time and end_time:
         if task_name == 'LOAD':
-            print("trying to load")
-            [load_data_for_date_range(table, start_time, end_time) for table in tables]
+            # loading tables
+            for table in ('c_call', 'c_event'):
+                if load_data_for_date_range(table, start_time, end_time):
+                    print("Loaded data for", table, start_time, end_time)
+                else:
+                    print("Error loading data for", table, start_time, end_time)
             # Load data for selected tables - Celery
             # load_job = group(
             #     [load_data_for_date_range.s(table, start_time, end_time) for table in tables]
@@ -30,10 +36,15 @@ def data_task(task_name, start_time=None, end_time=None, tables=('c_call', 'c_ev
             # for status in cr.GroupResult(results=result):
             #     print(status)
             return True
-        elif task_name == 'GET':
-            print("start get", tables)
-            return get_data(tables[0], start_time, end_time)
+        elif isinstance(table, str):
+            # a table is provided
+            return get_data(table, start_time, end_time)
         else:
-            return empty_data(tables[0])
+            return False
     else:
-        return empty_data(tables[0] if isinstance(tables, (list, tuple)) else tables)
+        # Empty table
+        print("else returning data")
+        if isinstance(table, str):
+            return get_data(table, datetime.now(), datetime.now())
+        else:
+            return False

@@ -1,5 +1,5 @@
 # backend/__init__.py
-from .factories import create_application
+from backend.factories.application import create_application
 from backend.factories.server import create_server
 
 

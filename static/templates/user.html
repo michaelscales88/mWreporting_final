@@ -6,6 +6,9 @@
         <div class="col-lg-3">
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
         </div>
+        <div class="col-xs-12 col-md-12 col-sm-12">
+            <button type="button" class="btn btn-primary" id="saveClients" style="width: 100%">Save Clients</button>
+        </div>
     </div>
 {% endblock control_area %}
 
@@ -44,34 +47,59 @@
     <script>
         $(document).ready(function () {
             // Apply plugins
-            let $select = $('#userClientSelector').multiselect();
-            let $select_to = $('#userClientSelector_to').multiselect();
-            // Disable during INIT
-            $select.multiselect('disable');
-            $select_to.multiselect('disable');
-            $.ajax({
-                url: "/api/client",
-                success: function OnPopulateControl(data, textStatus) {
-                    if (data && (textStatus === 'success')) {
-                        let option_info = data.data;
-                        console.log(option_info);
-                        if (option_info.length > 0) {
-                            // Enable if we have options
-                            $select.multiselect('enable');
-                            $select_to.multiselect('enable');
-                            $.each(option_info, function () {
-                                $select.append($("<option></option>").val(this[2]).html(this[1] + ' (' + this[2] + ')'));
-                            });
+            let $select = $('select#userClientSelector').multiselect();
+            let $select_to = $('select#userClientSelector_to').multiselect();
+
+            function updateSelection() {
+                // Disable during INIT
+                $select.empty();
+                $select.multiselect('disable');
+                $select_to.multiselect('disable');
+
+                $.ajax({
+                    url: "/api/client",
+                    success: function OnPopulateControl(data, textStatus) {
+                        if (data && (textStatus === 'success')) {
+                            let option_info = data.data;
+                            console.log(option_info);
+                            if (option_info.length > 0) {
+                                // Enable if we have options
+                                $select.multiselect('enable');
+                                $select_to.multiselect('enable');
+                                $.each(option_info, function () {
+                                    $select.append($("<option></option>").val(this[2]).html(this[1] + ' (' + this[2] + ')'));
+                                });
+                            }
+                        }
+                        // Update the multiselects after populating
+                        $select.multiselect('refresh');
+                        $select.multiselect('refresh');
+                    },
+                    error: function () {
+                        alert("Error");
+                    }
+                });
+            }
+            updateSelection();
+
+            $("button#saveClients").on("click", function (e) {
+                let toSave = [];
+                $.each($("select#userClientSelector_to option"), function () {
+                    toSave.push(this.value.toString());
+                });
+                console.log(toSave);
+                $.ajax({
+                    url: "/api/user",
+                    method: "PUT",
+                    data: { my_clients: JSON.stringify(toSave) },
+                    success: function (resp, status) {
+                        // Toaster message
+                        if (status === 'success') {
+
                         }
                     }
-                    // Update the multiselects after populating
-                    $select.multiselect('refresh');
-                    $select.multiselect('refresh');
-                },
-                error: function () {
-                    alert("Error");
-                }
-            });
+                })
+            })
         });
     </script>
 {% endblock scripts %}

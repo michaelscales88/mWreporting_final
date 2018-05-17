@@ -28,7 +28,7 @@ class SlaReportAPI(Resource):
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'task', dest='task', help='A task to complete.'
+            'task', help='A task to complete.'
         )
         parser.add_argument(
             'start_time', type=to_datetime,

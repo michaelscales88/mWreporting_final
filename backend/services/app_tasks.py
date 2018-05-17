@@ -22,8 +22,10 @@ def return_task(fn):
 
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        result = None
         try:
             result = fn(*args, **kwargs)
+            print("in wrapper", result)
             if isinstance(result, bool):
                 # Boolean result for model updates
                 key_words = {}
@@ -39,6 +41,9 @@ def return_task(fn):
                 key_words = {
                     "data": result.to_dict(orient='split')['data']
                 }
+        except AttributeError:
+            # Exclude Response objects
+            return result
         except Exception as e:
             if current_app.config.get('NOISY_ERROR'):
                 import sys

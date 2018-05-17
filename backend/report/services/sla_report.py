@@ -9,8 +9,8 @@ from sqlalchemy.exc import DatabaseError
 from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 from backend.services.app_tasks import query_to_frame, display_columns, get_model
 from backend.report.models import SlaReportModel
-from backend.factories import create_application
-from backend.factories import create_celery
+from backend.factories.application import create_application
+from backend.factories.celery import create_celery
 
 
 celery = create_celery(create_application())

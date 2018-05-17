@@ -23,7 +23,7 @@ class DataAPI(Resource):
             'end_time', location='form', type=to_datetime,
             help='End time for data interval.'
         )
-        parser.add_argument('tables', location='form', type=to_list)
+        parser.add_argument('table', location='form', type=to_list)
         self.args = parser.parse_args()
         super().__init__()
 
@@ -31,7 +31,6 @@ class DataAPI(Resource):
         pass
 
     def get(self):
-        print('Hit GET Data API', self.args)
         return "c_call", "c_event"
 
     def put(self):
@@ -40,5 +39,5 @@ class DataAPI(Resource):
             self.args['task'],
             start_time=self.args['start_time'],
             end_time=self.args['end_time'],
-            tables=self.args['tables']
+            table=self.args['table']
         )

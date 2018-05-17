@@ -90,10 +90,9 @@
             // Set all our ajax calls to have the necessary headers for the server.
             $.ajaxSetup({
                 beforeSend: function (xhr) {
-                    // xhr.setRequestHeader('Authorization', sessionStorage.getItem('access_key'));
                     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=utf-8");
                 }
-            });
+             });
         });
     </script>
 {% endblock scripts %}

@@ -76,6 +76,7 @@ class TablesLoaded(db.Model):
 
     @classmethod
     def check_date_set(cls, date, table_name):
+        print("checking date set")
         return cls.query.filter(
             and_(
                 cls.date_loaded == date,

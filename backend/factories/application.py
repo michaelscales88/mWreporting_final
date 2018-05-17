@@ -1,6 +1,15 @@
 # backend/__init__.py
 from flask import Flask
 
+from backend.services import (
+    init_notifications, init_logging, make_dir, add_cdns
+)
+from backend.services.extensions import (
+    bootstrap, nav, mail,
+    moment, health, babel,
+    db
+)
+
 
 def create_application(*cfg):
     """
@@ -22,6 +31,25 @@ def create_application(*cfg):
 
     if not app_instance.debug:
         app_instance.config.from_object('backend.config.default_config.ProductionConfig')
+
+    # Init + Bind services to app_instance
+    db.init_app(app_instance)
+    babel.init_app(app_instance)
+    bootstrap.init_app(app_instance)
+    nav.init_app(app_instance)
+    mail.init_app(app_instance)
+    moment.init_app(app_instance)
+    health.init_app(app_instance, "/healthcheck")
+
+    # Enable production settings
+    if not app_instance.debug:
+        init_logging(app_instance)
+        init_notifications(app_instance, mail)
+
+    make_dir(app_instance.config['TMP_DIR'])
+
+    # Add CDNs for frontend
+    add_cdns(app_instance)
 
     return app_instance
 

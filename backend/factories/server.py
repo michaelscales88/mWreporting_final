@@ -1,22 +1,18 @@
 # backend/server.py
-from flask import render_template, redirect, url_for
-from flask_user import SQLAlchemyAdapter
+from flask import render_template, redirect, url_for, flash
 from flask_login.utils import logout_user
-
-from backend.services import (
-    add_cdns, make_dir, get_local_healthcheck,
-    get_data_healthcheck, init_logging,
-    AppJSONEncoder, BaseModel, init_notifications
-)
-from backend.services.extensions import (
-    bootstrap, nav, mail,
-    moment, health, babel,
-    user_manager
-)
+from flask_user import SQLAlchemyAdapter
 
 # Modules
 from backend.backend import api_bp
 from backend.frontend import frontend_bp
+from backend.services import (
+    get_local_healthcheck,
+    get_data_healthcheck, AppJSONEncoder, BaseModel
+)
+from backend.services.extensions import (
+    health, user_manager, db
+)
 
 
 def create_server(server_instance):
@@ -30,24 +26,6 @@ def create_server(server_instance):
     print("Starting server setup.")
     with server_instance.app_context():
 
-        # Enable production settings
-        if not server_instance.debug:
-            init_logging(server_instance)
-            init_notifications(server_instance, mail)
-
-        make_dir(server_instance.config['TMP_DIR'])
-
-        # Init Services
-        babel.init_app(server_instance)
-        bootstrap.init_app(server_instance)
-        nav.init_app(server_instance)
-        mail.init_app(server_instance)
-        moment.init_app(server_instance)
-        health.init_app(server_instance, "/healthcheck")
-
-        # Add CDNs for frontend
-        add_cdns(server_instance)
-
         # Register system checks
         health.add_check(get_local_healthcheck)
         health.add_check(get_data_healthcheck)
@@ -56,9 +34,6 @@ def create_server(server_instance):
         server_instance.json_encoder = AppJSONEncoder
 
         # Configure DB
-        from backend.services.extensions import db
-        db.init_app(server_instance)
-
         # Import models that need to be created
         from backend.client.models import ClientModel
         from backend.data.models import EventTableModel, CallTableModel, TablesLoaded
@@ -77,15 +52,18 @@ def create_server(server_instance):
         @server_instance.route("/logout")
         def logout():
             logout_user()
+            flash("Logged out!")
             return redirect(url_for("frontend.serve_pages", page="index"))
 
         # Error pages
         @server_instance.errorhandler(404)
         def not_found_error(error):
-            return render_template('404.html', title='Page Not Found'), 404
+            flash("Could not find the page you were looking for.", 'error')
+            return redirect(url_for("frontend.serve_pages", page="index"))
 
         @server_instance.errorhandler(500)
         def internal_error(error):
+            flash("Could not find the resource you were looking for.", 'error')
             return render_template('500.html', title='Resource Error'), 500
 
         # Register API rules with the server

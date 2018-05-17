@@ -8,22 +8,23 @@ from sqlalchemy.sql import and_, func, false
 
 from backend.services import get_session
 from backend.services.app_tasks import get_model, get_pk, get_foreign_id, parse_time
-from backend.factories import create_application
-from backend.factories import create_celery
+from backend.factories.application import create_application
+from backend.factories.celery import create_celery
 
 
 celery = create_celery(create_application())
 
 
-def empty_data(table_name):
-    loader_model = get_model(table_name)
-    print("found table", loader_model)
-    return loader_model.query.filter(false)
-
-
 def check_loaded(table_name, date):
     loader_model = get_model('tables_loaded')
+    print(loader_model)
     if isinstance(date, DATETYPE):
+        print(loader_model.query.filter(
+            and_(
+                loader_model.date_loaded == date,
+                loader_model.table == table_name
+            )
+        ).first())
         return loader_model.check_date_set(date, table_name)
     else:
         return False
@@ -79,6 +80,7 @@ def data_loader(periods=60, table_names=('c_call', 'c_event')):
 
 @celery.task(name='data.tasks.load_data_for_date_range')
 def load_data_for_date_range(table_name, start_date=None, end_date=None, periods=()):
+    print("starting load data for range")
     """
     Add data in whole day increments.
     For a table_name in the db, add records in whole day increments and update
@@ -142,12 +144,8 @@ def load_data_for_date_range(table_name, start_date=None, end_date=None, periods
                     # Update loader model with the table and date loaded
                     loader_model.create(date_loaded=date, table=table_name)
 
-                # else:
-                #     # Records already loaded
-                #     print('records already loaded', table_name, date)
-                #     pass
-
         except Exception as err:
+            print("hit exception", err)
             logging.info(err)
             logging.info("Error in data/services/loaders.py")
             ext_session.rollback()
@@ -156,6 +154,7 @@ def load_data_for_date_range(table_name, start_date=None, end_date=None, periods
             # Commit records and updated the table: tables_loaded
             table.session.commit()
             loader_model.session.commit()
+            print("loaded records", table_name)
             return True
         finally:
             # Always close the connection to the external database

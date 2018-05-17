@@ -5,7 +5,7 @@ function configDataPage(start_time, end_time) {
             start_time: $("input#start-selector").val(),
             end_time: $("input#end-selector").val(),
             task: "GET",
-            tables: JSON.stringify($("select#data-select").multipleSelect("getSelects"))
+            table: JSON.stringify($("select#data-select").multipleSelect("getSelects")[0])
         }
     }
 
@@ -26,8 +26,8 @@ function configDataPage(start_time, end_time) {
             num_rows: 50
         };
 
-        let table = getGridArea(ajaxFn, tableConfig, "PUT");
-        $('button#refreshTableButton').on('click', function () { table.ajax.reload()});
+        let $table = getGridArea(ajaxFn, tableConfig, "PUT");
+        $('button#refreshTableButton').on('click', function () { $table.ajax.reload()});
 
         $('button#loadButton').on('click', function () {
             $.ajax({
@@ -35,12 +35,15 @@ function configDataPage(start_time, end_time) {
                 data: {
                     start_time: $("input#start-selector").val(),
                     end_time: $("input#end-selector").val(),
-                    task: "LOAD",
-                    tables: JSON.stringify($("select#data-select").multipleSelect("getSelects"))
+                    task: "LOAD"
                 },
-                method: "PUT"
+                method: "PUT",
+                success: function (resp, status) {
+                    if (status === 'success') {
+                        $table.ajax.reload();
+                    }
+                }
             });
-            table.ajax.reload();
         });
     });
 }
