@@ -1,8 +1,9 @@
 <!-- client module page: client.html -->
-{% extends 'base_template.html' %}
+{% extends 'my_base.html' %}
 
 
-{% block controlarea %}
+{% block control_area %}
+    {{ super() }}
     <div class="row">
         <div class="col-lg-6">
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
@@ -18,40 +19,49 @@
     {% include "partials/client_modal.html" %}
     <div class="row">
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#clientModal"
-                    style="width: 100%">Add
-            </button>
+            <button type="button" class="btn btn-primary button-class" data-toggle="modal"
+                    data-target="#clientModal" style="width: 100%" value="Add">Add</button>
         </div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary" id="removeButton" style="width: 100%">Remove</button>
+            <button type="button" class="btn btn-primary button-class" data-toggle="modal"
+                    data-target="#clientModal" style="width: 100%" value="Remove">Remove</button>
         </div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary" id="refreshButton" style="width: 100%">Refresh</button>
+            <button type="button" class="btn btn-primary" id="refreshTableButton" style="width: 100%">Refresh</button>
         </div>
     </div>
-{% endblock %}
+{% endblock control_area %}
 
-{% block data_area %}{% include "partials/data_grid.html" %}{% endblock %}
+{% block data_area %}
+    {{ super() }}{% include "partials/data_grid.html" %}
+{% endblock data_area %}
 
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            function ajaxFn() {
-                return {
-                    task: "{{ task }}"
-                }
-            }
-
-            $.getScript("{{ url_for("static", filename="js/client.js") }}", function () {
-                configClientPage("{{ url_for(api) }}", "{{ grid_length }}", ajaxFn);
+            $("button#onClick").click(function() {
+                let method = $(".modal-body #hiddenValue").val();
+                $.ajax({
+                    url: '/api/client',
+                    method: (method === 'Add') ? 'PUT': 'DELETE',
+                    data: $("form#clientForm").serialize(),
+                    success: function (data, success) {
+                        $("button#formReset").click();
+                        if (success === 'success') { $("button#refreshTableButton").click(); }
+                    }
+                })
             });
-            $.getScript("{{ url_for("static", filename="js/selector-widget.js") }}", function () {
-                loadMultiSelect("{{ url_for(api) }}", "#client-select", "{{ task }}");
-            });
+            $.getScript("{{ url_for("static", filename="js/client.js") }}", function () { configClientPage(); });
+            $.getScript("{{ url_for("static", filename="js/client-selector.js") }}", function () { loadClientSelect(); });
             $("button#formReset").on("click", function () {
                 document.getElementById("clientForm").reset();
             });
+            $(".button-class").click(function () {
+                let action = $(this).val();
+                $("#modal-title").text(action + " Client");
+                $(".modal-body #hiddenValue").val(action);
+            })
         });
     </script>
-{% endblock %}
+{% endblock scripts %}

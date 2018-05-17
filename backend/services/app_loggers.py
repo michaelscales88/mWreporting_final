@@ -3,13 +3,16 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 
-def init_logging(app, mail):
-    mail_handler = get_mail_handler(mail)
+def init_logging(app):
     file_handler = get_handler('instance/backend.log')
     server_logger = get_logger('werkzeug')
     server_logger.addHandler(file_handler)
-    app.logger.addHandler(mail_handler)
     app.logger.addHandler(file_handler)
+
+
+def init_notifications(app, mail):
+    mail_handler = get_mail_handler(mail)
+    app.logger.addHandler(mail_handler)
 
 
 def get_handler(log_filename):

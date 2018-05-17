@@ -6,10 +6,14 @@ from datetime import timedelta
 from sqlalchemy.exc import DatabaseError
 
 
-from backend import celery
+from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
 from backend.services.app_tasks import query_to_frame, display_columns, get_model
 from backend.report.models import SlaReportModel
-from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
+from backend.factories.application import create_application
+from backend.factories.celery import create_celery
+
+
+celery = create_celery(create_application())
 
 
 class SqlAlchemyTask(celery.Task):
@@ -26,7 +30,7 @@ class SqlAlchemyTask(celery.Task):
             SlaReportModel.session.commit()
 
 
-@celery.task(base=SqlAlchemyTask)
+@celery.task(base=SqlAlchemyTask, name='report.tasks.make_sla_report_model')
 def make_sla_report_model(start_time, end_time):
     # Check if report already exists
     try:

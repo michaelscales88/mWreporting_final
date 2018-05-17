@@ -1,11 +1,17 @@
 import requests
 import threading
 import time
-from backend import celery
+
+from backend.factories.server import mail
+from backend.factories import create_celery
+from backend.factories import create_application
 
 
-@celery.task()
-def start_runner(host="127.0.0.1", port=8080, max_retries=5):
+celery = create_celery(create_application())
+
+
+@celery.task(name="tasks.start_runner")
+def start_runner(host="0.0.0.0", port=8080, max_retries=5):
     print("start running")
 
     def start_loop(retries_remaining):
@@ -42,3 +48,9 @@ def start_runner(host="127.0.0.1", port=8080, max_retries=5):
             print("raising exit")
             raise SystemExit("Securing server operations.")
     print("outside thread")
+
+
+@celery.task(name="tasks.send_async_mail")
+def send_async_email(msg):
+    """Background task to send an email with Flask-Mail."""
+    mail.send(msg)

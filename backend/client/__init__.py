@@ -1,3 +1,3 @@
-from .api import ClientAPI
+from .controllers import ClientAPI
 
 

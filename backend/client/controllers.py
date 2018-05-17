@@ -1,9 +1,10 @@
 # client/api.py
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
+from flask_user import login_required
 
 
-from backend.services.app_tasks import return_task, query_to_frame, to_bool
+from backend.services.app_tasks import return_task, to_bool
 from .tasks import add_client, disable_client, get_clients
 from .models import ClientModel
 
@@ -20,10 +21,10 @@ class ClientAPI(Resource):
         )
         parser.add_argument(
             'client_ext', location='form',
-            type=int, help='The client number to change.'
+            help='The client number to change.'
         )
         parser.add_argument(
-            'active', location='form',
+            'is_active', location='form',
             type=to_bool, help='Active clients.'
         )
         self.args = parser.parse_args()
@@ -40,10 +41,12 @@ class ClientAPI(Resource):
         print('Hit GET Client API')
         return get_clients()
 
+    @login_required
     def put(self):
-        print('hit PUT Client API')
+        print('hit PUT Client API', self.args)
         return add_client(self.args['client_name'], self.args['client_ext'])
 
+    @login_required
     def delete(self):
         print('hit DELETE Client API')
         return disable_client(self.args['client_name'], self.args['client_ext'])

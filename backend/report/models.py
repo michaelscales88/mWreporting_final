@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import and_
 
 from backend.services import json_type
-from backend import db
+from backend.services.extensions import db
 
 
 class SlaReportModel(db.Model):

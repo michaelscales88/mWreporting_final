@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import and_, func
 
 
-from backend import db
+from backend.services.extensions import db
 
 
 class CallTableModel(db.Model):
@@ -28,6 +28,11 @@ class CallTableModel(db.Model):
     @hybrid_property
     def length(self):
         return self.end_time - self.start_time
+
+    @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
 
 
 class EventTableModel(db.Model):
@@ -53,6 +58,11 @@ class EventTableModel(db.Model):
     def length(self):
         return self.end_time - self.start_time
 
+    @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
+
 
 class TablesLoaded(db.Model):
 
@@ -66,6 +76,7 @@ class TablesLoaded(db.Model):
 
     @classmethod
     def check_date_set(cls, date, table_name):
+        print("checking date set")
         return cls.query.filter(
             and_(
                 cls.date_loaded == date,

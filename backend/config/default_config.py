@@ -3,11 +3,13 @@ import os
 
 
 class Config(object):
+    SITE_NAME = "mW Reporting"
     SECRET_KEY = os.urandom(24)  # Generate a random session key
+    CSRF_ENABLED = True
 
     NOISY_ERROR = True
 
-    BASEDIR = os.path.abspath(os.path.dirname(__file__))
+    BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     PACKAGEDIR = os.path.dirname(BASEDIR)
     TMP_DIR = os.path.join(PACKAGEDIR, 'instance')
     PACKAGE_NAME = os.path.basename(PACKAGEDIR)
@@ -42,13 +44,16 @@ class Config(object):
     SQLALCHEMY_MIGRATE_REPO = os.environ.get('SQLALCHEMY_MIGRATE_FOLDER',
                                              os.path.join(PACKAGEDIR, 'instance/db_repository'))
 
-    # email server
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_PORT = 465
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    # Flask-Mail settings
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME', 'youremail@example.com')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', 'yourpassword')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', '"mWReporting" <noreply@example.com>')
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', '465'))
+    MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL', True))
+
+    # Flask-User settings
+    USER_APP_NAME = "mWReporting"  # Used by email templates
 
     # administrator list
     ADMINS = ['mindwirelessreporting@gmail.com', 'michael.scales@g.austincc.edu']
@@ -62,9 +67,10 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = os.getenv('DEBUG_APP', False)
+    DEBUG = os.getenv('DEBUG_APP', True)
     USE_DEBUGGER = True
     TEST_MODE = os.getenv('TEST_MODE', False)
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Turn this off to reduce overhead
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                                            os.path.join(Config.PACKAGEDIR, 'instance/local_app.db'))
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.environ.get(
+        'SQLALCHEMY_DATABASE_URI', os.path.join(Config.PACKAGEDIR, 'instance/local_test.sqlite')
+    )

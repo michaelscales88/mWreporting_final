@@ -1,11 +1,11 @@
-function configDataPage(api, start_time, end_time, num_rows) {
+function configDataPage(start_time, end_time) {
 
     function ajaxFn() {
         return {
             start_time: $("input#start-selector").val(),
             end_time: $("input#end-selector").val(),
             task: "GET",
-            tables: JSON.stringify($("#data-select").multipleSelect("getSelects"))
+            table: JSON.stringify($("select#data-select").multipleSelect("getSelects")[0])
         }
     }
 
@@ -19,32 +19,31 @@ function configDataPage(api, start_time, end_time, num_rows) {
     });
 
     // configure the data grid
-    $.getScript("/static/js/data-table.js", function () {
+    $.getScript("/static/js/grid-area.js", function () {
         let tableConfig = {
-            api: api,
+            api: "/api/data",
             table_name: 'table#displayTable',
-            num_rows: num_rows
+            num_rows: 50
         };
 
-        let table = getDataTable(ajaxFn, tableConfig, "PUT");
-        $('button#refreshButton').on('click', function () {
-            console.log("clicked refresh");
-            table.ajax.reload()
-        });
+        let $table = getGridArea(ajaxFn, tableConfig, "PUT");
+        $('button#refreshTableButton').on('click', function () { $table.ajax.reload()});
 
         $('button#loadButton').on('click', function () {
-            console.log("clicked load");
             $.ajax({
-                url: api,
+                url: "/api/data",
                 data: {
                     start_time: $("input#start-selector").val(),
                     end_time: $("input#end-selector").val(),
-                    task: "LOAD",
-                    tables: JSON.stringify($("#data-select").multipleSelect("getSelects"))
+                    task: "LOAD"
                 },
-                method: "PUT"
+                method: "PUT",
+                success: function (resp, status) {
+                    if (status === 'success') {
+                        $table.ajax.reload();
+                    }
+                }
             });
-            table.ajax.reload();
         });
     });
 }

@@ -1,6 +1,7 @@
 # report/tasks.py
 import datetime
-from backend.report.services import get_sla_report, empty_report
+
+from .services import get_sla_report, empty_report
 from celery.schedules import crontab
 
 
@@ -17,7 +18,6 @@ def register_tasks(server):
 
 
 def report_task(report_name, start_time=None, end_time=None, clients=None):
-    print("hit report_task", report_name, start_time, end_time, clients)
     if report_name == 'sla_report':
         if start_time and end_time:
             report = get_sla_report(start_time, end_time, clients)

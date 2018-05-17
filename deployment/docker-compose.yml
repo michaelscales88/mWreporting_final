@@ -3,8 +3,11 @@ version: '2'
 services:
   # Task Broker
   rabbit:
-    image: rabbitmq:latest
+    image: rabbitmq:3.6.6-management
     env_file: app.env
+    ports:
+      - "5672"
+      - "15672:15672"
 
   # Flask Images/Controller/View/Worker Layers
   uwsgi:
@@ -30,30 +33,36 @@ services:
       context: uwsgi
       dockerfile: Dockerfile
     env_file: app.env
+    volumes:
+      - ./uwsgi/celery_worker.py:/app/celery_worker.py
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
     working_dir: /app
-    command: celery -A backend.celery worker -l info
+    command: celery -A celery_worker.celery worker -l info
 
   beat:
     build:
       context: uwsgi
       dockerfile: Dockerfile
     env_file: app.env
+    volumes:
+      - ./uwsgi/celery_worker.py:/app/celery_worker.py
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
     working_dir: /app
-    command: celery -A backend.celery beat -l info
+    command: celery -A celery_worker.celery beat --pidfile= -l info
 
   flower:
     build:
       context: uwsgi
       dockerfile: Dockerfile
     env_file: app.env
+    volumes:
+      - ./uwsgi/celery_worker.py:/app/celery_worker.py
     volumes_from:
       - uwsgi
     depends_on:
@@ -61,7 +70,7 @@ services:
     ports:
       - "5555"
     working_dir: /app
-    command: celery -A backend.celery flower
+    command: flower -A celery_worker.celery
 
   # Data Layers
   data:

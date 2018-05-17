@@ -1,10 +1,8 @@
 # report/api.py
 from flask_restful import Resource, reqparse
-from sqlalchemy.exc import DatabaseError
 
 
 from backend.services.app_tasks import return_task, to_datetime, to_list
-from .models import SlaReportModel
 from .tasks import report_task
 
 
@@ -30,7 +28,7 @@ class SlaReportAPI(Resource):
     def __init__(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'task', dest='task', help='A task to complete.'
+            'task', help='A task to complete.'
         )
         parser.add_argument(
             'start_time', type=to_datetime,

@@ -4,8 +4,8 @@
         <div class="modal-content">
             <!--Header-->
             <div class="modal-header text-center">
-                <h1 class="display-3">Add Client</h1>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h1 class="display-3" id="modal-title"></h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="formReset">
                     <span aria-hidden="true" class="white-text">&times;</span>
                 </button>
             </div>
@@ -13,19 +13,19 @@
             <!--Body-->
             <div class="modal-body">
                 <form id="clientForm">
-                    <input id="client-name" type="text" title="Client Name"
+                    <input id="client_name" type="text" title="Client Name"
                                placeholder="ExampleClient" name="client_name" class="form-control">
-                    <input id="client-ext" type="text" title="DID Extension"
+                    <input id="client_ext" type="text" title="DID Extension"
                            placeholder="Ex. 7592" name="client_ext" class="form-control">
-                    <input type="hidden" name="task" value="">
+                    <input type="hidden" name="hiddenValue" id="hiddenValue" value="" />
                 </form>
             </div>
 
             <!--Footer-->
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" id="addButton">Add</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="onClick">Submit</button>
                 <button type="button" class="btn btn-primary" id="formReset">Reset</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="formReset" data-dismiss="modal">Close</button>
             </div>
         </div>
         <!--/.Content-->

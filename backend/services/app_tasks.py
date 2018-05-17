@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from flask import jsonify, current_app, request
 from json import loads
-from flask_sqlalchemy import Model
+from flask_sqlalchemy import Model, BaseQuery
 from sqlalchemy.inspection import inspect
 from functools import wraps
 
@@ -21,9 +21,11 @@ def shutdown_server():
 def return_task(fn):
 
     @wraps(fn)
-    def wrapper(*args, **kwds):
+    def wrapper(*args, **kwargs):
+        result = None
         try:
-            result = fn(*args, **kwds)
+            result = fn(*args, **kwargs)
+            print("in wrapper", result)
             if isinstance(result, bool):
                 # Boolean result for model updates
                 key_words = {}
@@ -31,12 +33,17 @@ def return_task(fn):
                 key_words = {
                     "data": result
                 }
-            else:
-                data = result.to_dict(orient='split')
-                print("hit to_dict")
+            elif isinstance(result, BaseQuery):
                 key_words = {
-                    "data": data['data']
+                    "data": []
                 }
+            else:
+                key_words = {
+                    "data": result.to_dict(orient='split')['data']
+                }
+        except AttributeError:
+            # Exclude Response objects
+            return result
         except Exception as e:
             if current_app.config.get('NOISY_ERROR'):
                 import sys
@@ -46,7 +53,8 @@ def return_task(fn):
                                           limit=2, file=sys.stdout)
             return jsonify(
                 status=404,
-                error=str(e)
+                error=str(e),
+                data=[]
             )
         else:
             return jsonify(
