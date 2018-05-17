@@ -1,7 +1,6 @@
 # services/extensions.py
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
-from flask_jwt import JWT
 from flask_mail import Mail
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -20,4 +19,3 @@ nav = get_nav()                         # Navigation Bar
 moment = Moment()                       # MomentJS
 health = HealthCheck()                  # Resource information
 user_manager = UserManager()            # Login manager
-jwt = JWT()                             # Token authentication
