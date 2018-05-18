@@ -37,10 +37,10 @@ def serve_pages(page):
         return restricted_page(
             'client.html',
             title='Clients',
-            columns=display_columns('client_table')
+            columns=display_columns('client')
         )
     elif page in ("user.html", "user"):
-        return render_template(
+        return restricted_page(
             'user.html',
             title='User Page'
         )

@@ -22,7 +22,7 @@ function configReportPage(start_time, end_time) {
         let tableConfig = {
             api: "/api/sla-report",
             table_name: 'table#displayTable',
-            num_rows: 50
+            num_rows: -1
         };
 
         let table = getGridArea(ajaxFn, tableConfig, "PUT");

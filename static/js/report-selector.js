@@ -1,32 +1,48 @@
 function loadReportSelect() {
     let $multiSelect = $("select#report-select").multipleSelect({
-        width: '100%'
+        width: '100%',
+        placeholder: "Select the clients for the report"
     });
-
     $multiSelect.multipleSelect('disable');
-
     $("button#checkAllBtn").on("click", $multiSelect.multipleSelect("checkAll"));
-
     $("button#uncheckAllBtn").on("click", $multiSelect.multipleSelect("uncheckAll"));
 
+    // Populate the select box
     $.ajax({
         url: "/api/client",
         success: function (data, status) {
             if (status === 'success') {
-                let option_info = data.data;
-                console.log(option_info);
-                if (option_info.length > 0) {
+                let allClients = data.data;
+                if (allClients.length > 0) {
                     $multiSelect.empty();
-                    // Enable if we have options
-                    $multiSelect.multipleSelect('enable');
-                    $.each(option_info, function () {
+                    $.each(allClients, function () {
                         $multiSelect.append(
                             $("<option></option>").val(this[2]).html(' ' + this[1] + ' (' + this[2] + ')')
                         );
                     });
+                    $multiSelect.multipleSelect("refresh");
                 }
-                $multiSelect.multipleSelect("refresh");
-            }
+            } // End /api/client Success
         }
+    });
+
+    // After the select box is populated -> select the current users options or all
+    $.get("/api/user").done(function() {
+        // Ajax success
+        $multiSelect.multipleSelect("enable");
+        $.ajax({
+            url: "/api/user",
+            success: function (data, status) {
+                if (status === 'success') {
+                    let myClients = data.data;
+                    if (myClients && myClients.hasOwnProperty("length") && myClients.length > 0) {
+                        let selectValues = [];
+                        $.each(myClients, function () { selectValues.push(this['ext']); });
+                        $multiSelect.val(selectValues);
+                        $multiSelect.multipleSelect("refresh");
+                    } else $("select#report-select").multipleSelect("checkAll");
+                } else $("select#report-select").multipleSelect("checkAll");
+            }
+        });
     });
 }

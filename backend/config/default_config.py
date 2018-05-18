@@ -53,7 +53,11 @@ class Config(object):
     MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL', True))
 
     # Flask-User settings
-    USER_APP_NAME = "mWReporting"  # Used by email templates
+    USER_APP_NAME = "Flask-User QuickStart App"  # Shown in and email templates and page footers
+    USER_ENABLE_EMAIL = False  # Disable email authentication
+    USER_ENABLE_USERNAME = True  # Enable username authentication
+    USER_REQUIRE_RETYPE_PASSWORD = False  # Simplify register form
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Mike1234")
 
     # administrator list
     ADMINS = ['mindwirelessreporting@gmail.com', 'michael.scales@g.austincc.edu']

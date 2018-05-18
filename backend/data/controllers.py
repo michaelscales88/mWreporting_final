@@ -31,10 +31,17 @@ class DataAPI(Resource):
         pass
 
     def get(self):
+        """
+
+        :return:
+        """
         return "c_call", "c_event"
 
     def put(self):
-        print('Hit PUT Data API', self.args)
+        """
+
+        :return:
+        """
         return data_task(
             self.args['task'],
             start_time=self.args['start_time'],

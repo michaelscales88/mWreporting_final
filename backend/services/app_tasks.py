@@ -25,11 +25,10 @@ def return_task(fn):
         result = None
         try:
             result = fn(*args, **kwargs)
-            print("in wrapper", result)
             if isinstance(result, bool):
                 # Boolean result for model updates
                 key_words = {}
-            elif isinstance(result, tuple):
+            elif isinstance(result, (tuple, list)):
                 key_words = {
                     "data": result
                 }
@@ -37,6 +36,8 @@ def return_task(fn):
                 key_words = {
                     "data": []
                 }
+            elif isinstance(result, dict) and isinstance(result.get("data"), list):
+                key_words = result
             else:
                 key_words = {
                     "data": result.to_dict(orient='split')['data']
@@ -57,6 +58,7 @@ def return_task(fn):
                 data=[]
             )
         else:
+            print(key_words)
             return jsonify(
                 **key_words
             )
@@ -64,7 +66,8 @@ def return_task(fn):
     return wrapper
 
 
-def to_datetime(value, name):
+def to_datetime(value, name, *args):
+    print(args)
     try:
         dt = parse(value)
     except (ValueError, OverflowError):
@@ -87,12 +90,14 @@ def get_model(model=None):
     from backend.client.models import _mmap as client_map
     from backend.data.models import _mmap as model_map
     from backend.report.models import _mmap as report_map
+    from backend.user.models import _mmap as user_map
 
     # Access models from any module by name
     all_map = {
         **client_map,
         **model_map,
-        **report_map
+        **report_map,
+        **user_map
     }
 
     return all_map.get(model, None)

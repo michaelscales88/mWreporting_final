@@ -7,7 +7,7 @@ from backend.services import (
 from backend.services.extensions import (
     bootstrap, nav, mail,
     moment, health, babel,
-    db
+    db, ma
 )
 
 
@@ -33,10 +33,12 @@ def create_application(*cfg):
         app_instance.config.from_object('backend.config.default_config.ProductionConfig')
 
     # Init + Bind services to app_instance
+    # Ordering is important.
     db.init_app(app_instance)
     babel.init_app(app_instance)
     bootstrap.init_app(app_instance)
     nav.init_app(app_instance)
+    ma.init_app(app_instance)
     mail.init_app(app_instance)
     moment.init_app(app_instance)
     health.init_app(app_instance, "/healthcheck")
