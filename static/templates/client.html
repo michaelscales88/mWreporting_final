@@ -10,9 +10,7 @@
         </div>
         <div class="col-lg-6">
             <div class="row">
-                <p><select id="client-select" title="Clients" multiple="multiple" style="width: 100%">
-                        <option value="test">Test Option</option>
-                    </select></p>
+                <p><select id="client-select" title="Clients" multiple="multiple" style="width: 100%"></select></p>
             </div>
         </div>
     </div>
@@ -40,23 +38,36 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            $("button#onClick").click(function() {
-                let method = $(".modal-body #hiddenValue").val();
-                $.ajax({
-                    url: '/api/client',
-                    method: (method === 'Add') ? 'PUT': 'DELETE',
-                    data: $("form#clientForm").serialize(),
-                    success: function (data, success) {
-                        $("button#formReset").click();
-                        if (success === 'success') { $("button#refreshTableButton").click(); }
-                    }
-                })
-            });
+            // Client Grid Area configuration
             $.getScript("{{ url_for("static", filename="js/client.js") }}", function () { configClientPage(); });
-            $.getScript("{{ url_for("static", filename="js/client-selector.js") }}", function () { loadClientSelect(); });
+
+            // Client Selector JS
+            $.getScript("{{ url_for("static", filename="js/client-selector.js") }}", function () {
+                updateSelectOptions();
+
+                $("button#onClick").click(function() {
+                    let method = $(".modal-body #hiddenValue").val();
+                    $.ajax({
+                        url: '/api/client',
+                        method: (method === 'Add') ? 'PUT': 'DELETE',
+                        data: $("form#clientForm").serialize(),
+                        success: function (data, success) {
+                            $("button#formReset").click();
+                            if (success === 'success') {
+                                $("button#refreshTableButton").click();
+                                updateSelectOptions();
+                            }
+                        }
+                    })
+                });
+            });
+
+            // Clear the modal's form
             $("button#formReset").on("click", function () {
                 document.getElementById("clientForm").reset();
             });
+
+            // Configure the modal to be used for Add and Remove
             $(".button-class").click(function () {
                 let action = $(this).val();
                 $("#modal-title").text(action + " Client");

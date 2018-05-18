@@ -53,31 +53,60 @@
             function updateSelection() {
                 // Disable during INIT
                 $select.empty();
-                $select.multiselect('disable');
+                $select_to.empty();
                 $select_to.multiselect('disable');
+                $select.multiselect('disable');
 
                 $.ajax({
                     url: "/api/client",
                     success: function OnPopulateControl(data, textStatus) {
                         if (data && (textStatus === 'success')) {
+                            // Add all the clients
                             let option_info = data.data;
-                            console.log(option_info);
-                            if (option_info.length > 0) {
-                                // Enable if we have options
-                                $select.multiselect('enable');
-                                $select_to.multiselect('enable');
+                            if (option_info.hasOwnProperty("length") && option_info.length > 0) {
                                 $.each(option_info, function () {
-                                    $select.append($("<option></option>").val(this[2]).html(this[1] + ' (' + this[2] + ')'));
+                                    $select.append($("<option></option>").val(
+                                        this[2]).html(this[1] + ' (' + this[2] + ')')
+                                    );
                                 });
                             }
+                            $select.multiselect('refresh');
+                            $select.multiselect('enable');
                         }
-                        // Update the multiselects after populating
-                        $select.multiselect('refresh');
-                        $select.multiselect('refresh');
                     },
                     error: function () {
                         alert("Error");
                     }
+                });
+
+                $.get("/api/client").done(function () {
+                    $.ajax({
+                        url: "/api/user",
+                        success: function (data, textStatus) {
+                            if (data && (textStatus === 'success')) {
+                                let option_info = data.data;
+                                if (option_info.hasOwnProperty("length") && option_info.length > 0) {
+                                    $.each(option_info, function () {
+                                        if (this.hasOwnProperty("ext")) {
+                                            let ext = this['ext'];
+                                            // Single quotes are important
+                                            // Remove selected options from left side list
+                                            $('select#userClientSelector option[value='+ext+']').remove();
+                                            $select_to
+                                                .append($("<option></option>")
+                                                    .val(ext)
+                                                    .html(this['client_name'] + ' (' + ext + ')')
+                                            );
+                                        }
+                                    });
+                                    $("button#userClientSelector_rightSelected").click();
+                                }
+                                $select.multiselect('refresh');
+                                $select_to.multiselect('refresh');
+                                $select_to.multiselect('enable');
+                            }
+                        }
+                    });
                 });
             }
             updateSelection();
@@ -91,7 +120,7 @@
                 $.ajax({
                     url: "/api/user",
                     method: "PUT",
-                    data: { my_clients: JSON.stringify(toSave) },
+                    data: {my_clients: JSON.stringify(toSave)},
                     success: function (resp, status) {
                         // Toaster message
                         if (status === 'success') {

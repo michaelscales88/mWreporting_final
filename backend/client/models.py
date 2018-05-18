@@ -4,7 +4,7 @@ from backend.services.extensions import db
 
 class ClientModel(db.Model):
 
-    __tablename__ = 'client_table'
+    __tablename__ = 'client'
     __repr_attrs__ = ['id', 'client_name', 'ext', 'active']
 
     id = db.Column(db.Integer, primary_key=True)
@@ -18,5 +18,5 @@ class ClientModel(db.Model):
 
 
 _mmap = {
-    "client_table": ClientModel
+    "client": ClientModel
 }

@@ -10,7 +10,7 @@ api = Api(api_bp)
 from .client import ClientAPI
 from .data import DataAPI
 from .report import SlaReportAPI, ReportAPI
-from .users import UserAPI
+from .user import UserAPI
 
 
 # Register the endpoint to the api

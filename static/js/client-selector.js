@@ -1,14 +1,13 @@
-function loadClientSelect() {
-    let $multiSelect = $("select#client-select").multipleSelect({
-        width: '100%'
-    });
+let $multiSelect = $("select#client-select").multipleSelect({
+    width: '100%',
+    placeholder: "Add/Remove multiple clients"
+});
 
+$("button#checkAllBtn").on("click", $multiSelect.multipleSelect("checkAll"));
+$("button#uncheckAllBtn").on("click", $multiSelect.multipleSelect("uncheckAll"));
+
+function updateSelectOptions() {
     $multiSelect.multipleSelect('disable');
-
-    $("button#checkAllBtn").on("click", $multiSelect.multipleSelect("checkAll"));
-
-    $("button#uncheckAllBtn").on("click", $multiSelect.multipleSelect("uncheckAll"));
-
     $.ajax({
         url: "/api/client",
         success: function (data, status) {
