@@ -47,7 +47,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             // Client Grid Area configuration
-            $.getScript("{{ url_for("static", filename="js/client.js") }}", function () { configClientPage(); });
+            configClientPage();
 
             // Client Selector JS
             $.getScript("{{ url_for("static", filename="js/client-selector.js") }}", function () {

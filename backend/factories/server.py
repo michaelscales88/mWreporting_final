@@ -2,6 +2,7 @@
 import datetime
 
 from flask import render_template, redirect, url_for, flash
+from flask_assets import Bundle
 from flask_login.utils import logout_user
 from flask_user import SQLAlchemyAdapter, UserManager
 
@@ -13,7 +14,7 @@ from backend.services import (
     get_data_healthcheck, AppJSONEncoder, BaseModel
 )
 from backend.services.extensions import (
-    health, db
+    health, db, assets
 )
 
 
@@ -88,7 +89,6 @@ def create_server(server_instance):
 
         @server_instance.errorhandler(500)
         def internal_error(error):
-            flash("Could not find the resource you were looking for.", 'error')
             return render_template('500.html', title='Resource Error'), 500
 
         # Register API rules with the server
@@ -103,6 +103,20 @@ def create_server(server_instance):
         from backend.report.tasks import register_tasks as register_report_tasks
         register_data_tasks(server_instance)
         register_report_tasks(server_instance)
+
+        # Add server's static files to be bundled and minified
+        js = Bundle(
+            'js/client.js', 'js/data.js',
+            'js/dt-selector.js', 'js/grid-area.js',
+            'js/modal-form.js', 'js/multiple-select.js', 'js/report.js',
+            filters='jsmin', output='gen/packed.js'
+        )
+        css = Bundle(
+            'css/style.css', 'css/multiple-select.css',
+            filters='cssmin', output='gen/all.css'
+        )
+        assets.register('js_all', js)
+        assets.register('css_all', css)
 
         print("Completed server setup.")
         return server_instance

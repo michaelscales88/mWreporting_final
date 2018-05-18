@@ -34,16 +34,11 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            $.getScript("{{ url_for("static", filename="js/data-selector.js") }}", function () {
-                loadDataSelect();
-
-                $.getScript("{{ url_for("static", filename="js/data.js") }}", function () {
-                    configDataPage(
-                        moment().subtract(1, "days").hour(0).minute(0).second(0),
-                        moment().hour(0).minute(0).second(0),
-                    );
-                });
-            });
+            configDataPage(
+                moment().subtract(1, "days").hour(0).minute(0).second(0),
+                moment().hour(0).minute(0).second(0),
+            );
+            $.getScript("{{ url_for("static", filename="js/data-selector.js") }}", function () { loadDataSelect(); });
         });
     </script>
 {% endblock scripts %}

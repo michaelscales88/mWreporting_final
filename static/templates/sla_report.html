@@ -29,16 +29,14 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            $.getScript("{{ url_for("static", filename="js/report-selector.js") }}", function () {
-                loadReportSelect();
+            // Report Grid Area configuration
+            configReportPage(
+                moment().subtract(1, "days").hour(0).minute(0).second(0),
+                moment().hour(0).minute(0).second(0),
+            );
 
-                $.getScript("{{ url_for("static", filename="js/report.js") }}", function () {
-                    configReportPage(
-                        moment().subtract(1, "days").hour(0).minute(0).second(0),
-                        moment().hour(0).minute(0).second(0),
-                    );
-                });
-            });
+            // Client Selector JS - Select clients for report
+            $.getScript("{{ url_for("static", filename="js/report-selector.js") }}", function () { loadReportSelect(); });
         });
     </script>
 {% endblock scripts %}

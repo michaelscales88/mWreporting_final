@@ -1,6 +1,8 @@
 anyjson
 celery
+cssmin
 flask
+Flask-Assets
 flask_babel
 flask_bootstrap
 flask_mail
@@ -12,6 +14,7 @@ flask_sqlalchemy
 Flask-User==0.6.21
 flower
 healthcheck
+jsmin
 kombu
 marshmallow-sqlalchemy
 requests

@@ -7,7 +7,7 @@ from backend.services import (
 from backend.services.extensions import (
     bootstrap, nav, mail,
     moment, health, babel,
-    db, ma
+    db, ma, assets
 )
 
 
@@ -52,6 +52,10 @@ def create_application(*cfg):
 
     # Add CDNs for frontend
     add_cdns(app_instance)
+
+    # Add static file bundling
+    assets.init_app(app_instance)
+
 
     return app_instance
 

@@ -22,8 +22,12 @@
 
 {% block styles -%}
     {{ super() }}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/multiple-select.css') }}">
+    <!-- Local CSS Files -->
+    {% assets "css_all" %}
+        <link rel="stylesheet" href="{{ ASSET_URL }}" />
+    {% endassets %}
+
+    <!-- CDN CSS Files-->
     <link href="{{ bootstrap_find_resource('css/bootstrap-datetimepicker.css', cdn='bootstrapdtp') }}" rel="stylesheet">
     <link href="{{ bootstrap_find_resource('css/buttons.dataTables.css', cdn='dataTableBtns', use_minified=true) }}"
           rel="stylesheet">
@@ -64,6 +68,8 @@
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
+
+    <!-- CDN JS Files-->
     <script src="{{ bootstrap_find_resource('js/jquery.dataTables.js', cdn='dataTable', use_minified=true) }}"></script>
     <script src="{{ bootstrap_find_resource('js/bootstrap-datetimepicker.js', cdn='bootstrapdtp', use_minified=true) }}"></script>
     <script src="{{ bootstrap_find_resource('js/dataTables.buttons.js', cdn='dataTableBtns', use_minified=true) }}"></script>
@@ -74,7 +80,11 @@
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/pdfmake.js', cdn='saveJs', use_minified=true) }}"></script>
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"></script>
     <script src="{{ bootstrap_find_resource('latest/toastr.js', cdn='toastr', use_minified=true) }}"></script>
-    <script src="{{url_for('static', filename='js/multiple-select.js')}}"></script>
+
+    <!-- Load all the servers static files bundled and minified -->
+    {% assets "js_all" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 
     <!-- Manage AJAX requests -->
     <script>
