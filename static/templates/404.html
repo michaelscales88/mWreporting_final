@@ -1,7 +1,12 @@
 <!-- extend base layout -->
-{% extends "my_base.html" %}
+{% extends "base.html" %}
 
-{% block content %}
-  <h1>File Not Found</h1>
-  <p><a href="{{ url_for('frontend.serve_pages', page='index') }}">Back to Gallery</a></p>
-{% endblock %}
+{% block control_area %}
+    {{ super() }}
+    <h1>Resource Not Found</h1>
+{% endblock control_area %}
+
+{% block data_area %}
+    {{ super() }}
+    <p><a href="{{ url_for('frontend.serve_pages', page='index') }}">Home</a></p>
+{% endblock data_area %}

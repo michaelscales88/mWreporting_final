@@ -40,7 +40,7 @@ services:
     depends_on:
       - rabbit
     working_dir: /app
-    command: celery -A celery_worker.celery worker -l info
+    command: celery -A celery_worker.celery worker -E -l info
 
   beat:
     build:

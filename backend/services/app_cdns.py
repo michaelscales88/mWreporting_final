@@ -21,6 +21,9 @@ def add_cdns(app):
     app.extensions['bootstrap']['cdns']['multiselect'] = WebCDN(
         'https://cdnjs.cloudflare.com/ajax/libs/multiselect/'
     )
+    app.extensions['bootstrap']['cdns']['toastr'] = WebCDN(
+        'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/'
+    )
 
 
 

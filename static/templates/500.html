@@ -1,8 +1,13 @@
 <!-- extend base layout -->
-{% extends "my_base.html" %}
+{% extends "base.html" %}
 
-{% block content %}
-  <h1>An unexpected error has occurred</h1>
-  <p>The administrator has been notified. Sorry for the inconvenience!</p>
-  <p><a href="{{ url_for('frontend.serve_pages', page='index') }}">Back</a></p>
-{% endblock %}
+{% block control_area %}
+    {{ super() }}
+    <h1>An unexpected error has occurred</h1>
+{% endblock control_area %}
+
+{% block data_area %}
+    {{ super() }}
+    <p>The administrator has been notified. Sorry for the inconvenience!</p>
+  <p><a href="{{ url_for('frontend.serve_pages', page='index') }}">Home</a></p>
+{% endblock data_area %}

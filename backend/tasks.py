@@ -2,9 +2,9 @@ import requests
 import threading
 import time
 
-from backend.factories.server import mail
-from backend.factories import create_celery
-from backend.factories import create_application
+from backend.services.extensions import mail
+from backend.factories.celery import create_celery
+from backend.factories.application import create_application
 
 
 celery = create_celery(create_application())

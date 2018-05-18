@@ -1,5 +1,5 @@
 <!-- client module page: client.html -->
-{% extends 'my_base.html' %}
+{% extends 'base.html' %}
 
 
 {% block control_area %}
@@ -9,7 +9,12 @@
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
         </div>
         <div class="col-lg-6">
-            <div class="row">
+            <div class="form-row">
+                <label for="client-select">Showing:</label>
+                <p id="client-select">Active/Inactive/All Select Box</p>
+            </div>
+            <div class="form-row">
+                <label for="client-select">Clients:</label>
                 <p><select id="client-select" title="Clients" multiple="multiple" style="width: 100%"></select></p>
             </div>
         </div>
@@ -17,15 +22,18 @@
     {% include "partials/client_modal.html" %}
     <div class="row">
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary button-class" data-toggle="modal"
-                    data-target="#clientModal" style="width: 100%" value="Add">Add</button>
+            <button type="button" class="btn btn-primary button-class" data-toggle="modal tooltip" data-target="#clientModal"
+                    style="width: 100%" value="Add" data-placement="bottom" title="Add/Reactivate client.">Add Client</button>
         </div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary button-class" data-toggle="modal"
-                    data-target="#clientModal" style="width: 100%" value="Remove">Remove</button>
+            <button type="button" class="btn btn-primary button-class" data-toggle="modal tooltip" data-target="#clientModal"
+                    style="width: 100%" value="Remove" data-placement="bottom" title="Deactivate a client.">Remove Client</button>
         </div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary" id="refreshTableButton" style="width: 100%">Refresh</button>
+            <button type="button" class="btn btn-primary" id="refreshTableButton" style="width: 100%"
+                data-toggle="tooltip" data-placement="bottom" title="Update the page based on the current selection.">
+                Get Selection
+            </button>
         </div>
     </div>
 {% endblock control_area %}

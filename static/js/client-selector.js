@@ -1,6 +1,6 @@
 let $multiSelect = $("select#client-select").multipleSelect({
     width: '100%',
-    placeholder: "Add/Remove multiple clients"
+    placeholder: "Remove multiple clients"
 });
 
 $("button#checkAllBtn").on("click", $multiSelect.multipleSelect("checkAll"));

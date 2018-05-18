@@ -11,7 +11,6 @@ def mynavbar():
         Subgroup(
             'Reports',
             View('SLA Report', 'frontend.serve_pages', page='sla_report'),
-            View('Data', 'frontend.serve_pages', page='data'),
         )
     )
 
@@ -20,13 +19,11 @@ def secnavbar():
     secnav = list(mynavbar().items)
     if current_user.is_authenticated:
         secnav.extend([
+            View('My Clients', 'frontend.serve_pages', page='user'),
             Subgroup(
-                'Clients',
-                View('Clients', 'frontend.serve_pages', page='client'),
-            ),
-            Subgroup(
-                'User',
-                View('User', 'frontend.serve_pages', page='user'),
+                'Admin',
+                View('Raw Data', 'frontend.serve_pages', page='data'),
+                View('Modify Clients', 'frontend.serve_pages', page='client'),
             ),
             View('Log out', 'logout')
         ])

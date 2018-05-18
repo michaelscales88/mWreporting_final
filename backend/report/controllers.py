@@ -56,12 +56,3 @@ class SlaReportAPI(Resource):
             end_time=self.args['end_time'],
             clients=self.args['clients']
         )
-
-    def put(self):
-        print('Hit PUTS Report API', self.args)
-        return report_task(
-            self.args['task'],
-            start_time=self.args['start_time'],
-            end_time=self.args['end_time'],
-            clients=self.args['clients']
-        )

@@ -1,13 +1,16 @@
 <!-- report module page: sla_report.html -->
-{% extends 'my_base.html' %}
+{% extends 'base.html' %}
 
 {% block control_area %}
     <div class="row">
-        <div class="col-lg-3">
+        <div class="col-12">
             <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
         </div>
-        <div class="col-xs-12 col-md-12 col-sm-12">
-            <button type="button" class="btn btn-primary" id="saveClients" style="width: 100%">Save Clients</button>
+        <div class="col-xs-12 col-md-12 col-sm-12" style="padding-top: 15px">
+            <button type="button" class="btn btn-primary" id="saveClients" style="width: 100%"
+                data-toggle="tooltip" data-placement="bottom" title="Save your clients to your user profile.">
+                Save my clients
+            </button>
         </div>
     </div>
 {% endblock control_area %}
@@ -17,12 +20,12 @@
         <!-- Left side select -->
         <div class="col-xs-5 col-md-5 col-sm-5">
             <label for="userClientSelector">All Clients</label>
-            <select name="from[]" id="userClientSelector" class="form-control" size="8" multiple="multiple"></select>
+            <select name="from[]" id="userClientSelector" class="form-control" size="12" multiple="multiple"></select>
         </div>
 
         <!-- Action buttons -->
         <div class="col-xs-2 col-md-2 col-sm-2">
-            <button type="button" id="userClientSelector_rightAll" class="btn btn-block"><i
+            <button type="button" id="userClientSelector_rightAll" class="btn btn-block" style="padding-top: 50%"><i
                     class="glyphicon glyphicon-forward"></i></button>
             <button type="button" id="userClientSelector_rightSelected" class="btn btn-block"><i
                     class="glyphicon glyphicon-chevron-right"></i></button>
@@ -35,7 +38,7 @@
         <!-- Right side select -->
         <div class="col-xs-5 col-md-5 col-sm-5">
             <label for="userClientSelector_to">Your Clients</label>
-            <select name="to[]" id="userClientSelector_to" class="form-control" size="8" multiple="multiple"></select>
+            <select name="to[]" id="userClientSelector_to" class="form-control" size="12" multiple="multiple"></select>
         </div>
     </div>
 {% endblock data_area %}
@@ -124,7 +127,7 @@
                     success: function (resp, status) {
                         // Toaster message
                         if (status === 'success') {
-
+                            toastr.success("Updated your clients!");
                         }
                     }
                 })

@@ -14,6 +14,13 @@ def default():
     return redirect(url_for("frontend.serve_pages", page="index"))
 
 
+@login_required
+def restricted_page(*args, **kwargs):
+    return render_template(
+        *args, **kwargs
+    )
+
+
 @frontend_bp.route('/<string:page>')
 def serve_pages(page):
     if page in ("index.html", "index"):
@@ -24,7 +31,7 @@ def serve_pages(page):
     elif page in ("sla_report.html", "sla_report"):
         return render_template(
             'sla_report.html',
-            title='Reports',
+            title='SLA Report',
             columns=display_columns('sla_report')
         )
     elif page in ("data.html", "data"):
@@ -42,14 +49,7 @@ def serve_pages(page):
     elif page in ("user.html", "user"):
         return restricted_page(
             'user.html',
-            title='User Page'
+            title='My Clients'
         )
     else:
         return abort(404)
-
-
-@login_required
-def restricted_page(*args, **kwargs):
-    return render_template(
-        *args, **kwargs
-    )

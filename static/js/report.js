@@ -25,16 +25,16 @@ function configReportPage(start_time, end_time) {
             num_rows: -1
         };
 
-        let table = getGridArea(ajaxFn, tableConfig, "PUT");
+        let table = getGridArea(ajaxFn, tableConfig, "GET");
         $('button#refreshButton').on('click', function() { table.ajax.reload(); });
 
-        $("button#loadButton").on("click", function () {
-            $.ajax({
-                url: "/api/sla-report",
-                data: ajaxFn,
-                method: "PUT"
-            });
-            table.ajax.reload();
+        $.get("/api/sla-report").done(function (data, textStatus) {
+            let respData = data.data;
+            if (textStatus === 'success' && respData && respData.length > 0) {
+                toastr.success("Selection loaded.");
+            } else {
+                toastr.info("Could not retrieve table data.");
+            }
         });
     });
 }

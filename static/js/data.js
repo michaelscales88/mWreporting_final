@@ -45,5 +45,11 @@ function configDataPage(start_time, end_time) {
                 }
             });
         });
+
+        $.get("/api/data").done(function () {
+            if ($("table#displayTable").data().length > 0 ) {
+                toastr.success("Selection loaded.");
+            } else toastr.info("Could not retrieve table data.");
+        });
     });
 }
