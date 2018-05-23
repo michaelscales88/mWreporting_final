@@ -16,18 +16,18 @@ function loadDataSelect() {
         success: function (data, status) {
             if (status === 'success') {
                 let option_info = data.data;
-                console.log(option_info);
                 if (option_info.length > 0) {
                     $multiSelect.empty();
                     // Enable if we have options
-                    $multiSelect.multipleSelect('enable');
                     $.each(option_info, function () {
                         $multiSelect.append($("<option></option>").val(this).html(' ' + this));
                     });
                     $multiSelect.select(0);
+                    $multiSelect[0].selectedIndex = 0;
                 }
-                $multiSelect[0].selectedIndex = 0;
                 $multiSelect.multipleSelect("refresh");
+                $multiSelect.multipleSelect('enable');
+                console.log("set first option selected");
             }
         }
     });

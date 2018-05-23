@@ -1,0 +1,12 @@
+<table id="displayTable" class="table table-striped table-bordered" cellspacing="0" width="100%"
+       data-toggle="tooltip" data-placement="top" title="Scroll left or right to see more information.">
+    <!-- Configure the headers for the ajax call-->
+    <thead>
+    <tr>{% for column in columns %}
+        <th>{{ column }}</th>{% endfor %}</tr>
+    </thead>
+    <tfoot>
+    <tr>{% for column in columns %}
+        <th>{{ column }}</th>{% endfor %}</tr>
+    </tfoot>
+</table>

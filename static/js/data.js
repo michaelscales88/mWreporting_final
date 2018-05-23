@@ -4,27 +4,21 @@ function configDataPage(start_time, end_time) {
         return {
             start_time: $("input#start-selector").val(),
             end_time: $("input#end-selector").val(),
-            task: "GET",
-            table: JSON.stringify($("select#data-select").multipleSelect("getSelects")[0])
-        }
+            table: $("#data-select").multipleSelect("getSelects")[0]
+        };
     }
 
     // dateTimePicker for dtSelectStart & dtSelectEnd
-    let pickerConfig = {
-        start_time: start_time,
-        end_time: end_time
-    };
-    dtSelector('#start-selector', '#end-selector', pickerConfig);
+    dtSelector(
+        'input#start-selector', 'input#end-selector',
+        { start_time: start_time, end_time: end_time})
+    ;
 
     // configure the data grid
-    let tableConfig = {
-        api: "/api/data",
-        table_name: 'table#displayTable',
-        num_rows: 50
-    };
-
-    let $table = getGridArea(ajaxFn, tableConfig, "PUT");
-    $('button#refreshTableButton').on('click', function () { $table.ajax.reload()});
+    let $table = getGridArea(
+        ajaxFn, { api: "/api/data", table_name: 'table#displayTable', num_rows: 50 }, "PUT"
+    );
+    $('button#refreshTableButton').on('click', function () {$table.ajax.reload()});
 
     $('button#loadButton').on('click', function () {
         $.ajax({
@@ -32,20 +26,18 @@ function configDataPage(start_time, end_time) {
             data: {
                 start_time: $("input#start-selector").val(),
                 end_time: $("input#end-selector").val(),
-                task: "LOAD"
+                task: "LOAD",
             },
             method: "PUT",
-            success: function (resp, status) {
-                if (status === 'success') {
-                    $table.ajax.reload();
-                }
+            success: function (data, textStatus) {
+                if (textStatus === 'success') $table.ajax.reload();
+            }
+        }).done(function (data, textStatus) {
+            if (textStatus === 'success' && $table.data().length > 0) {
+                toastr.success("Selection loaded.");
+            } else {
+                toastr.info("Could not retrieve table data.");
             }
         });
-    });
-
-    $.get("/api/data").done(function () {
-        if ($("table#displayTable").data().length > 0 ) {
-            toastr.success("Selection loaded.");
-        } else toastr.info("Could not retrieve table data.");
     });
 }

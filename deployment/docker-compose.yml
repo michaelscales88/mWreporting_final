@@ -18,7 +18,7 @@ services:
     volumes:
       - ./uwsgi/uwsgi.ini:/uwsgi/uwsgi.ini
       - ./uwsgi/wsgi.py:/app/wsgi.py
-      - ../backend:/app/backend
+      - ../app:/app/app
       - ../instance:/app/instance
       - ../static:/app/static
       - asset-volume:/tmp

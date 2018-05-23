@@ -1,4 +1,4 @@
-from backend import build_server
+from app import build_server
 
 server = build_server()
 if __name__ == '__main__':
