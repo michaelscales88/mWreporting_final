@@ -7,7 +7,6 @@ from .extensions import (
     db, serializer, assets, debugger
 )
 from .server import configure_server
-from .services import make_dir, add_cdns, BaseModel
 
 """
 Creates the server that the html pages interact with.
@@ -34,18 +33,17 @@ serializer.init_app(app_instance)
 mail.init_app(app_instance)
 moment.init_app(app_instance)
 health.init_app(app_instance, "/healthcheck")
-BaseModel.set_session(db.session)
 
 # Manage JavaScript
 assets.init_app(app_instance)
-add_cdns(app_instance)
 
 # Enable production/development settings
 if app_instance.debug:
     debugger.init_app(app_instance)
 
 # Module imports
-import app.user
+import app.scheduled_tasks
+import app.security
 
 # Add local HTML
 import templates as template_routes

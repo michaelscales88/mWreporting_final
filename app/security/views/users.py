@@ -1,4 +1,4 @@
-from .base import BaseView
+from app.base_view import BaseView
 from ..models import UserModel
 
 

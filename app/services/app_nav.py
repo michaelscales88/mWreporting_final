@@ -20,11 +20,9 @@ def secnavbar():
     secnav = list(mynavbar().items)
     if current_user.is_authenticated:
         secnav.extend([
-            View('My Clients', 'frontend_bp.serve_pages', page='user'),
             Subgroup(
                 'Admin',
-                View('Raw Data', 'frontend_bp.serve_pages', page='data'),
-                View('Modify Clients', 'frontend_bp.serve_pages', page='client'),
+                View('Admin Page', 'admin.index')
             ),
             View('Log out', 'logout')
         ])

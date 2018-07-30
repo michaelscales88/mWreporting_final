@@ -73,8 +73,8 @@
                     }
                 });
             }
-            initSelectBox("{{ url_for('roles.get_users') }}", "users");
-            initSelectBox("{{ url_for('roles.get_tasks') }}", "tasks");
+            initSelectBox("{{ url_for('rolesmodel.details_view') }}");
+            {#initSelectBox("{{ url_for('roles.get_tasks') }}");#}
         });
     </script>
 {% endblock %}

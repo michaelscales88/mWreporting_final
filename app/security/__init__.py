@@ -5,9 +5,11 @@ from flask_admin import helpers
 from flask_security import Security, SQLAlchemyUserDatastore, logout_user
 
 from app import app_instance, admin, db
+from app.server import build_routes
 from .views import RolesView, UsersView
 from .models import UserModel, RolesModel
 from .forms import ExtendedLoginForm, ExtendedRegisterForm
+
 
 security_bp = Blueprint('user_bp', __name__)
 security_api = Api(security_bp)
@@ -34,12 +36,12 @@ def security_context_processor():
 def logout():
     logout_user()
     flash("Logged out!")
-    return redirect(url_for("frontend.serve_pages", page="index"))
+    return redirect(url_for("frontend_bp.serve_pages", page="index"))
 
 
 """ Create models for module in dB """
 with app_instance.app_context():
-    import app.user.models
+    import app.security.models
     # Creates any models that have been imported
     db.create_all()
 
@@ -67,5 +69,5 @@ with app_instance.app_context():
 
 app_instance.register_blueprint(security_bp)
 
-""" Register routes for modules """
-# import modules.security.routes
+# Inject module routes
+build_routes(app_instance, security_api, "security")

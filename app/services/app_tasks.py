@@ -142,10 +142,6 @@ def get_foreign_id(query_obj, column_name):
         return query_obj.get(column_name)
 
 
-def make_dir(directory):
-    os.makedirs(directory, exist_ok=True)
-
-
 def parse_time(s):
     try:
         ret = parse(s)

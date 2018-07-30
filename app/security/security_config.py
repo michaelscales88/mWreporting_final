@@ -1,6 +1,19 @@
 import os
 
 
+SECURITY_MODULE_ROUTES = {
+    "Authorize": {
+        "url": "/api/security/get-token",
+        "methods": {}
+    },
+    "RefreshToken": {
+        "url": "/api/security/refresh-token",
+        "methods": {}
+    }
+}
+
+SECURITY_INTERVAL = os.getenv("SECURITY_INTERVAL", 90)
+
 # Flask-Security config
 SECURITY_URL_PREFIX = os.getenv("SECURITY_URL_PREFIX", "/admin")
 SECURITY_PASSWORD_HASH = os.getenv("SECURITY_PASSWORD_HASH", "pbkdf2_sha512")

@@ -14,7 +14,7 @@ from app.services import BaseModel, get_nav
 
 
 # Services
-admin = Admin(base_template="security_layout.html")
+admin = Admin(template_mode='bootstrap3', base_template="security_layout.html")
 babel = Babel()
 db = SQLAlchemy(model_class=BaseModel)  # Database manager
 mail = Mail()                           # Mailer

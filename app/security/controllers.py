@@ -29,7 +29,7 @@ class Authorize(Resource):
             payload = {
                 'identity': user_id,
                 'iat': datetime.utcnow(),
-                'exp': datetime.utcnow() + timedelta(minutes=50),
+                'exp': datetime.utcnow() + timedelta(minutes=int(current_app.config['SECURITY_INTERVAL'])),
                 'nbf': datetime.utcnow(),
             }
 

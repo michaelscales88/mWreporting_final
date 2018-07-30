@@ -1,17 +1,29 @@
 # config/server.py
+from importlib import import_module
 from flask_assets import Bundle
-from flask_login.utils import logout_user
 
-# Modules
-# from .backend import api_bp
-from .extensions import (
-    health, db, assets
-)
-# from .frontend import frontend_bp
-from .services import (
-    get_local_healthcheck, get_data_healthcheck, BaseModel
-)
 from .encoders import AppJSONEncoder
+from .extensions import health, db, assets
+from .services import (
+    get_local_healthcheck, get_data_healthcheck, BaseModel,
+    add_cdns
+)
+
+
+def build_routes(server_instance, api, module_name):
+    with server_instance.app_context():
+        api_config = server_instance.config.get("{module}_MODULE_ROUTES".format(module=module_name.upper()))
+        if api_config:
+            resources = import_module("app.{module}.controllers".format(module=module_name))
+            for api_name in api_config.keys():
+                if api_config[api_name].get("url") is None:
+                    continue
+                api_resource = getattr(resources, api_name)
+                api.add_resource(
+                    api_resource, *(api_config[api_name]['url'], api_config[api_name]['url'] + '/')
+                )
+        else:
+            print("Error: Failed to load routes for the {module} module.".format(module=module_name))
 
 
 def configure_server(server_instance):
@@ -22,21 +34,20 @@ def configure_server(server_instance):
     :param server_instance: Flask App
     :return: Configured Flask App
     """
-    print("Starting server setup.")
     with server_instance.app_context():
 
         # Register system checks
         health.add_check(get_local_healthcheck)
         health.add_check(get_data_healthcheck)
 
+        # Add CDN content to application
+        add_cdns(server_instance)
+
+        # Inject session into BaseModel
+        BaseModel.set_session(db.session)
+
         # Register JSON encoder
         server_instance.json_encoder = AppJSONEncoder
-
-        # Register persistent celery tasks
-        # from app.data.tasks import register_tasks as register_data_tasks
-        # from app.report.tasks import register_tasks as register_report_tasks
-        # register_data_tasks(server_instance)
-        # register_report_tasks(server_instance)
 
         # Add server's static files to be bundled and minified
         js = Bundle(
@@ -51,5 +62,3 @@ def configure_server(server_instance):
         )
         assets.register('js_all', js)
         assets.register('css_all', css)
-
-        print("Completed server setup.")
