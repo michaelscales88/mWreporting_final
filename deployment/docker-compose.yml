@@ -21,6 +21,7 @@ services:
       - ../app:/app/app
       - ../instance:/app/instance
       - ../static:/app/static
+      - ../templates:/app/templates
       - asset-volume:/tmp
     depends_on:
       - postgres
@@ -67,6 +68,8 @@ services:
       - uwsgi
     depends_on:
       - rabbit
+      - worker
+      - beat
     ports:
       - "5555"
     working_dir: /app

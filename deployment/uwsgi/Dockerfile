@@ -14,8 +14,9 @@ RUN update-ca-certificates
 ENV PYTHONUNBUFFERED=1 PYTHONHASHSEED=random PYTHONDONTWRITEBYTECODE=1
 
 COPY requirements.txt /tmp
-RUN pip install -U pip
-RUN pip install --requirement /tmp/requirements.txt
+RUN pip3 install -U pip
+RUN pip3 install -U uWSGI
+RUN pip3 install --requirement /tmp/requirements.txt
 RUN rm -f /tmp/requirements.txt
 
 # Set entrypoint directory

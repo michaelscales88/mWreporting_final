@@ -19,12 +19,12 @@
                 {% else %} {{ current_user.username }}
                 {% endif %}
                 </h3>
-                <p>Do you want to <a href="{{ url_for('logout') }}">log out</a>?</p>
-                <p>Go to <a href="{{ url_for('frontend.serve_pages', page="sla_report") }}">reports</a>!<p>
+                <p>Do you want to <a href="{{ url_for('security.logout') }}">log out</a>?</p>
+                <p>Go to <a href="{{ url_for('frontend_bp.serve_pages', page="sla_report") }}">reports</a>!<p>
             {% else %}
-                <p>Hello! Would you like to <a href="{{ url_for('user.login') }}">log in</a>?</p>
+                <p>Hello! Would you like to <a href="{{ url_for('security.login') }}">log in</a>?</p>
                 <p>Or</p>
-                <p>You can make a <a href="{{ url_for('frontend.serve_pages', page="sla_report") }}">report</a>!</p>
+                <p>You can make a <a href="{{ url_for('frontend_bp.serve_pages', page="sla_report") }}">report</a>!</p>
             {% endif %}
         </div>
     </div>

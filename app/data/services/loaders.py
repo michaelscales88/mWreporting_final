@@ -8,11 +8,7 @@ from sqlalchemy.sql import and_, func, false
 
 from app.services import get_session
 from app.services.app_tasks import get_model, get_pk, get_foreign_id, parse_time
-from app.factories.application import create_application
-from app.factories.celery import create_celery
-
-
-celery = create_celery(create_application())
+from app.celery import celery
 
 
 def check_loaded(table_name, date):
@@ -43,7 +39,7 @@ def filter_loaded(table_name, date_range):
                 yield date
 
 
-@celery.task(name='data.tasks.data_loader')
+@celery.task
 def data_loader(periods=60, table_names=('c_call', 'c_event')):
     """
     Maintains the invariant of whole day record loads to ensure that all

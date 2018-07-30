@@ -2,7 +2,7 @@
 # Must be run with sudo for rabbitmq-server.
 
 # include environment variables for worker
-include tmp/test.env
+include deployment/app.env
 export
 
 .PHONY: start_worker stop_worker \
@@ -18,7 +18,7 @@ stop_rabbit:
 
 # Celery worker thread start up commands
 start_worker:
-	celery -A backend.celery worker --beat -l info
+	celery -A app.celery worker --beat -l info
 
 stop_worker:
 	pkill -9 -f 'celery worker'

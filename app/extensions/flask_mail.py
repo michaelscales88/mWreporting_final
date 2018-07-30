@@ -2,7 +2,7 @@
 # Credit to Doekman https://gist.github.com/doekman/d24e233035c0a193d4890eaf9703e220
 # Added async email integration with celery
 import logging
-from app import send_async_email
+from flask_mail import Message
 
 
 def _has_newline(line):
@@ -59,14 +59,13 @@ class FlaskMailHTMLFormatter(logging.Formatter):
 # see: https://github.com/python/cpython/blob/3.6/Lib/logging/__init__.py (class Handler)
 
 class FlaskMailHandler(logging.Handler):
-    def __init__(self, mailer, subject_template, level=logging.NOTSET, a_handler=send_async_email):
+    def __init__(self, mailer, subject_template, level=logging.NOTSET):
         # Assumes mailer.app.conf[0] is the FROM: admin
         logging.Handler.__init__(self, level)
         self.mailer = mailer
         self.send_to = mailer.app.config['ADMINS']
         self.subject_template = subject_template
         self.html_formatter = None
-        self.a_handler = a_handler
 
     def setFormatter(self, text_fmt, html_fmt=None):
         """
@@ -105,18 +104,13 @@ class FlaskMailHandler(logging.Handler):
         if rv:
             self.acquire()
             try:
-                if self.a_handler:
-                    # Added async support
-                    self.a_handler(self.emit(record))
-                else:
-                    self.emit(record)
+                self.emit(record)
             finally:
                 self.release()
         return rv
 
     def emit(self, record):
         try:
-            from flask_mail import Message
             msg = Message(self.get_subject(record), recipients=self.send_to, sender=self.send_to[0])
             if self.formatter:
                 msg.body = self.format(record)

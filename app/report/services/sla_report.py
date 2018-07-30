@@ -1,13 +1,17 @@
 # report/services/sla_report.py
 import pandas as pd
 import numpy as np
+import io
 from collections import OrderedDict
-from datetime import timedelta
+from datetime import timedelta, datetime
+from flask import current_app
+from flask_mail import Message, Attachment
 from sqlalchemy.exc import DatabaseError
 
 
 from .connections import get_report_model, report_exists_by_name, get_calls_by_direction, add_frame_alias
-from app.services.app_tasks import query_to_frame, display_columns, get_model
+from app.tasks import send_async_email
+from app.services.app_tasks import query_to_frame, display_columns, get_model, export_excel
 from app.report.models import SlaReportModel
 from app.factories.application import create_application
 from app.factories.celery import create_celery
@@ -30,9 +34,64 @@ class SqlAlchemyTask(celery.Task):
             SlaReportModel.session.commit()
 
 
+def get_td(interval, period):
+    time_delta = {}
+    if interval == 'D':
+        time_delta['days'] = period
+    elif interval == 'H':
+        time_delta['hours'] = period
+    elif interval == 'M':
+        time_delta['minutes'] = period
+
+    return timedelta(**time_delta)
+
+
+def email_reports(start_time, end_time, interval='D', period=1):
+    td = get_td(interval, period)
+    filename = "test_report.xlsx"
+    # output = io.BytesIO()
+    # writer = pd.ExcelWriter(filename,
+    #                         engine='xlsxwriter',
+    #                         datetime_format='mmm d yyyy hh:mm:ss',
+    #                         date_format='mmmm dd yyyy')
+    while start_time <= end_time:
+        report = get_sla_report(start_time, start_time + td)
+        with report as report:
+            print(report)
+            msg = Message(
+                "Report Test",
+                recipients=[current_app.config['MAIL_USERNAME']],
+                # attachments=Attachment(
+                #     filename=filename,
+                #     data=report.to_excel(writer)
+                # )
+            )
+            msg.attach(filename, "xlsx", export_excel(report))
+            send_async_email(msg)
+        # report.to_excel(writer)
+        start_time += td
+
+    return True
+
+
+def run_reports(start_time, end_time, interval='D', period=1):
+    td = get_td(interval, period)
+
+    while start_time <= end_time:
+        make_sla_report_model(start_time, start_time + td)
+        start_time += td
+
+    return True
+
+
 @celery.task(base=SqlAlchemyTask, name='report.tasks.make_sla_report_model')
-def make_sla_report_model(start_time, end_time):
+def make_sla_report_model(start_time=None, end_time=None):
     # Check if report already exists
+    if not (start_time and end_time):
+        start_time = end_time = datetime.today().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        start_time -= timedelta(days=1)
     try:
         if report_exists_by_name('sla_report', start_time, end_time):
             raise AssertionError("Report is already made.")
@@ -48,7 +107,6 @@ def make_sla_report_model(start_time, end_time):
         query = get_calls_by_direction('c_call', start_time, end_time)
 
         # Collate data for interval
-
         output_headers = [
             'I/C Presented',
             'I/C Live Answered',
@@ -67,20 +125,20 @@ def make_sla_report_model(start_time, end_time):
         ]
 
         default_row = [
-            0,  # 'I/C Presented'
-            0,  # 'I/C Live Answered'
-            0,  # 'I/C Abandoned'
-            0,  # 'Voice Mails'
-            timedelta(0),  # Answered Incoming Duration
-            timedelta(0),  # Answered Wait Duration
-            timedelta(0),  # Lost Wait Duration
-            0,  # 'Calls Ans Within 15'
-            0,  # 'Calls Ans Within 30'
-            0,  # 'Calls Ans Within 45'
-            0,  # 'Calls Ans Within 60'
-            0,  # 'Calls Ans Within 999'
-            0,  # 'Call Ans + 999'
-            timedelta(0)  # 'Longest Waiting Answered'
+            0,              # 'I/C Presented'
+            0,              # 'I/C Live Answered'
+            0,              # 'I/C Abandoned'
+            0,              # 'Voice Mails'
+            timedelta(0),   # Answered Incoming Duration
+            timedelta(0),   # Answered Wait Duration
+            timedelta(0),   # Lost Wait Duration
+            0,              # 'Calls Ans Within 15'
+            0,              # 'Calls Ans Within 30'
+            0,              # 'Calls Ans Within 45'
+            0,              # 'Calls Ans Within 60'
+            0,              # 'Calls Ans Within 999'
+            0,              # 'Call Ans + 999'
+            timedelta(0)    # 'Longest Waiting Answered'
         ]
 
         report_draft = {}
@@ -284,7 +342,7 @@ def get_sla_report(start_time, end_time, clients=None):
 
         # Make the visible index the DID extension + client name,
         # or just DID extension if no name exists
-        report_frame = add_frame_alias("client_table", report_frame)
+        report_frame = add_frame_alias("client", report_frame)
 
         if not report_frame.empty:
             # Create programmatic columns and rows

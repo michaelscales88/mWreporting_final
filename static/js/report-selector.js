@@ -35,10 +35,13 @@ function loadReportSelect() {
             success: function (data, status) {
                 if (status === 'success') {
                     let myClients = data.data;
+                    console.log("hit user success");
                     if (myClients && myClients.hasOwnProperty("length") && myClients.length > 0) {
+                        console.log("setting clients");
                         let selectValues = [];
                         $.each(myClients, function () { selectValues.push(this['ext']); });
                         $multiSelect.val(selectValues);
+                        console.log("set values");
                         $multiSelect.multipleSelect("refresh");
                     } else $("select#report-select").multipleSelect("checkAll");
                 } else $("select#report-select").multipleSelect("checkAll");

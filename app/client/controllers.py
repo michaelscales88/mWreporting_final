@@ -1,7 +1,7 @@
 # client/api.py
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import DatabaseError
-from flask_user import login_required
+from flask_security import login_required
 
 
 from app.services.app_tasks import return_task, to_bool
@@ -24,8 +24,8 @@ class ClientAPI(Resource):
             help='The client number to change.'
         )
         parser.add_argument(
-            'is_active', location='form',
-            type=to_bool, help='Active clients.'
+            'is_active', location='form', type=to_bool,
+            help='Active clients.'
         )
         self.args = parser.parse_args()
         super().__init__()

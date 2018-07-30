@@ -1,5 +1,6 @@
 # services/tasks.py
 import os
+import io
 import pandas as pd
 from datetime import datetime
 from dateutil.parser import parse
@@ -151,3 +152,11 @@ def parse_time(s):
     except ValueError:
         ret = datetime.utcfromtimestamp(s)
     return ret
+
+
+def export_excel(df):
+    with io.BytesIO() as buffer:
+        writer = pd.ExcelWriter(buffer)
+        df.to_excel(writer)
+        writer.save()
+        return buffer.getvalue()

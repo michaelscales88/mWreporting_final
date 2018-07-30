@@ -32,14 +32,18 @@ def add_frame_alias(table_name, frame):
     # Show the clients as row names
     table = get_model(table_name)
     aliases = []
+    print(table)
     if not frame.empty and hasattr(table, "client_name"):
         print(table.all())
         # aliases = table.query.filter(table.client_name.in_(list(frame.index))).all()
-        # print('found aliases', aliases)
+        print('found aliases', aliases)
         for index in list(frame.index):
+            print('frame index')
             client = table.get(index)
+            print(client)
             if client:
-                aliases.append(client.client_name)
+                # aliases.append("{name} ({ext})".format(name=client.client_name, ext=client.ext))
+                aliases.append("{name}".format(name=client.client_name))
             else:
                 aliases.append(index)
         print('aliases:', aliases)
