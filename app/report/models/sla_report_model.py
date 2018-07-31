@@ -1,9 +1,10 @@
 # report/models.py
 from datetime import date as DATETYPE
+
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import and_
 
-from app.services import json_type
+from app.encoders import json_type
 from app.extensions import db
 
 
@@ -60,8 +61,3 @@ class SlaReportModel(db.Model):
     def set_empty(cls, model):
         model.data = {}
         return model
-
-
-_mmap = {
-    "sla_report": SlaReportModel
-}

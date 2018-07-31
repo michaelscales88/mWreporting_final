@@ -1,7 +1,7 @@
 # user/views/__init__.py
 import logging
 from sqlalchemy.event import listens_for
-from app.services import BaseModel
+from app.utilities import BaseModel
 from .users import UsersView
 from .roles import RolesView
 

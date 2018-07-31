@@ -2,8 +2,8 @@
 from flask_restful import Resource, reqparse
 
 
-from app.services.app_tasks import return_task, to_datetime, to_list
-from .tasks import report_task
+from app.utilities.helpers import return_task, to_datetime, to_list
+from app.report.tasks import report_task
 
 
 class ReportAPI(Resource):
@@ -49,7 +49,7 @@ class ReportAPI(Resource):
         )
 
 
-class SlaReportAPI(Resource):
+class SLAReportAPI(Resource):
 
     decorators = [return_task]
 

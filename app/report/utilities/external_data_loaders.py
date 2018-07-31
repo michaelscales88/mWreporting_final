@@ -3,11 +3,10 @@ import logging
 import pandas as pd
 from datetime import date as DATETYPE, datetime, timedelta
 from flask import current_app
-from sqlalchemy.sql import and_, func, false
+from sqlalchemy.sql import and_, func
 
-
-from app.services import get_session
-from app.services.app_tasks import get_model, get_pk, get_foreign_id, parse_time
+from .external_data_handlers import get_session
+from app.utilities.helpers import get_model, get_pk, get_foreign_id, parse_time
 from app.celery import celery
 
 

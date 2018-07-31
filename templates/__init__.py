@@ -1,7 +1,11 @@
-# app/frontend.py
+# templates/frontend.py
 from flask import Blueprint, abort, render_template, redirect, url_for
 
-from app.services.app_tasks import display_columns
+from app.utilities.helpers import display_columns
+from .navbar import get_nav
+
+# Export templates navbar
+nav = get_nav()
 
 frontend_bp = Blueprint('frontend_bp', __name__)
 

@@ -1,5 +1,4 @@
 # services/tasks.py
-import os
 import io
 import pandas as pd
 from datetime import datetime
@@ -9,6 +8,7 @@ from json import loads
 from flask_sqlalchemy import Model, BaseQuery
 from sqlalchemy.inspection import inspect
 from functools import wraps
+from .base_model import BaseModel
 
 
 def shutdown_server():
@@ -87,21 +87,10 @@ def to_bool(value):
     return loads(value) is True
 
 
-def get_model(model=None):
-    from app.client.models import _mmap as client_map
-    from app.data.models import _mmap as model_map
-    from app.report.models import _mmap as report_map
-    from app.user.models import _mmap as user_map
-
-    # Access models from any module by name
-    all_map = {
-        **client_map,
-        **model_map,
-        **report_map,
-        **user_map
-    }
-
-    return all_map.get(model, None)
+def get_model(tablename):
+    for c in BaseModel._decl_class_registry.values():
+        if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
+            return c
 
 
 def get_model_headers(model_name=None):

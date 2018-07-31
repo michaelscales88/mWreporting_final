@@ -10,7 +10,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from healthcheck import HealthCheck
 
-from app.services import BaseModel, get_nav
+from app.utilities import BaseModel
 
 
 # Services
@@ -19,7 +19,6 @@ babel = Babel()
 db = SQLAlchemy(model_class=BaseModel)  # Database manager
 mail = Mail()                           # Mailer
 bootstrap = Bootstrap()                 # Styles
-nav = get_nav()                         # Navigation Bar
 moment = Moment()                       # MomentJS
 health = HealthCheck()                  # Resource information
 serializer = Marshmallow()              # Serialization Schema

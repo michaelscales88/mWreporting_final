@@ -38,19 +38,3 @@ class BaseModel(Base, AllFeaturesMixin):
     @hybrid_property
     def headers(self):
         return self.__repr_attrs__
-
-
-def abort_ro(*args,**kwargs):
-    """
-    Avoid writing to ro session
-    """
-    print("Writing operations disabled. Aborting session flush.")
-    return
-
-
-def get_session(engine, echo=False, readonly=False):
-    engine = create_engine(engine, echo=echo)
-    session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    if readonly:
-        session.flush = abort_ro  # Disable flushing to db
-    return session()

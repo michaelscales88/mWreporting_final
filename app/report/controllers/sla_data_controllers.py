@@ -2,8 +2,8 @@
 from flask_restful import Resource, reqparse
 import datetime
 
-from app.services.app_tasks import return_task, to_datetime, to_list
-from .tasks import data_task
+from app.utilities import return_task, to_datetime
+from ..tasks import data_task
 
 
 class DataAPI(Resource):

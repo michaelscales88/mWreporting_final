@@ -1,13 +1,11 @@
 # config/server.py
 from importlib import import_module
+
 from flask_assets import Bundle
 
 from .encoders import AppJSONEncoder
-from .extensions import health, db, assets
-from .services import (
-    get_local_healthcheck, get_data_healthcheck, BaseModel,
-    add_cdns
-)
+from .extensions import health, assets
+from .utilities import check_local_db
 
 
 def build_routes(server_instance, api, module_name):
@@ -35,16 +33,9 @@ def configure_server(server_instance):
     :return: Configured Flask App
     """
     with server_instance.app_context():
-
         # Register system checks
-        health.add_check(get_local_healthcheck)
-        health.add_check(get_data_healthcheck)
 
-        # Add CDN content to application
-        add_cdns(server_instance)
-
-        # Inject session into BaseModel
-        BaseModel.set_session(db.session)
+        health.add_check(check_local_db)
 
         # Register JSON encoder
         server_instance.json_encoder = AppJSONEncoder

@@ -2,7 +2,7 @@
 import os
 
 from app import app_instance
-
+from .app_cdns import add_cdns
 
 for root, dirs, files in os.walk("app/"):
     for file in files:
