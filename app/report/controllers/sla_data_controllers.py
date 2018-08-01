@@ -6,7 +6,7 @@ from app.utilities import return_task, to_datetime
 from ..tasks import data_task
 
 
-class DataAPI(Resource):
+class SLADataAPI(Resource):
 
     decorators = [return_task]
 

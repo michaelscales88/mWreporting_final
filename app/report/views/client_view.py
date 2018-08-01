@@ -1,5 +1,5 @@
 from app.base_view import BaseView
 
 
-class SLAReportView(BaseView):
+class ClientView(BaseView):
     pass

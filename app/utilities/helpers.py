@@ -11,13 +11,6 @@ from functools import wraps
 from .base_model import BaseModel
 
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-
 # Other Tasks
 def return_task(fn):
 
@@ -87,14 +80,14 @@ def to_bool(value):
     return loads(value) is True
 
 
-def get_model(tablename):
+def get_model_by_tablename(tablename):
     for c in BaseModel._decl_class_registry.values():
         if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
             return c
 
 
 def get_model_headers(model_name=None):
-    model = get_model(model_name)
+    model = get_model_by_tablename(model_name)
     return list(model.headers) if model else None
 
 

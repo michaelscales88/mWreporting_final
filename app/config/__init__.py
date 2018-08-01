@@ -3,6 +3,8 @@ import os
 
 from app import app_instance
 from .app_cdns import add_cdns
+from .default_loggers import init_loggers
+
 
 for root, dirs, files in os.walk("app/"):
     for file in files:
@@ -38,13 +40,3 @@ for root, dirs, files in os.walk("instance/"):
                     "Loaded [ {module_name} ] file's "
                     "instance settings.".format(module_name=module)
                 )
-
-if app_instance.config["USE_LOGGERS"]:
-    with app_instance.app_context():
-        """ Create loggers after default settings have been discovered """
-        from .default_loggers import init_loggers
-        from app.extensions.mailer import init_notifications
-
-        # Set default loggers for the application
-        init_loggers()
-        init_notifications()

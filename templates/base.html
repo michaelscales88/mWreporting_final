@@ -17,7 +17,7 @@
     {{ super() }}
     {{ fixes.ie8() }}
     <link rel="shortcut icon"
-          href="{{ url_for('static', filename='img/favicon.ico') }}">
+          href="{{ url_for('static', filename='favicon.ico') }}">
 {%- endblock head %}
 
 {% block styles -%}
@@ -34,6 +34,8 @@
     <link href="{{ bootstrap_find_resource('css/jquery.dataTables.css', cdn='dataTable', use_minified=true) }}"
           rel="stylesheet">
     <link href="{{ bootstrap_find_resource('latest/toastr.css', cdn='toastr', use_minified=true) }}"
+          rel="stylesheet">
+    <link href="{{ bootstrap_find_resource('/css/bootstrap-select.css', cdn='multiselect', use_minified=true) }}"
           rel="stylesheet">
 {% endblock styles %}
 
@@ -80,6 +82,7 @@
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/pdfmake.js', cdn='saveJs', use_minified=true) }}"></script>
     <script src="{{ bootstrap_find_resource('pdfmake/0.1.32/vfs_fonts.js', cdn='saveJs') }}"></script>
     <script src="{{ bootstrap_find_resource('latest/toastr.js', cdn='toastr', use_minified=true) }}"></script>
+    <script src="{{ bootstrap_find_resource('js/bootstrap-select.js', cdn='multiselect', use_minified=true) }}"></script>
 
     <!-- Load all the servers static files bundled and minified -->
     {% assets "js_all" %}

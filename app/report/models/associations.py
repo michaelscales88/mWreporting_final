@@ -1,18 +1,27 @@
-# from datetime import datetime
+#
 import datetime
 from app.extensions import db
 from sqlalchemy.sql import and_, func
 
 
-class TablesLoaded(db.Model):
+from app.utilities import get_model_by_tablename
 
-    __tablename__ = 'tables_loaded'
-    __repr_attrs__ = ['date_loaded', 'dt_downloaded']
+user_model = get_model_by_tablename("user")
+
+
+class TablesLoadedModel(db.Model):
+
+    __tablename__ = 'loaded_tables'
+    __repr_attrs__ = ['loaded_date', 'table', 'date_downloaded']
 
     id = db.Column(db.Integer, primary_key=True)
-    date_loaded = db.Column(db.Date, nullable=False)
     table = db.Column(db.String, nullable=False)
-    dt_downloaded = db.Column(db.DateTime, default=datetime.datetime.now())
+    loaded_date = db.Column(db.Date, nullable=False)
+
+    date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
+    date_downloaded = db.Column(db.DateTime)
+
+    is_loaded = db.Column(db.Boolean, default=False)
 
     @classmethod
     def check_date_set(cls, date, table_name):
@@ -20,14 +29,15 @@ class TablesLoaded(db.Model):
         return cls.query.filter(
             and_(
                 cls.date_loaded == date,
-                cls.table == table_name
+                cls.table == table_name,
+                cls.is_loaded is True
             )
-        ).first()
+        ).first() is not None
 
     @classmethod
     def check_date_interval(cls, start_time, end_time, table_name):
         """
-        Return True if the data is loaded for the interval, or False
+        Return True if the data is loaded for the interval, or Falsea
         if any day is not loaded.
         """
         while start_time < end_time:
@@ -40,3 +50,13 @@ class TablesLoaded(db.Model):
                 return False
             start_time += datetime.timedelta(days=1)
         return True
+
+
+class ClientManagerAssociation(db.Model):
+    __tablename__ = 'client_manager_association'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('client_table.id'), primary_key=True)
+    manager = db.relationship(user_model, backref="clients")
+
+    def __str__(self):
+        return str(self.manager)

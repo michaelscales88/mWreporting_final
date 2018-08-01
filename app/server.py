@@ -25,6 +25,8 @@ def build_routes(server_instance, api, module_name):
 
 
 def configure_server(server_instance):
+    from .config import init_loggers
+    from .extensions.mailer import init_notifications
     """
     Uses the server's context to build all the components of the server.
     This allows the blueprints to access the instance of server that they're
@@ -33,8 +35,15 @@ def configure_server(server_instance):
     :return: Configured Flask App
     """
     with server_instance.app_context():
-        # Register system checks
 
+        # Enable production/development settings
+        if server_instance.debug:
+            init_loggers("DEBUG")
+        else:
+            init_loggers("INFO")
+            init_notifications()
+
+        # Register system checks
         health.add_check(check_local_db)
 
         # Register JSON encoder
@@ -42,13 +51,12 @@ def configure_server(server_instance):
 
         # Add server's static files to be bundled and minified
         js = Bundle(
-            'js/client.js', 'js/data.js',
-            'js/dt-selector.js', 'js/grid-area.js',
-            'js/modal-form.js', 'js/multiple-select.js', 'js/report.js',
+            'js/selectBox.js', 'js/grid-area.js',
+            'js/dt-selector.js',
             filters='jsmin', output='gen/packed.js'
         )
         css = Bundle(
-            'css/style.css', 'css/multiple-select.css',
+            'css/style.css',
             filters='cssmin', output='gen/all.css'
         )
         assets.register('js_all', js)

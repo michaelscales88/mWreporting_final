@@ -2,11 +2,11 @@
 from sqlalchemy.sql import and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.utilities import get_model, query_to_frame
+from app.utilities import get_model_by_tablename, query_to_frame
 
 
 def get_data_for_table(table_name, start_time, end_time):
-    table = get_model(table_name)
+    table = get_model_by_tablename(table_name)
     return table.query.filter(
         and_(
             table.start_time >= start_time,
@@ -27,7 +27,7 @@ def abort_ro(*args,**kwargs):
     return
 
 
-def get_session(engine, echo=False, readonly=False):
+def get_external_session(engine, echo=False, readonly=True):
     engine = create_engine(engine, echo=echo)
     session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
     if readonly:

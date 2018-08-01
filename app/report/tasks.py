@@ -11,22 +11,12 @@ from .utilities import (
 )
 
 
-def register_tasks(server):
-    server.config['CELERYBEAT_SCHEDULE']['loading_task'] = {
-        'task': 'app.data.services.loaders.data_loader',
+def register_tasks(server_instance):
+    server_instance.config['CELERYBEAT_SCHEDULE']['loading_task'] = {
+        'task': 'report.utilities.data_loader',
         'schedule': crontab(
-            **{server.config['BEAT_PERIOD']: server.config['BEAT_RATE']}
-        ),
-        'args': (server.config.get('DAYS_TO_LOAD', 5),)
-    }
-    end_time = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    start_time = end_time - datetime.timedelta(days=1)
-    server.config['CELERYBEAT_SCHEDULE']['daily_report_task'] = {
-        'task': 'app.report.services.sla_report.make_sla_report_model',
-        'schedule': crontab(
-            **{server.config['BEAT_PERIOD']: server.config['BEAT_RATE']}
-        ),
-        'args': (start_time, end_time,)
+            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
+        )
     }
 
 

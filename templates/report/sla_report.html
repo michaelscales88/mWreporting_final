@@ -29,14 +29,41 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            // Report Grid Area configuration
-            configReportPage(
-                moment().subtract(1, "days").hour(0).minute(0).second(0),
-                moment().hour(0).minute(0).second(0),
-            );
+            // JS functions are imported from packed.js
 
-            // Client Selector JS - Select clients for report
-            $.getScript("{{ url_for("static", filename="js/report-selector.js") }}", function () { loadReportSelect(); });
+            let tableConfig = {
+                api: "/api/report/sla_report",
+                table_name: 'table#displayTable',
+                num_rows: -1
+            };
+
+            let midnight = moment().hour(0).minute(0).second(0);
+
+            let pickerConfig = {
+                start_time: midnight.subtract(1, "days"),
+                end_time: midnight
+            };
+
+            function ajaxFn() {
+                return {
+                    start_time: $("input#start-selector").val(),
+                    end_time: $("input#end-selector").val(),
+                    task: "sla_report",
+                    // clients: JSON.stringify($("#report-select").selectpicker("getSelects"))
+                };
+            }
+
+            // DT picker for selecting report interval
+            dtSelector('#start-selector', '#end-selector', pickerConfig);
+
+            // Configure Table Area
+            let table = getGridArea(ajaxFn, tableConfig);
+            $('button#refreshButton').on('click', function () {
+                table.ajax.reload();
+            });
+
+            // Client Selector
+            initSelectBox("{{ url_for("sla_report_bp.clientapi") }}", "report-select");
         });
     </script>
 {% endblock scripts %}

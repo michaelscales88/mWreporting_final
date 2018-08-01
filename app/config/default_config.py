@@ -45,9 +45,6 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Mike1234")
 # administrator list
 ADMINS = [MAIL_DEFAULT_SENDER, '"Mike Scales" michael.scales88@gmail.com']
 
-# settings for data source loader
-MAX_INTERVAL = 2
-
 # SQLAlchemy Settings
 DB_TYPE = os.getenv("DB_TYPE", "")
 USER = os.getenv('DB_USER', '')

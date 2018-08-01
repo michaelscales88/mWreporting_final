@@ -9,7 +9,7 @@ from sqlalchemy.sql import and_
 
 # celery = create_celery(create_application())
 # from app.tasks import send_async_email
-from app.utilities.helpers import query_to_frame, display_columns, get_model, export_excel
+from app.utilities.helpers import query_to_frame, display_columns, get_model_by_tablename, export_excel
 
 
 # from app.factories.application import create_application
@@ -72,7 +72,7 @@ def check_src_data_loaded(start_time, end_time, tables=("c_call", "c_event")):
     if not.
     :return:
     """
-    table_loader = get_model("tables_loaded")
+    table_loader = get_model_by_tablename("tables_loaded")
     for table_name in tables:
         if not table_loader.check_date_interval(start_time, end_time, table_name):
             print("Data not loaded:", start_time, end_time, table_name)
@@ -210,12 +210,12 @@ def get_sla_report(start_time, end_time, clients=None):
 
 
 def report_exists_by_name(table_name, start_time, end_time):
-    report_table = get_model(table_name)
+    report_table = get_model_by_tablename(table_name)
     return hasattr(report_table, "exists") and report_table.exists(start_time, end_time)
 
 
 def get_report_model(table_name, start_time=None, end_time=None):
-    report_table = get_model(table_name)
+    report_table = get_model_by_tablename(table_name)
     if start_time and end_time and hasattr(report_table, "get"):
         return report_table.get(start_time, end_time)
     else:
@@ -223,7 +223,7 @@ def get_report_model(table_name, start_time=None, end_time=None):
 
 
 def get_calls_by_direction(table_name, start_time, end_time, call_direction=1):
-    table = get_model(table_name)
+    table = get_model_by_tablename(table_name)
     return table.query.filter(
         and_(
             table.start_time >= start_time,
@@ -236,7 +236,7 @@ def get_calls_by_direction(table_name, start_time, end_time, call_direction=1):
 def add_frame_alias(table_name, frame):
     print("running frame alias")
     # Show the clients as row names
-    table = get_model(table_name)
+    table = get_model_by_tablename(table_name)
     aliases = []
     print(table)
     if not frame.empty and hasattr(table, "client_name"):

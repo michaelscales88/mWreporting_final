@@ -7,7 +7,7 @@ from logging.handlers import TimedRotatingFileHandler
 from flask import current_app
 
 
-def set_logger(name='app', level=logging.INFO, rotating=True):
+def set_logger(level, name='app', rotating=True):
     logger = logging.getLogger(name)
 
     if rotating:
@@ -57,10 +57,10 @@ def get_persistent_handler(log_name):
     return file_handler
 
 
-def init_loggers():
+def init_loggers(level):
     # Application logger: rotates every 30 days
-    set_logger()
+    set_logger(level)
 
     # SQLAlchemy logger: long term to show history of DB modifications
-    set_logger(name="sqlalchemy.engine", rotating=False)
+    set_logger(level, name="sqlalchemy.engine", rotating=False)
 

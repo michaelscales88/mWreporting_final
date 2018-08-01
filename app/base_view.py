@@ -22,6 +22,11 @@ class BaseView(ModelView):
             self.can_create = True
             self.can_delete = True
             return True
+
+        if current_user.has_role('_permissions | manager'):
+            # Manager access privileges
+            return True
+
         return False
 
     def _handle_view(self, name, **kwargs):

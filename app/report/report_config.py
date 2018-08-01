@@ -7,4 +7,12 @@ REPORT_MODULE_ROUTES = {
         "url": "/api/report/sla_report",
         "methods": {}
     },
+    "SLADataAPI": {
+        "url": "/api/report/sla_data",
+        "methods": {}
+    },
+    "ClientAPI": {
+        "url": "/api/report/clients",
+        "methods": {}
+    }
 }

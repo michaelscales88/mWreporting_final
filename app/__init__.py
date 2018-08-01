@@ -7,10 +7,9 @@ from .extensions import (
     db, serializer, assets, debugger
 )
 from .server import configure_server
+from .utilities import BaseModel
 
-"""
-Creates the server that the html pages interact with.
-"""
+""" Create the application. """
 app_instance = Flask(
     __name__,
     template_folder='../templates',
@@ -21,7 +20,7 @@ app_instance = Flask(
 """ Bind config + security settings """
 import app.config as app_config
 
-""" Init + Bind services to app """
+""" Init + Bind extensions to app """
 # Ordering is important.
 admin.init_app(app_instance)
 babel.init_app(app_instance)
@@ -32,6 +31,9 @@ mail.init_app(app_instance)
 moment.init_app(app_instance)
 health.init_app(app_instance, "/healthcheck")
 
+# Inject db session into all models
+BaseModel.set_session(db.session)
+
 # Manage JavaScript
 assets.init_app(app_instance)
 app_config.add_cdns(app_instance)
@@ -41,9 +43,10 @@ if app_instance.debug:
     debugger.init_app(app_instance)
 
 # Module imports
+# Security should go first
+import app.security
 import app.report
 import app.scheduled_tasks
-import app.security
 
 # Add local HTML
 import templates as template_routes

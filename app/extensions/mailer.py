@@ -1,8 +1,8 @@
 # config/mailer.py
 import logging
 from flask import current_app
-from app.extensions import mail
-from app.services import FlaskMailHandler
+from . import mail
+from .flask_mail import FlaskMailHandler
 
 
 subject_template = 'Web-app problems in %(module)s > %(funcName)s'

@@ -10,15 +10,13 @@
                 </p>
                 <p>
                     Manage users, roles, schedules.<BR>
+                    Go back to
+                    <a href="{{ url_for('frontend_bp.serve_pages', page="index") }}">reports</a>.
                 </p>
                 {% if not current_user.is_authenticated %}
                     <p>
-                    <p>
-                        Back to
-                        <a href="{{ url_for('frontend_bp.serve_pages', page="index") }}">reports</a>.
-                    </p>
-                    <a class="btn btn-primary" href="{{ url_for('security.login') }}">login</a>
-                    <a class="btn btn-default" href="{{ url_for('security.register') }}">register</a>
+                        <a class="btn btn-primary" href="{{ url_for('security.login') }}">login</a>
+                        <a class="btn btn-default" href="{{ url_for('security.register') }}">register</a>
                     </p>
                 {% endif %}
             </div>

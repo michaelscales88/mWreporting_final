@@ -3,7 +3,8 @@
 {% block head_tail %}
     {{ super() }}
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <link href="{{ bootstrap_find_resource('/css/bootstrap-select.css', cdn='multiselect', use_minified=true) }}"
+          rel="stylesheet">
 {% endblock %}
 
 {% block body %}
@@ -14,7 +15,7 @@
 {% block tail %}
     {{ super() }}
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+    <script src="{{ bootstrap_find_resource('js/bootstrap-select.js', cdn='multiselect', use_minified=true) }}"></script>
     <script>
         $(document).ready(function () {
             function sortOptions(selector) {

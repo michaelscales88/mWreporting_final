@@ -9,7 +9,7 @@ from .models import SlaReportModel
 from .utilities import check_src_data_loaded, report_exists_by_name, get_calls_by_direction
 
 
-@celery.task(base=SqlAlchemyTask, name='report.tasks.make_sla_report_model')
+@celery.task(base=SqlAlchemyTask, name='report.builders.make_sla_report_model')
 def make_sla_report_model(start_time=None, end_time=None):
     # Check if report already exists
     if not (start_time and end_time):
