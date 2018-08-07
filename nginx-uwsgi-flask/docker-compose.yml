@@ -4,24 +4,21 @@ services:
   # Task Broker
   rabbit:
     image: rabbitmq:3.6.6-management
-    env_file: app.env
+    env_file: dev.env
     ports:
       - "5672"
-      - "15672:15672"
+      - "15672"
 
   # Flask Images/Controller/View/Worker Layers
   uwsgi:
-    build:
-      context: uwsgi
-      dockerfile: Dockerfile
-    env_file: app.env
+    image: flask_base:latest
+    env_file: dev.env
     volumes:
-      - ./uwsgi/uwsgi.ini:/uwsgi/uwsgi.ini
-      - ./uwsgi/wsgi.py:/app/wsgi.py
-      - ../app:/app/app
-      - ../instance:/app/instance
-      - ../static:/app/static
-      - ../templates:/app/templates
+      - ./uwsgi.ini:/uwsgi/uwsgi.ini
+      - ../app:/var/www/app
+      - ../instance:/var/www/instance
+      - ../static:/var/www//static
+      - ../templates:/var/www/templates
       - asset-volume:/tmp
     depends_on:
       - postgres
@@ -30,50 +27,26 @@ services:
     restart: always
 
   worker:
-    build:
-      context: uwsgi
-      dockerfile: Dockerfile
-    env_file: app.env
-    volumes:
-      - ./uwsgi/celery_worker.py:/app/celery_worker.py
+    image: flask_base:latest
+    env_file: dev.env
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
-    working_dir: /app
-    command: celery -A celery_worker.celery worker -E -l info
-
-  beat:
-    build:
-      context: uwsgi
-      dockerfile: Dockerfile
-    env_file: app.env
-    volumes:
-      - ./uwsgi/celery_worker.py:/app/celery_worker.py
-    volumes_from:
-      - uwsgi
-    depends_on:
-      - rabbit
-    working_dir: /app
-    command: celery -A celery_worker.celery beat --pidfile= -l info
+    working_dir: /var/www
+    command: celery -A app.celery worker --beat -l debug
 
   flower:
-    build:
-      context: uwsgi
-      dockerfile: Dockerfile
-    env_file: app.env
-    volumes:
-      - ./uwsgi/celery_worker.py:/app/celery_worker.py
+    image: flask_base:latest
+    env_file: dev.env
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
-      - worker
-      - beat
     ports:
       - "5555"
-    working_dir: /app
-    command: flower -A celery_worker.celery
+    working_dir: /var/www
+    command: celery flower -A app.celery
 
   # Data Layers
   data:
@@ -95,18 +68,18 @@ services:
 
   # Reverse proxy LB
   proxy:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./uwsgi_params:/etc/nginx/uwsgi_params
+      - ../instance:/var/www/instance
       - asset-volume:/tmp
     links:
       - uwsgi
       - flower
     ports:
       - "80:80"
+      - "443:443"
       - "5555:5555"
     command: nginx -c nginx.conf
     restart: always

@@ -12,5 +12,4 @@ class ScheduleItemModel(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
 
     def __str__(self):
-        # Necessary for showing the role name
         return self.name
