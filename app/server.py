@@ -51,8 +51,8 @@ def configure_server(server_instance):
 
         # Add server's static files to be bundled and minified
         js = Bundle(
-            'js/selectBox.js', 'js/grid-area.js',
-            'js/dt-selector.js',
+            'js/selectBox.js', 'js/gridArea.js',
+            'js/dtSelector.js',
             filters='jsmin', output='gen/packed.js'
         )
         css = Bundle(

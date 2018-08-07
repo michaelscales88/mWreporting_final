@@ -2,11 +2,13 @@
 from flask import Blueprint
 from flask_restful import Api
 
-
 from app import app_instance, admin, db
 from app.server import build_routes
-from .views import SLAReportView, ClientView, CallDataView, EventDataView, TablesLoadedView
 from .tasks import register_tasks
+from .views import (
+    SLAReportView, ClientView, CallDataView,
+    EventDataView, TablesLoadedView, ClientManagerView
+)
 
 sla_report_bp = Blueprint('sla_report_bp', __name__)
 sla_report_api = Api(sla_report_bp)
@@ -15,7 +17,7 @@ sla_report_api = Api(sla_report_bp)
 """ Create models for module in dB """
 with app_instance.app_context():
     from app.report.models import (
-        SlaReportModel, TablesLoadedModel, ClientManagerAssociation,
+        SlaReportModel, TablesLoadedModel, ClientManager,
         CallTableModel, EventTableModel, ClientModel
     )
 
@@ -26,18 +28,18 @@ with app_instance.app_context():
     db.create_all()
 
     # Report Views: All
-    admin.add_view(SLAReportView(SlaReportModel, db.session, name='SLA Report', category="Reports"))
+    admin.add_view(SLAReportView(SlaReportModel, db.session, name='SLA Report', category="Data Admin"))
     
     # Client Manager Views: Manager Area
-    admin.add_view(ClientView(ClientManagerAssociation, db.session, name='Clients'))
+    admin.add_view(ClientManagerView(ClientManager, db.session, name="Client Managers"))
 
     # Client Manager Views: Admin Area
-    admin.add_view(ClientView(ClientModel, db.session, name='Modify Clients'))
+    admin.add_view(ClientView(ClientModel, db.session, name='Add/Remove Clients', category="Admin"))
 
     # Report Data Views: Admin Area
-    admin.add_view(TablesLoadedView(TablesLoadedModel, db.session, name='Loaded Data', category="Reports"))
-    admin.add_view(CallDataView(CallTableModel, db.session, name='Call Data', category="Reports"))
-    admin.add_view(EventDataView(EventTableModel, db.session, name='Event Data', category="Reports"))
+    admin.add_view(TablesLoadedView(TablesLoadedModel, db.session, name='Loaded Data', category="Data Admin"))
+    admin.add_view(CallDataView(CallTableModel, db.session, name='Call Data', category="Data Admin"))
+    admin.add_view(EventDataView(EventTableModel, db.session, name='Event Data', category="Data Admin"))
 
 
 app_instance.register_blueprint(sla_report_bp)

@@ -3,17 +3,9 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from flask import current_app
-from flask_mail import Message
 from sqlalchemy.sql import and_
 
-# celery = create_celery(create_application())
-# from app.tasks import send_async_email
-from app.utilities.helpers import query_to_frame, display_columns, get_model_by_tablename, export_excel
-
-
-# from app.factories.application import create_application
-# from app.factories.celery import create_celery
+from app.utilities.helpers import query_to_frame, get_model_by_tablename
 
 
 def get_td(interval, period):
@@ -28,51 +20,13 @@ def get_td(interval, period):
     return timedelta(**time_delta)
 
 
-def email_reports(start_time, end_time, interval='D', period=1):
-    td = get_td(interval, period)
-    filename = "test_report.xlsx"
-    # output = io.BytesIO()
-    # writer = pd.ExcelWriter(filename,
-    #                         engine='xlsxwriter',
-    #                         datetime_format='mmm d yyyy hh:mm:ss',
-    #                         date_format='mmmm dd yyyy')
-    while start_time <= end_time:
-        report = get_sla_report(start_time, start_time + td)
-        with report as report:
-            print(report)
-            msg = Message(
-                "Report Test",
-                recipients=[current_app.config['MAIL_USERNAME']],
-                # attachments=Attachment(
-                #     filename=filename,
-                #     data=report.to_excel(writer)
-                # )
-            )
-            msg.attach(filename, "xlsx", export_excel(report))
-            # send_async_email(msg)
-        # report.to_excel(writer)
-        start_time += td
-
-    return True
-
-
-def run_reports(start_time, end_time, interval='D', period=1):
-    td = get_td(interval, period)
-
-    while start_time <= end_time:
-        make_sla_report_model(start_time, start_time + td)
-        start_time += td
-
-    return True
-
-
 def check_src_data_loaded(start_time, end_time, tables=("c_call", "c_event")):
     """
     Return True if the data is loaded for the date interval for all tables. Return False
     if not.
     :return:
     """
-    table_loader = get_model_by_tablename("tables_loaded")
+    table_loader = get_model_by_tablename("loaded_tables")
     for table_name in tables:
         if not table_loader.check_date_interval(start_time, end_time, table_name):
             print("Data not loaded:", start_time, end_time, table_name)
@@ -85,7 +39,7 @@ def make_summary(df):
     sum_cols = [
         'I/C Presented',
         'I/C Live Answered',
-        'I/C Abandoned',
+        'I/C Lost',
         'Voice Mails',
         'Answered Incoming Duration',
         'Answered Wait Duration',
@@ -106,45 +60,61 @@ def make_summary(df):
     summary_frame['Longest Waiting Answered'] = pd.Series(
         df['Longest Waiting Answered'].max(), index=summary_frame.index
     )
-    return df.append(summary_frame)
+    return df.append(summary_frame, sort=False)
 
 
 def compute_avgs(df):
+    print("starting compute avgs")
+    print(df.dtypes)
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    #     print(df)
     df['Incoming Live Answered (%)'] = np.where(
         df['I/C Live Answered'] < 1,
         df['I/C Live Answered'],
         df['I/C Live Answered'] / df['I/C Presented']
     )
+    print("1")
     df['Incoming Received (%)'] = np.where(
         (df['I/C Live Answered'] + df['Voice Mails']) < 1,
         df['I/C Live Answered'],
         (df['I/C Live Answered'] + df['Voice Mails']) / df['I/C Presented']
     )
+    print("2")
     df['Incoming Abandoned (%)'] = np.where(
-        df['I/C Abandoned'] < 1,
-        df['I/C Abandoned'],
-        df['I/C Abandoned'] / df['I/C Presented']
+        df['I/C Lost'] < 1,
+        df['I/C Lost'],
+        df['I/C Lost'] / df['I/C Presented']
     )
-    df['Average Incoming Duration'] = np.where(
-        df['I/C Live Answered'] < 1,
-        df['Answered Incoming Duration'],
-        df['Answered Incoming Duration'] / df['I/C Live Answered']
-    )
-    df['Average Wait Answered'] = np.where(
-        df['I/C Live Answered'] < 1,
-        df['Answered Wait Duration'],
-        df['Answered Wait Duration'] / df['I/C Live Answered']
-    )
-    df['Average Wait Lost'] = np.where(
-        (df['I/C Abandoned'] + df['Voice Mails']) < 1,
-        df['Lost Wait Duration'],
-        df['Lost Wait Duration'] / (df['I/C Abandoned'] + df['Voice Mails'])
-    )
-    df['PCA'] = np.where(
-        df['I/C Presented'] < 1,
-        df['I/C Presented'],
-        (df['Calls Ans Within 15'] + df['Calls Ans Within 30']) / df['I/C Presented']
-    )
+    print("3")
+    # print(df['Answered Incoming Duration'] / df['I/C Live Answered'])
+    # df['Average Incoming Duration'] = df['Average Incoming Duration'].values.astype('datetime64[s]')
+    print(df['Answered Incoming Duration'])
+    print(df['I/C Live Answered'])
+    # df['Average Incoming Duration'] = np.where(
+    #     df['I/C Live Answered'] < 1,
+    #     df['Answered Incoming Duration'],
+    #     df['Answered Incoming Duration'] / df['I/C Live Answered']
+    # )
+    print("4")
+    # df['Average Wait Answered'] = df['Average Wait Answered'].apply(lambda x: x.replace(microsecond=0))
+    # df['Average Wait Answered'] = pd.DataFrame(
+    #     df['I/C Live Answered'] < 1,
+    #     df['Answered Wait Duration'],
+    #     df['Answered Wait Duration'] / df['I/C Live Answered']
+    # )
+    print("5")
+    # df['Average Wait Lost'] = np.where(
+    #     (df['I/C Lost'] + df['Voice Mails']) < 1,
+    #     df['Lost Wait Duration'],
+    #     df['Lost Wait Duration'] / (df['I/C Lost'] + df['Voice Mails'])
+    # )
+    # print("6")
+    # df['PCA'] = np.where(
+    #     df['I/C Presented'] < 1,
+    #     df['I/C Presented'],
+    #     (df['Calls Ans Within 15'] + df['Calls Ans Within 30']) / df['I/C Presented']
+    # )
+    print("computed avgs")
     return df
 
 
@@ -158,55 +128,6 @@ def format_df(cell):
 def empty_report():
     empty_model = get_report_model('sla_report')
     return query_to_frame(empty_model, is_report=True)
-
-
-def get_sla_report(start_time, end_time, clients=None):
-    # Check the report model exists
-    report_exists = report_exists_by_name('sla_report', start_time, end_time)
-    print("get_sla_report")
-    try:
-        # If the report does not exist make a report.
-        # Raise AssertionError if a report is not made.
-        if not report_exists:
-            report_made = make_sla_report_model(start_time, end_time)
-            print("made report:", report_made)
-            if not report_made:
-                raise AssertionError("Report not made.")
-
-        report_query = get_report_model('sla_report', start_time, end_time)
-
-        if not report_query:
-            raise AssertionError("Report not found.")
-
-        report_frame = query_to_frame(report_query, is_report=True)
-
-        # Filter the report to only include desired clients
-        if clients:
-            report_frame = report_frame.filter(items=clients, axis=0)
-
-        # Make the visible index the DID extension + client name,
-        # or just DID extension if no name exists
-        report_frame = add_frame_alias("client", report_frame)
-
-        if not report_frame.empty:
-            # Create programmatic columns and rows
-            report_frame = make_summary(report_frame)
-            report_frame = compute_avgs(report_frame)
-
-            # Filter out columns containing raw data
-            columns = display_columns('sla_report')
-            report_frame = report_frame[columns]
-
-    except AssertionError as e:
-        if e == "Report not made.":
-            print("Error: report not made")
-        if e == "Report not found.":
-            print("Error: report not found.")
-
-        return empty_report()
-    else:
-        # Prettify percentages
-        return report_frame.applymap(format_df)
 
 
 def report_exists_by_name(table_name, start_time, end_time):
@@ -234,24 +155,18 @@ def get_calls_by_direction(table_name, start_time, end_time, call_direction=1):
 
 
 def add_frame_alias(table_name, frame):
-    print("running frame alias")
     # Show the clients as row names
     table = get_model_by_tablename(table_name)
-    aliases = []
-    print(table)
-    if not frame.empty and hasattr(table, "client_name"):
-        print(table.all())
-        # aliases = table.query.filter(table.client_name.in_(list(frame.index))).all()
-        print('found aliases', aliases)
+    if not frame.empty and hasattr(table, "name"):
+        aliases = []
         for index in list(frame.index):
-            print('frame index')
-            client = table.get(index)
-            print(client)
+            client = table.query.filter(table.ext == index).first()
             if client:
-                # aliases.append("{name} ({ext})".format(name=client.client_name, ext=client.ext))
-                aliases.append("{name}".format(name=client.client_name))
+                # aliases.append("{name} ({ext})".format(name=client.name, ext=client.ext))
+                aliases.append("{name}".format(name=client.name))
             else:
                 aliases.append(index)
-        print('aliases:', aliases)
-    frame.insert(0, "Client", aliases if aliases else list(frame.index))
+        frame.insert(0, "Client", aliases)
+    else:
+        frame.insert(0, "Client", list(frame.index))
     return frame

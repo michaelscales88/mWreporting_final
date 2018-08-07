@@ -19,7 +19,7 @@ with app_instance.app_context():
     db.create_all()
 
     # Register the admin views to the extension
-    admin.add_view(ScheduledItemsView(ScheduleItemModel, db.session, name='Scheduled Reports'))
+    admin.add_view(ScheduledItemsView(ScheduleItemModel, db.session, name='My Scheduled Reports'))
 
 
 app_instance.register_blueprint(scheduled_tasks_bp)

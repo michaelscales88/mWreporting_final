@@ -2,7 +2,8 @@
 # Must be run with sudo for rabbitmq-server.
 
 # include environment variables for worker
-# include nginx-uwsgi-flask/app.env export
+include nginx-uwsgi-flask/dev.env
+export
 
 .PHONY: start_worker stop_worker \
         start_rabbit stop_rabbit refresh_worker \

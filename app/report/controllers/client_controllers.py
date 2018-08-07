@@ -1,9 +1,10 @@
 # client/api.py
 from flask import jsonify
 from flask_restful import Resource, reqparse
+from flask_security import current_user
 
 from app.utilities import to_bool
-from ..models import ClientModel
+from ..models import ClientModel, ClientManager
 from ..serializers import ClientModelSchema
 
 
@@ -20,15 +21,15 @@ class ClientAPI(Resource):
         super().__init__()
 
     def get(self):
-        clients = ClientModel.query.filter(ClientModel.active == self.args['active']).all()
+        all_clients = ClientModel.query.filter(ClientModel.active == self.args['active']).all()
+        print("all clients", all_clients)
         return jsonify(
-            data=self.schema.dump(clients).data
+            data=self.schema.dump(all_clients).data
         )
 
     def post(self):
-        print('Hit POST Client API')
-        all_clients = ClientModel.query.filter(ClientModel.active == self.args['active']).all()
-        # user_clients = ClientModel.query.filter(ClientModel)
+        manager_clients = ClientManager.find(int(current_user.id)).clients
+        print("manager clients", manager_clients)
         return jsonify(
-            data=self.schema.dump(all_clients).data
+            data=self.schema.dump(manager_clients).data
         )

@@ -37,9 +37,10 @@ kombu==4.2.1
 MarkupSafe==1.0
 marshmallow==2.15.3
 marshmallow-sqlalchemy==0.14.0
-numpy==1.15.0
+numpy==1.13.0
 pandas==0.23.3
 passlib==1.7.1
+psycopg2==2.7.5
 pycparser==2.18
 PyJWT==1.6.4
 python-dateutil==2.7.3

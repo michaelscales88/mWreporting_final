@@ -22,14 +22,14 @@ class SlaReportModel(db.Model):
         return [
             'I/C Presented',
             'I/C Live Answered',
-            'I/C Abandoned',
+            'I/C Lost',
             'Voice Mails',
             'Incoming Live Answered (%)',
             'Incoming Received (%)',
             'Incoming Abandoned (%)',
-            'Average Incoming Duration',
-            'Average Wait Answered',
-            'Average Wait Lost',
+            # 'Average Incoming Duration',
+            # 'Average Wait Answered',
+            # 'Average Wait Lost',
             'Lost Wait Duration',
             'Calls Ans Within 15',
             'Calls Ans Within 30',
@@ -38,7 +38,7 @@ class SlaReportModel(db.Model):
             'Calls Ans Within 999',
             'Call Ans + 999',
             'Longest Waiting Answered',
-            'PCA'
+            # 'PCA'
         ]
 
     @classmethod

@@ -10,6 +10,7 @@ class UserModel(db.Model, UserMixin):
     """ User Model for storing user related details """
     __tablename__ = "user"
     __repr_attrs__ = ['username']
+
     id = db.Column(db.Integer, primary_key=True)
 
     # User authentication information
@@ -25,13 +26,6 @@ class UserModel(db.Model, UserMixin):
     first_name = db.Column(db.String(100), nullable=False, server_default='')
     last_name = db.Column(db.String(100), nullable=False, server_default='')
 
-    # clients = db.relationship(
-    #     "ClientModel",
-    #     secondary=client_user_association,
-    #     backref="users",
-    #     cascade='all'
-    # )
-
     roles = db.relationship(
         RolesModel,
         secondary=users_roles_association,
@@ -42,3 +36,8 @@ class UserModel(db.Model, UserMixin):
     @classmethod
     def get(cls, uid):
         return cls.query.filter(cls.id == uid).first()
+
+    def __str__(self):
+        return "{last}, {first}".format(
+            last=self.last_name, first=self.first_name
+        )

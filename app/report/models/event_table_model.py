@@ -12,16 +12,15 @@ class EventTableModel(db.Model):
 
     event_id = db.Column(db.Integer, primary_key=True)
     event_type = db.Column(db.Integer, nullable=False)
-    calling_party = db.Column(db.Text)
-    receiving_party = db.Column(db.Text)
-    hunt_group = db.Column(db.Text)
-    is_conference = db.Column(db.Text)
+    calling_party = db.Column(db.String)
+    receiving_party = db.Column(db.String)
+    hunt_group = db.Column(db.String)
+    is_conference = db.Column(db.String)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
-    tag = db.Column(db.Text)
+    tag = db.Column(db.String)
     recording_rule = db.Column(db.Integer)
     call_id = db.Column(db.Integer, db.ForeignKey(CallTableModel.call_id))
-    call = db.relationship("CallTableModel")
 
     @hybrid_property
     def length(self):

@@ -20,7 +20,7 @@ class SqlAlchemyTask(celery.Task):
     def __call__(self, *args, **kwargs):
         try:
             logger.warning("Starting celery job.")
-            return super().__call__(*args, **kwargs)
+            return super().__call__(args[1:], **kwargs)
         except DatabaseError:
             BaseModel.session.rollback()
             logger.error("Leaving celery job on Database Error.")

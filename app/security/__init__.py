@@ -48,6 +48,8 @@ with app_instance.app_context():
     # Create the Admin user
     if not UserModel.find(1):
         user_datastore.create_role(name='_permissions | admin')
+        user_datastore.create_role(name='_permissions | manager')
+        user_datastore.create_role(name='_permissions | agent')
         user_datastore.create_user(
             username='admin',
             email='admin@email.com',
@@ -61,10 +63,10 @@ with app_instance.app_context():
     # Register the admin views to the extension
     admin.add_view(
         UsersView(
-            UserModel, db.session, name='Users', category='Users'
+            UserModel, db.session, name='Manage Users', category='Admin'
         )
     )
-    admin.add_view(RolesView(RolesModel, db.session, name='Roles', category='Users'))
+    admin.add_view(RolesView(RolesModel, db.session, name='Manage Roles', category='Admin'))
 
 
 app_instance.register_blueprint(security_bp)
