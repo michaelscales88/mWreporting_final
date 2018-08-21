@@ -3,6 +3,7 @@ import logging
 from flask import current_app
 from . import mail
 from .flask_mail import FlaskMailHandler
+from app.celery_tasks import celery
 
 
 subject_template = 'Web-app problems in %(module)s > %(funcName)s'
@@ -29,7 +30,7 @@ html_template = '''
 class AsyncFlaskMailer(FlaskMailHandler):
 
     @staticmethod
-    # @celery.task(name="tasks.send_async_mail")
+    @celery.task(name="extensions.mailer.send_async_email")
     def send_async_email(msg):
         """Background task to send an email with Flask-Mail."""
         mail.send(msg)

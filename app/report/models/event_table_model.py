@@ -1,4 +1,5 @@
 # data/models.py
+import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.extensions import db
@@ -24,7 +25,8 @@ class EventTableModel(db.Model):
 
     @hybrid_property
     def length(self):
-        return self.end_time - self.start_time
+        delta = self.end_time - self.start_time
+        return delta - datetime.timedelta(microseconds=delta.microseconds)
 
     @classmethod
     def set_empty(cls, model):

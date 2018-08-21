@@ -1,7 +1,6 @@
 # templates/frontend.py
 from flask import Blueprint, abort, render_template, redirect, url_for
 
-from app.utilities.helpers import display_columns
 from .navbar import get_nav
 
 # Export templates navbar
@@ -26,8 +25,7 @@ def serve_pages(page):
     elif page in ("sla_report.html", "sla_report"):
         return render_template(
             'report/sla_report.html',
-            title='SLA Report',
-            columns=display_columns('sla_report')
+            title='SLA Report'
         )
     else:
         return abort(404)

@@ -1,64 +1,78 @@
 # report/services/sla_report.py
-from collections import OrderedDict
+import logging
+from collections import OrderedDict, Counter
 from datetime import timedelta
+from sqlalchemy.sql import and_
 
-from .utilities import check_src_data_loaded, get_calls_by_direction
+from .models import TablesLoadedModel, CallTableModel, SlaReportModel
 
 
-def make_sla_report(start_time, end_time):
+logger = logging.getLogger("app")
 
+HEADERS = [
+    'I/C Presented',
+    'I/C Live Answered',
+    'I/C Lost',
+    'Voice Mails',
+    'Answered Incoming Duration',
+    'Answered Wait Duration',
+    'Lost Wait Duration',
+    'Calls Ans Within 15',
+    'Calls Ans Within 30',
+    'Calls Ans Within 45',
+    'Calls Ans Within 60',
+    'Calls Ans Within 999',
+    'Call Ans + 999',
+    'Longest Waiting Answered'
+]
+
+DEFAULT_ROW_VALS = [
+    0,  # 'I/C Presented'
+    0,  # 'I/C Live Answered'
+    0,  # 'I/C Abandoned'
+    0,  # 'Voice Mails'
+    timedelta(0),  # Answered Incoming Duration
+    timedelta(0),  # Answered Wait Duration
+    timedelta(0),  # Lost Wait Duration
+    0,  # 'Calls Ans Within 15'
+    0,  # 'Calls Ans Within 30'
+    0,  # 'Calls Ans Within 45'
+    0,  # 'Calls Ans Within 60'
+    0,  # 'Calls Ans Within 999'
+    0,  # 'Call Ans + 999'
+    timedelta(0)  # 'Longest Waiting Answered'
+]
+
+DEFAULT_ROW = OrderedDict(zip(HEADERS, DEFAULT_ROW_VALS))
+
+
+def build_sla_data(start_time, end_time):
+    logger.info(
+        "Started: Building SLA report data {start} to {end}".format(
+            start=start_time, end=end_time
+        )
+    )
     # Check that the data has been loaded for the report date
-    if not check_src_data_loaded(start_time, end_time):
-        # TODO: Have this provide the tables and dates not loaded or
-        # TODO: manage loading those tables and dates...
-        print("Cannot make report. Src data is not loaded.")
-        raise AssertionError("Data not loaded.")
+    if not TablesLoadedModel.interval_is_loaded(start_time, end_time):
+        logger.warning("Data not loaded for report interval.\n"
+                       "Attempting to load data.")
+        # TODO: implement this
 
-    # Check if the data exists and get data for the interval
-    query = get_calls_by_direction('c_call', start_time, end_time)
+    inbound_calls = CallTableModel.query.filter(
+        and_(
+            CallTableModel.start_time >= start_time,
+            CallTableModel.end_time <= end_time,
+            CallTableModel.call_direction == 1
+        )
+    ).all()
 
     # Collate data for interval
-    output_headers = [
-        'I/C Presented',
-        'I/C Live Answered',
-        'I/C Lost',
-        'Voice Mails',
-        'Answered Incoming Duration',
-        'Answered Wait Duration',
-        'Lost Wait Duration',
-        'Calls Ans Within 15',
-        'Calls Ans Within 30',
-        'Calls Ans Within 45',
-        'Calls Ans Within 60',
-        'Calls Ans Within 999',
-        'Call Ans + 999',
-        'Longest Waiting Answered'
-    ]
-
-    default_row = [
-        0,  # 'I/C Presented'
-        0,  # 'I/C Live Answered'
-        0,  # 'I/C Abandoned'
-        0,  # 'Voice Mails'
-        timedelta(0),  # Answered Incoming Duration
-        timedelta(0),  # Answered Wait Duration
-        timedelta(0),  # Lost Wait Duration
-        0,  # 'Calls Ans Within 15'
-        0,  # 'Calls Ans Within 30'
-        0,  # 'Calls Ans Within 45'
-        0,  # 'Calls Ans Within 60'
-        0,  # 'Calls Ans Within 999'
-        0,  # 'Call Ans + 999'
-        timedelta(0)  # 'Longest Waiting Answered'
-    ]
-
-    report_draft = {}
-
-    for call in query:
+    sla_data = {}
+    for call in inbound_calls:
 
         # Index on dialed party number
         row_name = str(call.dialed_party_number)
-        row = report_draft.get(row_name, OrderedDict(zip(output_headers, default_row)))
+        row = sla_data.get(row_name, DEFAULT_ROW)
 
         event_dict = {}
         # Caching events by type makes report comparisons easier
@@ -115,5 +129,74 @@ def make_sla_report(start_time, end_time):
             row['I/C Lost'] += 1
             row['Lost Wait Duration'] += call.length
 
-        report_draft[row_name] = row
-    return report_draft
+        sla_data[row_name] = row
+
+    # Remove empty rows
+    for row_name in [
+        row_name
+        for row_name in sla_data.keys()
+        if sla_data[row_name]['I/C Presented'] == 0
+    ]:
+        sla_data.pop(row_name)
+
+    logger.info(
+        "Completed: Building SLA report data {start} to {end}".format(
+            start=start_time, end=end_time
+        )
+    )
+    return sla_data
+
+
+def build_summary_sla_data(start_time, end_time, interval):
+    logger.info(
+        "Started: Building SLA summary report data {start} to {end}".format(
+            start=start_time, end=end_time
+        )
+    )
+
+    if not SlaReportModel.interval_is_loaded(start_time, end_time, interval):
+        logger.warning("Data not loaded for report interval.\n"
+                       "Attempting to load data.")
+        # TODO: implement this
+        return "Error: SLA reports are not loaded for the interval."
+
+    summary_sla_data = {}
+    while start_time < end_time:
+        end_dt = start_time + interval
+        report = SlaReportModel.get(start_time, end_dt)
+        if not report:
+            logger.warning("Report not created for report interval.\n"
+                           "Attempting to load data.")
+            SlaReportModel.create(start_time=start_time, end_time=end_dt)
+            SlaReportModel.session.commit()
+            # TODO: implement this
+            return "Error: a SLA report could not be located for {start} to {end}.".format(
+                start=start_time, end=end_dt
+            )
+
+        if not report.data:
+            logger.warning(
+                "Error: a SLA report with finished data could not "
+                "be located for {start} to {end}.".format(
+                    start=start_time, end=end_dt
+                )
+            )
+            # TODO: implement this
+            return "Error: data is not loaded for report"
+
+        dt_row_name = "{date} {start} to {end}".format(
+            date=start_time.date(), start=start_time.time(), end=end_dt.time()
+        )
+        for row_name in report.data.keys():
+            summary = summary_sla_data.get(row_name, {})
+            summary[dt_row_name] = report.data[row_name]
+            summary_sla_data[row_name] = summary
+
+        start_time = end_dt
+
+    logger.info(
+        "Completed: Building SLA report data {start} to {end}".format(
+            start=start_time, end=end_time
+        )
+    )
+    return summary_sla_data

@@ -1,10 +1,11 @@
 #
 import datetime
 from app.extensions import db
-from sqlalchemy.sql import and_, func
+from sqlalchemy.sql import func
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
-from app.utilities import get_model_by_tablename
+from app.core import get_model_by_tablename
 from .client_model import ClientModel
 
 
@@ -14,41 +15,54 @@ user_model = get_model_by_tablename("user")
 class TablesLoadedModel(db.Model):
 
     __tablename__ = 'loaded_tables'
-    __repr_attrs__ = ['loaded_date', 'table', 'date_downloaded']
+    __repr_attrs__ = ['loaded_date', 'last_updated', 'complete']
 
     id = db.Column(db.Integer, primary_key=True)
-    table = db.Column(db.String, nullable=False)
     loaded_date = db.Column(db.Date, nullable=False)
 
     date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
-    date_downloaded = db.Column(db.DateTime)
+    last_updated = db.Column(db.DateTime)
 
-    is_loaded = db.Column(db.Boolean, default=False)
+    calls_loaded = db.Column(db.Boolean, default=False)
+    events_loaded = db.Column(db.Boolean, default=False)
+
+    @hybrid_property
+    def complete(self):
+        return self.is_loaded(self.loaded_date)
 
     @classmethod
-    def find_table_by_date(cls, loaded_date, table_name):
+    def find(cls, date):
         return cls.query.filter(
-            and_(
-                cls.loaded_date == func.DATE(loaded_date),
-                cls.table == table_name
-            )
+            cls.loaded_date == func.DATE(date)
         ).first()
 
     @classmethod
-    def check_date_set(cls, date, table_name):
-        return cls.find_table_by_date(date, table_name) is not None
+    def is_loaded(cls, date):
+        record = cls.find(date)
+        return record and record.calls_loaded and record.events_loaded
 
     @classmethod
-    def check_date_interval(cls, start_time, end_time, table_name):
+    def interval_is_loaded(cls, start_time, end_time):
         """
-        Return True if the data is loaded for the interval, or Falsea
+        Return True if the data is loaded for the interval, or False
         if any day is not loaded.
         """
         while start_time < end_time:
-            if cls.find_table_by_date(start_time, table_name) is None:
+            if not cls.is_loaded(start_time):
                 return False
             start_time += datetime.timedelta(days=1)
         return True
+
+    @classmethod
+    def not_loaded_when2when(cls, start_time, end_time):
+        """
+        Return True if the data is loaded for the interval, or False
+        if any day is not loaded.
+        """
+        while start_time < end_time:
+            if cls.find(start_time) is None:
+                yield start_time
+            start_time += datetime.timedelta(days=1)
 
 
 client_user_association = db.Table(

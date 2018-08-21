@@ -4,11 +4,11 @@ from app.base_view import BaseView
 from flask_security import current_user
 
 
-class SLAReportView(BaseView):
+class SLASummaryReportView(BaseView):
     column_searchable_list = ("start_time", "end_time",)
-    column_exclude_list = ('date_requested', 'data',)
     column_details_list = ['data']
     form_excluded_columns = ('last_updated', 'completed_on')
+    column_list = ('start_time', 'end_time', 'interval', 'last_updated', 'completed_on')
 
     def _data_formatter(view, context, model, name):
         if model.data:

@@ -3,3 +3,4 @@ from .associations import TablesLoadedModel, ClientManager
 from .call_table_model import CallTableModel
 from .event_table_model import EventTableModel
 from .client_model import ClientModel
+from .summary_sla_report_model import SummarySLAReportModel

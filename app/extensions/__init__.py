@@ -1,4 +1,4 @@
-# services/extensions.py
+# app/extensions.py
 from flask_assets import Environment
 from flask_admin import Admin
 from flask_babel import Babel
@@ -10,8 +10,8 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from healthcheck import HealthCheck
 
-from app.utilities import BaseModel
-
+from .base_model import BaseModel
+from .cdn_registration import register_app_cdn
 
 # Services
 admin = Admin(template_mode='bootstrap3', base_template="security_layout.html")

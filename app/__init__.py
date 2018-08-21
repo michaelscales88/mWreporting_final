@@ -1,24 +1,25 @@
 # app/__init__.py
 from flask import Flask
 
-from .extensions import (
+import templates  # Templates directory functions as a frontend
+from app.extensions import (
     admin, bootstrap, mail,
     moment, health, babel,
-    db, serializer, assets, debugger
+    db, serializer, assets,
+    debugger, register_app_cdn, BaseModel
 )
 from .server import configure_server
-from .utilities import BaseModel
 
-""" Create the application. """
+""" Create the app """
 app_instance = Flask(
     __name__,
     template_folder='../templates',
     static_folder="../static",
 )
 
+""" Bind config + security settings to app """
+import app.core as app_core
 
-""" Bind config + security settings """
-import app.config as app_config
 
 """ Init + Bind extensions to app """
 # Ordering is important.
@@ -30,28 +31,23 @@ serializer.init_app(app_instance)
 mail.init_app(app_instance)
 moment.init_app(app_instance)
 health.init_app(app_instance, "/healthcheck")
+register_app_cdn(app_instance)
+assets.init_app(app_instance)   # Manage JavaScript bundles
+templates.nav.init_app(app_instance)
 
 # Inject db session into all models
 BaseModel.set_session(db.session)
 
-# Manage JavaScript
-assets.init_app(app_instance)
-app_config.add_cdns(app_instance)
-
-# Enable production/development settings
+# Enable/Disable development extensions
 if app_instance.debug:
     debugger.init_app(app_instance)
 
 # Module imports
-# Security should go first
-import app.security
+app_core.after_db_init()
+import app.celery_tasks
 import app.report
-import app.scheduled_tasks
 
 # Add local HTML
-import templates as template_routes
-app_instance.register_blueprint(template_routes.frontend_bp)
-template_routes.nav.init_app(app_instance)
-
+app_instance.register_blueprint(templates.frontend_bp)
 
 configure_server(app_instance)

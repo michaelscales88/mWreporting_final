@@ -4,8 +4,7 @@ from importlib import import_module
 from flask_assets import Bundle
 
 from .encoders import AppJSONEncoder
-from .extensions import health, assets
-from .utilities import check_local_db
+from app.extensions import health, assets
 
 
 def build_routes(server_instance, api, module_name):
@@ -25,8 +24,6 @@ def build_routes(server_instance, api, module_name):
 
 
 def configure_server(server_instance):
-    from .config import init_loggers
-    from .extensions.mailer import init_notifications
     """
     Uses the server's context to build all the components of the server.
     This allows the blueprints to access the instance of server that they're
@@ -36,11 +33,17 @@ def configure_server(server_instance):
     """
     with server_instance.app_context():
 
+        from app.core.utilities import check_local_db, set_logger
+        from app.extensions.mailer import init_notifications
+
         # Enable production/development settings
-        if server_instance.debug:
-            init_loggers("DEBUG")
-        else:
-            init_loggers("INFO")
+        if not server_instance.debug:
+            # Application logger: rotates every 30 days
+            set_logger("INFO")
+            # SQLAlchemy logger: long term to show history of DB modifications
+            set_logger("INFO", name="sqlalchemy.engine", rotating=False)
+            # SQLAlchemy logger: long term to show history of DB modifications
+            set_logger("INFO", name="app.sqlalchemy", rotating=False)
             init_notifications()
 
         # Register system checks

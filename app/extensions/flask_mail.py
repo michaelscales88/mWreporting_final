@@ -1,6 +1,5 @@
 # services/app_mail.py
 # Credit to Doekman https://gist.github.com/doekman/d24e233035c0a193d4890eaf9703e220
-# Added async email integration with celery
 import logging
 from flask_mail import Message
 

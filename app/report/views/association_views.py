@@ -3,7 +3,8 @@ from flask_security import current_user
 
 
 class TablesLoadedView(BaseView):
-    form_excluded_columns = ["date_downloaded", "date_requested", "is_loaded"]
+    form_excluded_columns = ('last_updated', 'date_requested', 'calls_loaded', "events_loaded")
+    column_list = ('loaded_date', 'last_updated', 'complete')
 
 
 class ClientManagerView(BaseView):

@@ -18,7 +18,7 @@ stop_rabbit:
 
 # Celery worker thread start up commands
 start_worker:
-	celery -A app.celery worker --beat -l debug
+	celery worker -A app.celery_tasks.celery -l info --beat -l info
 
 stop_worker:
 	pkill -9 -f 'celery worker'
