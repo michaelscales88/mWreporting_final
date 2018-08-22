@@ -1,18 +1,18 @@
 # security/__init__.py
 from flask import url_for, Blueprint, flash, redirect
 from flask_restful import Api
-from flask_admin import helpers
-from flask_security import Security, SQLAlchemyUserDatastore, logout_user
+from flask_security import logout_user
 
 from app import app_instance
+from app.extensions import admin, db
 from app.server import build_routes
-from .views import RolesView, UsersView
 from .models import UserModel, RolesModel, users_roles_association
 from .utilities import ExtendedLoginForm, ExtendedRegisterForm
-from app.extensions import admin, db
+from .views import RolesView, UsersView
 
 # Configure app settings
 import app.core.config_runner
+
 
 security_bp = Blueprint('user_bp', __name__)
 security_api = Api(security_bp)
@@ -31,20 +31,8 @@ def after_db_init():
         # Creates any models that have been imported
         db.create_all()
 
-        # Manage user roles and security
-        user_datastore = SQLAlchemyUserDatastore(db, UserModel, RolesModel)
-        security = Security(app_instance, user_datastore,
-                            login_form=ExtendedLoginForm,
-                            register_form=ExtendedRegisterForm)
-
-        @security.context_processor
-        def security_context_processor():
-            return dict(
-                admin_base_template=admin.base_template,
-                admin_view=admin.index_view,
-                h=helpers,
-                get_url=url_for
-            )
+        # Init security for the application
+        from .security import user_datastore
 
         # Create the Admin user
         if not UserModel.find(1):

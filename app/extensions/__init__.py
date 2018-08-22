@@ -14,7 +14,7 @@ from .base_model import BaseModel
 from .cdn_registration import register_app_cdn
 
 # Services
-admin = Admin(template_mode='bootstrap3', base_template="security_layout.html")
+admin = Admin(template_mode='bootstrap3', base_template="admin_layout.html")
 babel = Babel()
 db = SQLAlchemy(model_class=BaseModel)  # Database manager
 mail = Mail()                           # Mailer
