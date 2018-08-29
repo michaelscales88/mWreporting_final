@@ -1,3 +1,11 @@
+import atexit
+from app import app_instance
+
+
+@atexit.register
+def shutdown():
+    pass
+
+
 if __name__ == '__main__':
-    from backend import app
-    app.run(port=8080)
+    app_instance.run(port=8080)

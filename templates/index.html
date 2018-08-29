@@ -1,0 +1,36 @@
+<!-- index page: index.html -->
+{% extends 'base_layout.html' %}
+
+{% block control_area %}
+    {{ super() }}
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="display-3">{{ title if title else 'mW Reporting' }}</h1>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="form-row">
+            {% if current_user and current_user.is_authenticated %}
+                <h3>Hi
+                {% if current_user.first_name and current_user.last_name %}
+                    {{ current_user.first_name }} {{ current_user.last_name }}
+                {% elif current_user.first_name %} {{ current_user.first_name }}
+                {% elif current_user.last_name %} {{ current_user.last_name }}
+                {% else %} {{ current_user.username }}
+                {% endif %}
+                </h3>
+                <p>Do you want to <a href="{{ url_for('security.logout') }}">log out</a>?</p>
+                <p>Go to <a href="{{ url_for('frontend_bp.serve_pages', page="sla_report") }}">reports</a>!<p>
+            {% else %}
+                <p>Hello! Would you like to <a href="{{ url_for('security.login') }}">log in</a>?</p>
+                <p>Or</p>
+                <p>You can make a <a href="{{ url_for('frontend_bp.serve_pages', page="sla_report") }}">report</a>!</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock control_area %}
+
+{% block data_area %}
+    {{ super() }}
+    <p>This is where Health Checks will go.</p>
+{% endblock %}
