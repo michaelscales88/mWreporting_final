@@ -28,7 +28,3 @@ RUN mkdir -p /var/www
 RUN mkdir -p /uwsgi
 
 ADD main.py /var/www
-
-# Run as a non-root user by default, run as user with least privileges.
-USER nobody
-

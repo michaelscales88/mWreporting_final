@@ -1,10 +1,4 @@
-import atexit
 from app import app_instance
-
-
-@atexit.register
-def shutdown():
-    pass
 
 
 if __name__ == '__main__':
