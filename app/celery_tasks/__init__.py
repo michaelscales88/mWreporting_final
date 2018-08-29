@@ -5,7 +5,7 @@ from celery import Celery
 from celery.utils.log import get_task_logger
 
 from app import app_instance, admin, db
-from .views import ScheduledItemsView
+from .views import ScheduleDispatchItemView
 
 
 scheduled_tasks_bp = Blueprint('tasks_bp', __name__)
@@ -16,12 +16,12 @@ task_logger = get_task_logger(__name__)
 
 """ Create models for module in dB """
 with app_instance.app_context():
-    from .models import ScheduleItemModel
+    from .models import ScheduleDispatchItemModel
     # Creates any models that have been imported
     db.create_all()
 
     # Register the admin views to the extension
-    admin.add_view(ScheduledItemsView(ScheduleItemModel, db.session, name='Scheduled Tasks'))
+    admin.add_view(ScheduleDispatchItemView(ScheduleDispatchItemModel, db.session, name='Scheduled Tasks'))
 
     celery = Celery(
         app_instance.import_name,

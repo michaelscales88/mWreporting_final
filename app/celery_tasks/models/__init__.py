@@ -1,1 +1,1 @@
-from .models import ScheduleItemModel
+from .models import ScheduleDispatchItemModel

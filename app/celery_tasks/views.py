@@ -3,7 +3,9 @@ from app.base_view import BaseView
 from flask_security import current_user
 
 
-class ScheduledItemsView(BaseView):
+class ScheduleDispatchItemView(BaseView):
+    column_exclude_list = ['active']
+    form_excluded_columns = ['active']
 
     def is_accessible(self):
         if super().is_accessible():

@@ -30,8 +30,8 @@ with app_instance.app_context():
     db.create_all()
 
     # Report Views: All
-    admin.add_view(SLAReportView(SlaReportModel, db.session, name='SLA Report', category="SLA Admin"))
-    admin.add_view(SLASummaryReportView(SummarySLAReportModel, db.session, name='Summary Report', category="SLA Admin"))
+    admin.add_view(SLAReportView(SlaReportModel, db.session, name='SLA Reports', category="SLA Admin"))
+    admin.add_view(SLASummaryReportView(SummarySLAReportModel, db.session, name='Summary Reports', category="SLA Admin"))
 
     # Client Manager Views: Manager Area
     admin.add_view(ClientManagerView(ClientManager, db.session, name="Client Managers", category="User Admin"))
