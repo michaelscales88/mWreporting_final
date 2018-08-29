@@ -54,14 +54,11 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 
 # Flask stuff:
+gen/
 instance/
-tmp/
-database/db_repository/
-*.db
 .webassets-cache
 
 # Post-gres settings
