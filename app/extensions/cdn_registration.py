@@ -9,7 +9,7 @@ def register_app_cdn(app):
     )
     # DataTable for displaying information in a grid
     app.extensions['bootstrap']['cdns']['dataTable'] = WebCDN(
-        'https://cdn.datatables.net/1.10.16/'
+        'https://cdn.datatables.net/1.10.19/'
     )
     # Buttons for saving/printing
     app.extensions['bootstrap']['cdns']['dataTableBtns'] = WebCDN(

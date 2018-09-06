@@ -6,12 +6,14 @@ from sqlalchemy.sql import func, or_
 
 from .data_helpers import get_external_session
 from app.core import get_pk
-from app.celery_tasks import celery, task_logger as logger
+from app.celery import celery
+from app.celery_tasks import task_logger as logger
 from ..models import TablesLoadedModel, CallTableModel, EventTableModel
 
 
 @celery.task(name='report.utilities.data_loader')
 def data_loader(*args):
+    logger.warning("Started: Data loader.")
     """
 
     """
@@ -27,7 +29,7 @@ def data_loader(*args):
     dates_query = dates_query.filter(
         or_(
             TablesLoadedModel.last_updated.is_(None),
-            TablesLoadedModel.last_updated + timedelta(minutes=2) < func.DATETIME(datetime.utcnow())
+            TablesLoadedModel.last_updated + timedelta(minutes=2) < datetime.now()
         )
     )
     # Minimize stressing the system by preventing massive queries
@@ -36,7 +38,7 @@ def data_loader(*args):
     ).all()
 
     for tl_model in dates_to_load:
-        tl_model.update(last_updated=datetime.utcnow())
+        tl_model.update(last_updated=datetime.utcnow().replace(microsecond=0))
     TablesLoadedModel.session.commit()
 
     if not len(dates_to_load) > 0:
@@ -95,7 +97,7 @@ def data_loader(*args):
                     primary_key = rec.get(matching_key)
                     if not primary_key:
                         logger.error("Could not identify primary key for foreign record.\n"
-                                          "{dump}".format(dump=dumps(gr, indent=2, default=str)))
+                                     "{dump}".format(dump=dumps(gr, indent=2, default=str)))
                         continue
 
                     record = table.find(primary_key)
@@ -125,14 +127,24 @@ def data_loader(*args):
         return "Success: Tables loaded."
     finally:
         # Always close the connection to the external database
+        CallTableModel.session.remove()
         ext_session.close()
         logger.info("Closed external data connection.")
+
+        logger.warning("Completed: Summary report loader.")
 
 
 @celery.task(name='report.utilities.data_scheduler')
 def data_scheduler(*args):
-    RANGE_START = datetime.today().date().replace(month=7, day=1)
-    RANGE_END = datetime.today().date().replace(month=7, day=31)
-    for date in TablesLoadedModel.not_loaded_when2when(RANGE_START, RANGE_END):
+    """
+    Add days to load to the system.
+    :param args:
+    :return:
+    """
+    logger.warning("Started: Data scheduler.")
+    end = datetime.today().date()
+    start = end - timedelta(days=40)
+    for date in TablesLoadedModel.not_loaded_when2when(start, end):
         TablesLoadedModel.create(loaded_date=date)
     TablesLoadedModel.session.commit()
+    logger.warning("Completed: Data scheduler.")

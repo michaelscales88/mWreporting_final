@@ -1,12 +1,13 @@
 # report/tasks.py
 import logging
+
 import pandas as pd
 from celery.schedules import crontab
 
 from app.core import save_xls
 from .models import SlaReportModel, SummarySLAReportModel
 from .utilities import (
-    report_loader, make_summary_sla_report,
+    make_summary_sla_report,
     # run_reports, email_reports,
     make_sla_report, add_client_names, compute_avgs,
     format_df, make_summary,
@@ -15,58 +16,42 @@ from .utilities import (
 logger = logging.getLogger("app")
 
 
-def register_tasks(server_instance):
-    server_instance.config['CELERYBEAT_SCHEDULE']['loading_task'] = {
+def register_default_report_tasks(server_instance):
+    """ Report Data """
+    server_instance.config['CELERYBEAT_SCHEDULE']['load_report_data'] = {
         'task': 'report.utilities.data_loader',
         'schedule': crontab(
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )
     }
-    server_instance.config['CELERYBEAT_SCHEDULE']['report_task'] = {
-        'task': 'report.utilities.report_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
-    server_instance.config['CELERYBEAT_SCHEDULE']['make_loading_tasks'] = {
+    server_instance.config['CELERYBEAT_SCHEDULE']['schedule_loading_data'] = {
         'task': 'report.utilities.data_scheduler',
         'schedule': crontab(
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )
     }
-    server_instance.config['CELERYBEAT_SCHEDULE']['make_report_task'] = {
+
+    """ SLA Report """
+    server_instance.config['CELERYBEAT_SCHEDULE']['load_report'] = {
+        'task': 'report.utilities.report_loader',
+        'schedule': crontab(
+            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
+        )
+    }
+    server_instance.config['CELERYBEAT_SCHEDULE']['schedule_loading_report'] = {
         'task': 'report.utilities.report_scheduler',
         'schedule': crontab(
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )
     }
-    server_instance.config['CELERYBEAT_SCHEDULE']['make_summary_report_task'] = {
-        'task': 'report.utilities.summary_report_scheduler',
+
+    """ Summary SLA Report """
+    server_instance.config['CELERYBEAT_SCHEDULE']['load_summary_report'] = {
+        'task': 'report.utilities.summary_report_loader',
         'schedule': crontab(
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )
     }
-
-
-def report_task(report_name, start_time=None, end_time=None, clients=None):
-    if start_time and end_time:
-        if report_name == 'sla_report':
-            return report_loader(start_time, end_time, clients)
-        elif report_name == 'run_series':
-            return run_reports(start_time, end_time, interval='H', period=12)
-        elif report_name == 'get_summary':
-            return get_summary_sla_report(start_time, end_time, clients)
-        elif report_name == 'email_series':
-            return email_reports(start_time, end_time, interval='H', period=12)
-        else:
-            return SlaReportModel.set_empty(SlaReportModel())
-    else:
-        logger.error(
-            "Error: Report times: {start} and {end} are"
-            "not both provided.\n".format(
-                start=start_time, end=end_time
-            )
-        )
 
 
 def get_sla_report(start_time, end_time, clients=()):
@@ -99,25 +84,30 @@ def get_sla_report(start_time, end_time, clients=()):
             )
         )
 
-    df = pd.DataFrame.from_dict(report.data, orient='index')
+    if report.data:
+        df = pd.DataFrame.from_dict(report.data, orient='index')
 
-    # Filter the report to only include desired clients
-    if clients and len(clients) > 0:
-        df = df.filter(items=clients, axis=0)
+        # Filter the report to only include desired clients
+        if clients and len(clients) > 0:
+            df = df.filter(items=clients, axis=0)
 
-    # Make the visible index the DID extension + client name,
-    # or just DID extension if no name exists
-    df = add_client_names(df)
+        # Make the visible index the DID extension + client name,
+        # or just DID extension if no name exists
+        df = add_client_names(df)
 
-    if not df.empty:
         # Create programmatic columns and rows
         df = make_summary(df)
         df = compute_avgs(df)
+
         # Filter out columns containing raw data
         df = df[['Client'] + SlaReportModel.headers()]
 
-    # Prettify percentages
-    return df.applymap(format_df)
+        # Prettify percentages
+        df = df.applymap(format_df)
+    else:
+        df = pd.DataFrame(columns=['Client'] + SlaReportModel.headers())
+
+    return df
 
 
 def get_summary_sla_report(start_time, end_time, clients=()):
@@ -159,16 +149,10 @@ def get_summary_sla_report(start_time, end_time, clients=()):
     # Filter the report to only include desired clients
     if clients and len(clients) > 0:
         df = df.filter(items=clients, axis=1)
-        print("filtered")
 
     list_of_dfs = []
     for col in df.keys():
-        # Convert each column into a separate frame ->
         # Convert each column cell into a row with columns: preserving row_name
-        # for row_name in df[col].keys():
-            # print((row_name, df[col][row_name]))
-            # print()
-
         t_df = pd.DataFrame.from_dict(
             dict(
                 (row_name, df[col][row_name])
@@ -189,10 +173,6 @@ def get_summary_sla_report(start_time, end_time, clients=()):
         t_df.name = col
 
         list_of_dfs.append(t_df)
-
-    for t_df in list_of_dfs:
-        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-            print(t_df)
 
     save_xls(list_of_dfs, "test.xls")
 

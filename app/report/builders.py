@@ -43,8 +43,6 @@ DEFAULT_ROW_VALS = [
     timedelta(0)  # 'Longest Waiting Answered'
 ]
 
-DEFAULT_ROW = OrderedDict(zip(HEADERS, DEFAULT_ROW_VALS))
-
 
 def build_sla_data(start_time, end_time):
     logger.info(
@@ -55,8 +53,9 @@ def build_sla_data(start_time, end_time):
     # Check that the data has been loaded for the report date
     if not TablesLoadedModel.interval_is_loaded(start_time, end_time):
         logger.warning("Data not loaded for report interval.\n"
-                       "Attempting to load data.")
-        # TODO: implement this
+                       "Requesting to load data and will try again later.")
+        TablesLoadedModel.add_interval(start_time, end_time)
+        return
 
     inbound_calls = CallTableModel.query.filter(
         and_(
@@ -72,7 +71,8 @@ def build_sla_data(start_time, end_time):
 
         # Index on dialed party number
         row_name = str(call.dialed_party_number)
-        row = sla_data.get(row_name, DEFAULT_ROW)
+        row = sla_data.setdefault(row_name, OrderedDict(zip(HEADERS, DEFAULT_ROW_VALS))
+)
 
         event_dict = {}
         # Caching events by type makes report comparisons easier
@@ -157,8 +157,8 @@ def build_summary_sla_data(start_time, end_time, interval):
     if not SlaReportModel.interval_is_loaded(start_time, end_time, interval):
         logger.warning("Data not loaded for report interval.\n"
                        "Attempting to load data.")
-        # TODO: implement this
-        return "Error: SLA reports are not loaded for the interval."
+        # TODO: implement scheduling the reports needed for the interval
+        return "Exiting: Need to create reports first"
 
     summary_sla_data = {}
     while start_time < end_time:

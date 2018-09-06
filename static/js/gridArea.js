@@ -1,37 +1,44 @@
-function getGridArea(ajaxFn, config, method) {
-    return $(config['table_name']).DataTable({
-        processing: true,
-        pageLength: config['num_rows'],
-        ajax: {
-            url: config['api'],
-            data: ajaxFn,
-            method: method
+function getTableDiv(ajaxFn, api) {
+    return $.ajax({
+        url: api,
+        success: function (json) {
+            let $tableDiv = $("#tableDiv");
+            let $table = '<table id="displayTable" class="table table-striped table-bordered" ' +
+                '       cellspacing="0" width="100%" data-toggle="tooltip" data-placement="top" ' +
+                '       title="Scroll left or right to see more information."><thead><tr>' +
+                '       </tr></thead></table>';
+
+            $tableDiv.empty();
+            $tableDiv.append($table);
+            let $table2 = '<table id="displayTable2" class="table table-striped table-bordered" ' +
+                '       cellspacing="0" width="100%" data-toggle="tooltip" data-placement="top" ' +
+                '       title="Scroll left or right to see more information."><thead><tr>' +
+                '       </tr></thead></table>';
+
+            $tableDiv.append($table2);
+            $.each(json.columns, function (i, val) {
+                $('#displayTable thead tr').append("<th>" + val + "</th>")
+                $('#displayTable2 thead tr').append("<th>" + val + "</th>")
+            });
+
+            $('table.table').DataTable({
+                processing: true,
+                paging: false,
+                pageLength: -1,
+                dom: '<<B>lf<t>ip>',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                scrollX: true,
+                scrollY: 400,
+                scrollCollapse: true,
+                data: json
+            });
+
+            // Apply a search to the second table for the demo
+            $('#displayTable2').DataTable().search( '22' ).draw();
         },
-        columns: [
-            { title: "Client" },
-            { title: "I/C Presented" },
-            { title: "I/C Answered" },
-            { title: "I/C Lost" },
-            { title: "Voice Mails" },
-            { title: "Incoming Live Answered (%)" },
-            { title: "Incoming Received (%)" },
-            { title: "Incoming Abandoned (%)" },
-            { title: "Average Incoming Duration" },
-            { title: "Average Wait Answered" },
-            { title: "Average Wait Lost" },
-            { title: "Calls Ans Within 15" },
-            { title: "Calls Ans Within 30" },
-            { title: "Calls Ans Within 45" },
-            { title: "Calls Ans Within 60" },
-            { title: "Calls Ans Within 999" },
-            { title: "Call Ans + 999" },
-            { title: "Longest Waiting Answered" },
-            { title: "PCA" }
-        ],
-        dom: '<<B>lf<t>ip>',
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        scrollX: true
+        dataType: "json",
+        method: "POST"
     });
 }

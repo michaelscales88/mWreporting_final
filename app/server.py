@@ -32,9 +32,7 @@ def configure_server(server_instance):
     :return: Configured Flask App
     """
     with server_instance.app_context():
-
         from app.core.utilities import check_local_db, set_logger
-        from app.extensions.mailer import init_notifications
 
         # Enable production/development settings
         if not server_instance.debug:
@@ -44,7 +42,6 @@ def configure_server(server_instance):
             set_logger("INFO", name="sqlalchemy.engine", rotating=False)
             # SQLAlchemy logger: long term to show history of DB modifications
             set_logger("INFO", name="app.sqlalchemy", rotating=False)
-            init_notifications()
 
         # Register system checks
         health.add_check(check_local_db)

@@ -22,10 +22,15 @@ def serve_pages(page):
             'index.html',
             title='Home'
         )
-    elif page in ("sla_report.html", "sla_report"):
+    elif page in ("sla_report.html", "daily-report", "sla_report"):
         return render_template(
-            'report/sla_report.html',
-            title='SLA Report'
+            'report/daily_report.html',
+            title='Daily Report'
+        )
+    elif page in ("sla_summary_report.html", "summary-report", "summary_sla_report"):
+        return render_template(
+            'report/summary_report.html',
+            title='Summary Report'
         )
     else:
         return abort(404)

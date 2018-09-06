@@ -14,6 +14,24 @@ scheduled_tasks_api = Api(scheduled_tasks_bp)
 task_logger = get_task_logger(__name__)
 
 
+def create_celery(app):
+    celery = Celery(
+        app.import_name,
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return super().__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+
 """ Create models for module in dB """
 with app_instance.app_context():
     from .models import ScheduleDispatchItemModel
@@ -22,23 +40,6 @@ with app_instance.app_context():
 
     # Register the admin views to the extension
     admin.add_view(ScheduleDispatchItemView(ScheduleDispatchItemModel, db.session, name='Scheduled Tasks'))
-
-    celery = Celery(
-        app_instance.import_name,
-        broker=app_instance.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app_instance.config)
-
-
-    class ContextTask(celery.Task):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with app_instance.app_context():
-                return super().__call__(self, *args, **kwargs)
-
-
-    celery.Task = ContextTask
 
 
 app_instance.register_blueprint(scheduled_tasks_bp)

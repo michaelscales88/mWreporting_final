@@ -48,16 +48,19 @@ ADMINS = [MAIL_DEFAULT_SENDER, '"Mike Scales" michael.scales88@gmail.com']
 
 # SQLAlchemy Settings
 DB_TYPE = os.getenv("DB_TYPE", "")
-USER = os.getenv('DB_USER', '')
-PWD = os.getenv('DB_PW', '')
-DB_HOST = os.getenv('HOST', '')
-DB_NAME = os.getenv('DB_NAME', '')
-SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}/{name}'.format(
-    type=DB_TYPE, user=USER, pwd=PWD, host=DB_HOST, name=DB_NAME
+POSTGRES_USER = os.getenv('POSTGRES_USER', '')
+POSTGRES_PW = os.getenv('POSTGRES_PASSWORD', '')
+DB_HOST = os.getenv('DB_HOST', '')
+POSTGRES_DB = os.getenv('POSTGRES_DB', '')
+DB_PORT = os.getenv('DB_PORT', '')
+
+SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}:{port}/{name}'.format(
+    type=DB_TYPE, user=POSTGRES_USER, pwd=POSTGRES_PW, host=DB_HOST, name=POSTGRES_DB, port=DB_PORT
 ) if DB_TYPE else 'sqlite:///' + os.environ.get(
     'SQLALCHEMY_DATABASE_URI',
     os.path.join(BASE_DIR, 'instance/development_app.db')
 )
+
 SQLALCHEMY_MIGRATE_REPO = os.environ.get(
     'SQLALCHEMY_MIGRATE_FOLDER', os.path.join(BASE_DIR, '..', 'instance/db_repository')
 )

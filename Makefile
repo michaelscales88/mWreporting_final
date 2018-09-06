@@ -2,7 +2,7 @@
 # Must be run with sudo for rabbitmq-server.
 
 # include environment variables for worker
-include nginx-uwsgi-flask/dev.env
+include nginx-uwsgi/dev.env
 export
 
 .PHONY: start_worker stop_worker \
@@ -16,9 +16,9 @@ start_rabbit:
 stop_rabbit:
 	rabbitmqctl stop
 
-# Celery worker thread start up commands
+# Celery worker thread start up commands --autoscale=10,3
 start_worker:
-	celery worker -A app.celery_tasks.celery -l info --beat -l info
+	celery worker -A app.celery -l info --beat -l info
 
 stop_worker:
 	pkill -9 -f 'celery worker'

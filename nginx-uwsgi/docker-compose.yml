@@ -4,7 +4,7 @@ services:
   # Task Broker
   rabbit:
     image: rabbitmq:3.6.6-management
-    env_file: dev.env
+    env_file: app.env
     ports:
       - "5672"
       - "15672"
@@ -12,7 +12,7 @@ services:
   # Flask Images/Controller/View/Worker Layers
   uwsgi:
     image: flask_base:latest
-    env_file: dev.env
+    env_file: app.env
     volumes:
       - ./uwsgi.ini:/uwsgi/uwsgi.ini
       - ../app:/var/www/app
@@ -21,48 +21,41 @@ services:
       - ../templates:/var/www/templates
       - asset-volume:/tmp
     depends_on:
-      - postgres
+      - pgdb
     working_dir: /uwsgi
     command: uwsgi --thunder-lock --ini /uwsgi/uwsgi.ini
     restart: always
 
   worker:
     image: flask_base:latest
-    env_file: dev.env
+    env_file: app.env
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
+      - pgdb
     working_dir: /var/www
     command: celery -A app.celery worker --beat -l debug
 
   flower:
     image: flask_base:latest
-    env_file: dev.env
+    env_file: app.env
     volumes_from:
       - uwsgi
     depends_on:
       - rabbit
+      - pgdb
     ports:
       - "5555"
     working_dir: /var/www
     command: celery flower -A app.celery
 
-  # Data Layers
-  data:
-    build:
-      context: .
-      dockerfile: ./postgres/Dockerfile
+  # Data Layer
+  pgdb:
+    image: postgres:latest
+    env_file: app.env
     volumes:
-      - /var/lib/postgresql
-    command: "true"
-
-  postgres:
-    build:
-      context: .
-      dockerfile: ./postgres/Dockerfile
-    volumes_from:
-      - data
+      - db-data:/var/lib/postgresql/data
     ports:
       - "5432"
 
@@ -87,3 +80,4 @@ services:
 # Shared volume exposes sockets/pid files
 volumes:
   asset-volume:
+  db-data:

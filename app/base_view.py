@@ -13,6 +13,8 @@ class BaseView(ModelView):
     can_edit = False
     can_create = False
     can_view_details = True
+    page_size = 50
+    can_set_page_size = True
 
     def is_accessible(self):
         if not current_user.is_active or not current_user.is_authenticated:

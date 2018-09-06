@@ -19,7 +19,7 @@ class UserModel(db.Model, UserMixin):
 
     # User email information
     email = db.Column(db.String(255), nullable=False, unique=True)
-    confirmed_at = db.Column(db.DateTime())
+    confirmed_at = db.Column(db.DateTime(timezone=True))
 
     # User information
     active = db.Column('is_active', db.Boolean(), nullable=False, default=1)

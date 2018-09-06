@@ -17,16 +17,14 @@ class AlchemyJSONEncoder(json.JSONEncoder):
                 'day': obj.day,
                 'hour': obj.hour,
                 'minute': obj.minute,
-                'second': obj.second,
-                'microsecond': obj.microsecond,
+                'second': obj.second
             }
 
         elif isinstance(obj, timedelta):
             return {
                 '__type__': 'timedelta',
                 'days': obj.days,
-                'seconds': obj.seconds,
-                'microseconds': obj.microseconds,
+                'seconds': obj.seconds
             }
 
         else:

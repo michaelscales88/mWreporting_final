@@ -1,7 +1,7 @@
 from celery.schedules import crontab
 
 from app import app_instance
-from . import celery
+from app.celery import celery
 
 
 @celery.task(name="app.celery_tasks.dispatch_task")

@@ -24,22 +24,13 @@
 {% endblock control_area %}
 
 {% block data_area %}
-    <table id="displayTable" class="table table-striped table-bordered" cellspacing="0" width="100%"
-           data-toggle="tooltip" data-placement="top" title="Scroll left or right to see more information.">
-    </table>
+    <div id="tableDiv"></div>
 {% endblock data_area %}
 
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            // JS functions are imported from packed.js
-            let tableConfig = {
-                api: "/api/report/sla_report",
-                table_name: 'table#displayTable',
-                num_rows: -1
-            };
-
             let midnight = moment().hour(0).minute(0).second(0);
             let midnightYesterday = moment().hour(0).minute(0).second(0).subtract(1, "days");
 
@@ -52,7 +43,6 @@
                 return {
                     start_time: $("input#start-selector").val(),
                     end_time: $("input#end-selector").val(),
-                    task: "sla_report",
                     clients: JSON.stringify($("#report-select").val())
                 };
             }
@@ -64,9 +54,14 @@
             initSelectBox("{{ url_for("sla_report_bp.slaclientapi") }}", "report-select");
 
             // Configure Table Area
-            let table = getGridArea(ajaxFn, tableConfig, "POST");
+            let $tableArea = getTableDiv(ajaxFn, "{{ url_for("sla_report_bp.slareportapi") }}");
+
             $('button#refreshButton').on('click', function () {
-                table.ajax.reload();
+                $tableArea = getTableDiv(ajaxFn, "{{ url_for("sla_report_bp.slareportapi") }}");
+            });
+
+            $('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
+                $.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
             });
         });
     </script>

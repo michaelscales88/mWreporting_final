@@ -4,7 +4,7 @@ from flask_restful import Api
 
 from app import app_instance, admin, db
 from app.server import build_routes
-from .tasks import register_tasks
+from .tasks import register_default_report_tasks
 from .views import (
     SLAReportView, ClientView, CallDataView,
     EventDataView, TablesLoadedView, ClientManagerView,
@@ -24,7 +24,7 @@ with app_instance.app_context():
     )
 
     # Init task scheduling
-    register_tasks(app_instance)
+    register_default_report_tasks(app_instance)
 
     # Creates any models that have been imported
     db.create_all()

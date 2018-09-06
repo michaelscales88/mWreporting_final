@@ -12,14 +12,14 @@ class SummarySLAReportModel(db.Model):
     __repr_attrs__ = ['id', 'start_time', 'end_time', 'interval']
 
     id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
+    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
     frequency = db.Column(db.Integer, default=86400)
     data = db.Column(json_type)
 
-    date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
-    last_updated = db.Column(db.DateTime)
-    completed_on = db.Column(db.DateTime)
+    date_requested = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now())
+    last_updated = db.Column(db.DateTime(timezone=True))
+    completed_on = db.Column(db.DateTime(timezone=True))
 
     @hybrid_property
     def interval(self):

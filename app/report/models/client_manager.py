@@ -15,7 +15,7 @@ client_user_association = db.Table(
 class ClientManager(db.Model):
     __tablename__ = 'client_manager'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'))
     manager = db.relationship(user_model, backref="clients")
 
     clients = db.relationship(

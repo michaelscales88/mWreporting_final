@@ -3,7 +3,7 @@ import logging
 from flask import current_app
 from . import mail
 from .flask_mail import FlaskMailHandler
-from app.celery_tasks import celery
+from app.celery import celery
 
 
 subject_template = 'Web-app problems in %(module)s > %(funcName)s'
@@ -54,8 +54,8 @@ class AsyncFlaskMailer(FlaskMailHandler):
         return rv
 
 
-def init_notifications():
-    mail_handler = FlaskMailHandler(mail, subject_template)
+def init_notifications(mailer):
+    mail_handler = FlaskMailHandler(mailer, subject_template)
     mail_handler.setLevel(logging.ERROR)
     mail_handler.setFormatter(text_template, html_template)
     current_app.logger.addHandler(mail_handler)
