@@ -77,7 +77,7 @@ def report_loader(*args):
 
     reports_to_make = []
     for report_model in reports_query:
-        report_model.update(last_updated=datetime.datetime.utcnow())
+        report_model.update(last_updated=datetime.datetime.utcnow().replace(microsecond=0))
         reports_to_make.append((report_model.start_time, report_model.end_time))
     SlaReportModel.session.commit()
 
@@ -160,7 +160,7 @@ def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=Non
         logger.error(report_data)
         return
 
-    report.update(data=report_data, completed_on=datetime.datetime.utcnow())
+    report.update(data=report_data, completed_on=datetime.datetime.utcnow().replace(microsecond=0))
     SummarySLAReportModel.session.commit()
     logger.warning(
         "Successfully finished making report for: "
@@ -188,7 +188,7 @@ def summary_report_loader(*args):
         start_time = report_model.start_time
         end_time = report_model.end_time
         frequency = report_model.frequency
-        report_model.update(last_updated=datetime.datetime.utcnow())
+        report_model.update(last_updated=datetime.datetime.utcnow().replace(microsecond=0))
         SummarySLAReportModel.session.commit()
 
         if not make_summary_sla_report(

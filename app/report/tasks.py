@@ -111,6 +111,7 @@ def get_sla_report(start_time, end_time, clients=()):
 
 
 def get_summary_sla_report(start_time, end_time, clients=()):
+    # TODO: make each client a separate page -> make the frontend create the tables
     if not clients:
         clients = ("7559",)
 

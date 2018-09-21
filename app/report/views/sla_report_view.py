@@ -1,9 +1,12 @@
-from flask import Markup
 import datetime
-from pandas import DataFrame
-from app.base_view import BaseView
+
+import pytz
+from flask import Markup, flash
 from flask_security import current_user
+from pandas import DataFrame
 from wtforms.validators import DataRequired
+
+from app.base_view import BaseView
 
 
 class SLAReportView(BaseView):
@@ -16,30 +19,36 @@ class SLAReportView(BaseView):
         start_time=dict(
             label='Start Time',
             default=(
-                datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-                - datetime.timedelta(days=1)
+                    datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
+                    - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         ),
         end_time=dict(
             label='End Time',
             default=(
-                datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+                    datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
+                    - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         )
-
     )
-
-    def _data_formatter(view, context, model, name):
-        if model.data:
-            df = DataFrame(model.data)
-            return Markup(df.T.to_html())
-        else:
-            return ""
-
+    form_widget_args = dict(date_requested=dict(disabled=True))
     column_formatters = {
-        'data': _data_formatter
+        "data": lambda v, c, m, p:
+        ""
+        if m.data is None
+        else Markup(DataFrame(m.data).T.to_html()),
+        "last_updated": lambda v, c, m, p:
+        ""
+        if m.last_updated is None
+        else m.last_updated.replace(tzinfo=pytz.utc).astimezone(
+            tz=pytz.timezone("US/Central")),
+        "completed_on": lambda v, c, m, p:
+        ""
+        if m.completed_on is None
+        else m.completed_on.replace(tzinfo=pytz.utc).astimezone(
+            tz=pytz.timezone("US/Central")),
     }
 
     def is_accessible(self):
@@ -53,3 +62,10 @@ class SLAReportView(BaseView):
             return True
 
         return False
+
+    def validate_form(self, form):
+        """ Custom validation code that checks dates """
+        if form.start_time.data > form.end_time.data:
+            flash("start time cannot be greater than end time!")
+            return False
+        return super().validate_form(form)

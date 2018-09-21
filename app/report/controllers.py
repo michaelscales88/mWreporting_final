@@ -62,6 +62,7 @@ class SLAReportAPI(Resource):
         super().__init__()
 
     def post(self):
+        print("hit post", self.args)
         report_frame = get_sla_report(
             start_time=self.args['start_time'],
             end_time=self.args['end_time'],

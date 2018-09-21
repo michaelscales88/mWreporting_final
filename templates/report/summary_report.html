@@ -1,68 +1,12 @@
-<!-- report module page: sla_report.html -->
-{% extends 'base_layout.html' %}
-
-{% block control_area %}
-    <div class="row">
-        <div class="col-lg-3">
-            <h1 class="display-3">{{ title if title else 'Default_Data' }}</h1>
-        </div>
-        <div class="col-lg-4">
-            <label for="report-select">Selected clients:</label>
-            <p><select id="report-select" title="Client selector" multiple="multiple" style="width: 100%">
-            </select></p>
-        </div>
-        <div class="col-lg-5">{% include "partials/calendars.html" %}</div>
-    </div>
-    <div class="row" style="padding-top: 15px">
-        <div class="col-lg-12">
-            <button type="button" class="btn btn-primary" id="refreshButton" style="width: 100%"
-                    data-toggle="tooltip" data-placement="bottom" title="Get the report for the current selection.">
-                Get Report
-            </button>
-        </div>
-    </div>
-{% endblock control_area %}
-
-{% block data_area %}
-    <div id="tableDiv"></div>
-{% endblock data_area %}
+<!-- report module page: summary_report.html -> extends by report_layout.html -->
+{% extends 'report/report_layout.html' %}
 
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            let midnight = moment().hour(0).minute(0).second(0);
-            let midnightYesterday = moment().hour(0).minute(0).second(0).subtract(1, "days");
-
-            let pickerConfig = {
-                start_time: midnightYesterday,
-                end_time: midnight
-            };
-
-            function ajaxFn() {
-                return {
-                    start_time: $("input#start-selector").val(),
-                    end_time: $("input#end-selector").val(),
-                    clients: JSON.stringify($("#report-select").val())
-                };
-            }
-
-            // DT picker for selecting report interval
-            dtSelector('#start-selector', '#end-selector', pickerConfig);
-
-            // Client Selector
-            initSelectBox("{{ url_for("sla_report_bp.slaclientapi") }}", "report-select");
-
             // Configure Table Area
-            let $tableArea = getTableDiv(ajaxFn, "{{ url_for("sla_report_bp.slareportapi") }}");
-
-            $('button#refreshButton').on('click', function () {
-                $tableArea = getTableDiv(ajaxFn, "{{ url_for("sla_report_bp.slareportapi") }}");
-            });
-
-            $('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
-                $.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
-            });
+            initTableDiv("{{ url_for("sla_report_bp.slareportapi") }}");
         });
     </script>
 {% endblock scripts %}

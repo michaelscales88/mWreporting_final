@@ -13,15 +13,16 @@ from ..models import TablesLoadedModel, CallTableModel, EventTableModel
 
 @celery.task(name='report.utilities.data_loader')
 def data_loader(*args):
-    logger.warning("Started: Data loader.")
     """
 
     """
+    logger.warning("Started: Data loader.")
     # Get dates that aren't fully loaded
     dates_query = TablesLoadedModel.query.filter(
         or_(
             TablesLoadedModel.calls_loaded.is_(False),
-            TablesLoadedModel.events_loaded.is_(False)
+            TablesLoadedModel.events_loaded.is_(False),
+            TablesLoadedModel.complete == False
         )
     )
     # Filter to fresh dates or dates with grace time to prevent

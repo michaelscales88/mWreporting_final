@@ -11,13 +11,13 @@ class SlaReportModel(db.Model):
     __repr_attrs__ = ['id', 'start_time', 'end_time', 'completed_on']
 
     id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
     data = db.Column(json_type)
 
-    date_requested = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now())
-    last_updated = db.Column(db.DateTime(timezone=True))
-    completed_on = db.Column(db.DateTime(timezone=True))
+    date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
+    last_updated = db.Column(db.DateTime)
+    completed_on = db.Column(db.DateTime)
 
     @classmethod
     def headers(cls):
@@ -68,13 +68,14 @@ class SlaReportModel(db.Model):
         """
         if isinstance(interval, int):
             interval = datetime.timedelta(seconds=interval)
-        print(interval)
+
+        if not isinstance(interval, datetime.timedelta):
+            return None
+
         while start_time < end_time:
             end_dt = start_time + interval
             # Does not exist
-            print("checking for", start_time, end_dt)
             if not cls.get(start_time, end_dt):
-                print("missing {} {}".format(start_time, end_dt))
                 return False
             start_time = end_dt
         return True

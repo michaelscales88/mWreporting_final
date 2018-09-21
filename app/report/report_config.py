@@ -1,6 +1,6 @@
 REPORT_MODULE_ROUTES = {
     "SummaryReportAPI": {
-        "url": "/api/summary-report",
+        "url": "/api/report/summary-report",
         "methods": {}
     },
     "SLAReportAPI": {

@@ -22,6 +22,7 @@ class TablesLoadedModel(db.Model):
 
     @hybrid_property
     def complete(self):
+        # TODO: evaluate whether this is the best strategy
         return self.is_loaded(self.loaded_date)
 
     @classmethod
