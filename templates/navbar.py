@@ -11,7 +11,7 @@ def mynavbar():
         View('Home', 'frontend_bp.serve_pages', page='index'),
         Subgroup(
             'Reports',
-            View('Daily Report', 'frontend_bp.serve_pages', page='daily-report'),
+            View('Daily Report', 'frontend_bp.serve_pages', page='dailyl-report'),
             View('Summary Report', 'frontend_bp.serve_pages', page='summary-report'),
         )
     )

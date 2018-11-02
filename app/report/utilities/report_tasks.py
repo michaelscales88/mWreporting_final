@@ -1,7 +1,7 @@
 # report/services/sla_report.py
 import datetime
 from flask import current_app
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
 
 from app.celery import celery
 from app.celery_tasks import task_logger as logger
@@ -68,7 +68,10 @@ def report_loader(*args):
     reports_query = reports_query.filter(
         or_(
             SlaReportModel.last_updated.is_(None),
-            SlaReportModel.last_updated < datetime.datetime.utcnow() + datetime.timedelta(minutes=limit),
+            and_(
+                SlaReportModel.completed_on.is_(None),
+                datetime.datetime.utcnow() - SlaReportModel.last_updated > datetime.timedelta(minutes=limit)
+            )
         )
     )
 
@@ -103,7 +106,7 @@ def report_loader(*args):
 @celery.task(name='report.utilities.report_scheduler')
 def report_scheduler(*args):
     logger.warning("Started: Report scheduler.")
-    start = datetime.datetime.strptime("08/01/18 07:00", "%m/%d/%y %H:%M")
+    start = datetime.datetime.strptime("09/01/18 07:00", "%m/%d/%y %H:%M")
     end = start + datetime.timedelta(days=30)
     while start < end:
         end_dt = start + datetime.timedelta(hours=12)
