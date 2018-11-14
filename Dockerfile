@@ -31,3 +31,6 @@ ADD prepopulate.py /var
 ADD modules /var/modules
 ADD static /var/static
 ADD templates /var/templates
+
+# Lowest permissions by default
+USER nobody
