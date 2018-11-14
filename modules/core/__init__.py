@@ -56,20 +56,20 @@ def after_db_init():
         )
         admin.add_view(RolesView(RolesModel, db.session, name='Manage Privileges', category='User Admin'))
 
+        # Enable production/development settings
+        if not app.debug:
+            # Application logger: rotates every 30 days
+            set_logger("INFO")
+            # SQLAlchemy logger: long term to show history of DB modifications
+            set_logger("INFO", name="sqlalchemy.engine", rotating=False)
+            # SQLAlchemy logger: long term to show history of DB modifications
+            set_logger("INFO", name="app.sqlalchemy", rotating=False)
+
 
 app.register_blueprint(security_bp)
 
 # Inject module routes
 build_routes(app, security_api, "core")
-
-# Enable production/development settings
-if not app.debug:
-    # Application logger: rotates every 30 days
-    set_logger("INFO")
-    # SQLAlchemy logger: long term to show history of DB modifications
-    set_logger("INFO", name="sqlalchemy.engine", rotating=False)
-    # SQLAlchemy logger: long term to show history of DB modifications
-    set_logger("INFO", name="app.sqlalchemy", rotating=False)
 
 # Register system checks
 health.add_check(check_local_db)

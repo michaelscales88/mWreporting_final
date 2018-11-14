@@ -9,37 +9,23 @@ def get_log_dir(log_name):
     return log_dir
 
 
-for root, dirs, files in os.walk("modules/"):
+""" Make a folder for non-production dBs """
+os.makedirs("instance/", exist_ok=True)
+
+
+for root, dirs, files in os.walk("."):
+    # Venv should be the last directory
+    # Don't read any of the configs from the virtual env
+    if 'venv' in root.split("/"):
+        continue
+
     for file in files:
         if file.endswith("_config.py"):
             module, *d = file.split("_")
             try:
-                app.config.from_pyfile(os.path.join(os.path.basename(root), file))
+                path = os.path.abspath(os.path.join(root, file))
+                app.config.from_pyfile(path)
             except FileNotFoundError:
                 print("Failed to load [ {module_name} ] module settings.".format(module_name=module))
             else:
                 print("Loaded [ {module_name} ] module settings.".format(module_name=module))
-
-""" Make a folder for non-production dBs """
-os.makedirs("instance/", exist_ok=True)
-
-for root, dirs, files in os.walk("instance/"):
-    """
-    Load optional instance settings for the application.
-    """
-    for file in files:
-        if file.endswith("_config.py"):
-            module, *d = file.split("_")
-            try:
-                file_path = os.path.abspath(os.path.join("instance/", file))
-                app.config.from_pyfile(file_path)
-            except FileNotFoundError:
-                print(
-                    "Failed to load [ {module_name} ] "
-                    "file's instance settings.".format(module_name=module)
-                )
-            else:
-                print(
-                    "Loaded [ {module_name} ] file's "
-                    "instance settings.".format(module_name=module)
-                )
