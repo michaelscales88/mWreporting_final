@@ -1,26 +1,6 @@
 version: '3.6'
 
 services:
-  # Task Broker for network
-  rabbit:
-    image: rabbitmq:3.6.6-management
-    env_file: envs/app.env
-    ports:
-      - target: 5672
-        published: 5672
-        protocol: tcp
-        mode: host
-      - target: 25672
-        published: 25672
-        protocol: tcp
-        mode: host
-    networks:
-      - portainer_agent
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.role == manager] #[node.platform.os == linux]
-
   # Docker GUI management
   gui:
     image: portainer/portainer
@@ -66,4 +46,5 @@ volumes:
 
 networks:
   portainer_agent:
-    external: true
+    driver: overlay
+    attachable: true

@@ -14,7 +14,6 @@ services:
       - source: uwsgi_ini
         target: /uwsgi/uwsgi.ini
     networks:
-      - portainer_network
       - proxy_network
     ports:
       - "8001"
@@ -33,8 +32,6 @@ services:
     env_file: envs/app.env
     volumes:
       - app_instance:/var/instance
-    networks:
-      - portainer_network
     working_dir: /var/www
     command: celery -A app.celery worker --beat -l debug
     deploy:
@@ -52,7 +49,6 @@ services:
     volumes:
       - app_instance:/var/instance
     networks:
-      - portainer_network
       - proxy_network
     ports:
       - "5555"
@@ -66,14 +62,32 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  # Task Broker for network
+  rabbit:
+    image: rabbitmq:3.6.6-management
+    env_file: envs/app.env
+    ports:
+    - target: 5672
+      published: 5672
+      protocol: tcp
+      mode: host
+    - target: 25672
+      published: 25672
+      protocol: tcp
+      mode: host
+    networks:
+      - proxy_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+
 # Shared volume persists application information
 volumes:
   app_instance:
 
 networks:
   proxy_network:
-    external: true
-  portainer_network:
     external: true
 
 configs:
