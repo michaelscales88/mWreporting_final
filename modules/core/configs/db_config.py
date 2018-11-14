@@ -25,3 +25,5 @@ SQLALCHEMY_MIGRATE_REPO = os.environ.get(
 )
 # Turn this off to reduce overhead
 SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv("SQLALCHEMY_TRACK_MODIFICATIONS", False)
+
+EXTERNAL_DATABASE_URI = os.getenv("EXTERNAL_DATABASE_URI", "")

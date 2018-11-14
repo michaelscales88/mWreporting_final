@@ -28,6 +28,6 @@ RUN mkdir -p /uwsgi/logs
 ADD main.py /var
 ADD prepopulate.py /var
 
-ADD app /var/app
+ADD modules /var/modules
 ADD static /var/static
 ADD templates /var/templates

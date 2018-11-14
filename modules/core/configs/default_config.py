@@ -1,7 +1,6 @@
 # app/core/core_config.py
 import os
 
-
 # Application Settings
 SITE_NAME = os.getenv("SITE_NAME", "MW_REPORTING")
 BASE_DIR = os.path.abspath(

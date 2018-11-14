@@ -30,24 +30,6 @@ def after_db_init():
         # Creates any models that have been imported
         db.create_all()
 
-        # Init security for the application
-        from .security import user_datastore
-
-        # Create the Admin user
-        if not UserModel.find(1):
-            user_datastore.create_role(name='_permissions | admin')
-            user_datastore.create_role(name='_permissions | manager')
-            user_datastore.create_role(name='_permissions | agent')
-            user_datastore.create_user(
-                username='admin',
-                email='admin@email.com',
-                password='password',
-                first_name='Super',
-                last_name='Admin',
-                roles=['_permissions | admin']
-            )
-            db.session.commit()
-
         # Register the admin views to the extension
         admin.add_view(
             UsersView(
