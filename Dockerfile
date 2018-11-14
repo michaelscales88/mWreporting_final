@@ -23,8 +23,11 @@ RUN python3 -m pip install -U pip==$PIP_VER
 RUN python3 -m pip install --requirement /tmp/requirements.txt
 RUN rm -f /tmp/requirements.txt
 
-# Set entrypoint directory
-RUN mkdir -p /var/www
-RUN mkdir -p /uwsgi
+# Add code to the working directory
+RUN mkdir -p /uwsgi/logs
+ADD main.py /var
+ADD prepopulate.py /var
 
-ADD main.py /var/www
+ADD app /var/app
+ADD static /var/static
+ADD templates /var/templates

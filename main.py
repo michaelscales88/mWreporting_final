@@ -1,5 +1,5 @@
-from app import app_instance
+from modules import app
 
 
 if __name__ == '__main__':
-    app_instance.run(port=8080)
+    app.run(host='0.0.0.0', port=8080)

@@ -7,8 +7,14 @@ services:
     command: -g "daemon off;" -c /etc/nginx/nginx.conf
     entrypoint: nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
     configs:
 #      - source: ssl_creds
 #        target: /etc/nginx/ssl-cert.conf
@@ -35,10 +41,6 @@ services:
       placement:
         constraints: [node.role == manager]
 
-networks:
-  proxy_network:
-    external: true
-
 configs:
 #  ssl_creds:
 #    file: ./nginx-uwsgi/ssl-cert.conf
@@ -59,3 +61,8 @@ configs:
 #  ssl_key:
 #    file: ./nginx-uwsgi/ssl/cert.key
 #
+
+networks:
+  proxy_network:
+    driver: overlay
+    attachable: true
