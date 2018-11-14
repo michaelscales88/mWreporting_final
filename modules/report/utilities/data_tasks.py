@@ -6,7 +6,7 @@ from sqlalchemy.sql import func, or_
 
 from .data_helpers import get_external_session
 from modules.core import get_pk
-from modules.celery import celery
+from modules.celery_worker import celery
 from modules.celery_tasks import task_logger as logger
 from ..models import TablesLoadedModel, CallTableModel, EventTableModel
 

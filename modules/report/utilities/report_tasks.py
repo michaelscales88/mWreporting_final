@@ -3,7 +3,7 @@ import datetime
 from flask import current_app
 from sqlalchemy.sql import or_, and_
 
-from modules.celery import celery
+from modules.celery_worker import celery
 from modules.celery_tasks import task_logger as logger
 from ..builders import build_sla_data, build_summary_sla_data
 from ..models import SlaReportModel, SummarySLAReportModel
