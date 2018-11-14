@@ -1,0 +1,78 @@
+version: '3.6'
+
+services:
+  # Application
+  uwsgi:
+    image: flask_base:latest
+    env_file: envs/app.env
+    volumes:
+    - app_instance:/var/instance
+    configs:
+    - source: start_flask
+      target: /var/start_flask.sh
+      mode: 0755
+    - source: uwsgi_ini
+      target: /uwsgi/uwsgi.ini
+    networks:
+      - proxy_network
+    ports:
+      - "8001"
+    command: sh /var/start_flask.sh
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  worker:
+    image: flask_base:latest
+    env_file: envs/app.env
+    volumes_from:
+      - uwsgi
+    depends_on:
+      - rabbit
+    working_dir: /var/www
+    command: celery -A app.celery worker --beat -l debug
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  # Task Broker GUI management
+  flower:
+    image: flask_base:latest
+    env_file: envs/app.env
+    volumes_from:
+      - uwsgi
+    networks:
+      - proxy_network
+    ports:
+      - "5555"
+    working_dir: /var/www
+    command: celery flower -A app.celery
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+# Shared volume exposes sockets/pid files
+volumes:
+  app_instance:
+
+networks:
+  proxy_network:
+    external: true
+
+configs:
+  start_flask:
+    file: ./nginx-uwsgi/start_flask.sh
+  uwsgi_ini:
+    file: ./nginx-uwsgi/uwsgi.ini

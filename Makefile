@@ -2,7 +2,7 @@
 # Must be run with sudo for rabbitmq-server.
 
 # include environment variables for worker
-include nginx-uwsgi/dev.env
+include nginx-uwsgi/envs/dev.env
 export
 
 .PHONY: start_worker stop_worker \

@@ -1,0 +1,61 @@
+version: '3.6'
+
+services:
+  # Reverse proxy services
+  nginx:
+    image: nginx:latest
+    command: -g "daemon off;" -c /etc/nginx/nginx.conf
+    entrypoint: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    configs:
+#      - source: ssl_creds
+#        target: /etc/nginx/ssl-cert.conf
+      - source: proxy_params
+        target: /etc/nginx/proxy_params
+      - source: uwsgi_params
+        target: /etc/nginx/uwsgi_params
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
+      - source: sla_conf
+        target: /etc/nginx/conf.d/sla.reporting.com.conf
+      - source: flower_conf
+        target: /etc/nginx/conf.d/flower.reporting.com.conf
+#    secrets:
+#      - source: ssl_cert
+#        target: /etc/nginx/cert.crt
+#      - source: ssl_key
+#        target: /etc/nginx/cert.key
+    networks:
+      - proxy_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  proxy_network:
+    external: true
+
+configs:
+#  ssl_creds:
+#    file: ./nginx-uwsgi/ssl-cert.conf
+  proxy_params:
+    file: ./nginx/proxy_params
+  uwsgi_params:
+    file: ./nginx/uwsgi_params
+  nginx_conf:
+    file: ./nginx/nginx.conf
+  sla_conf:
+    file: ./nginx/conf.d/sla.reporting.com.conf
+  flower_conf:
+    file: ./nginx/conf.d/flower.reporting.com.conf
+
+#secrets:
+#  ssl_cert:
+#    file: ./nginx-uwsgi/ssl/cert.crt
+#  ssl_key:
+#    file: ./nginx-uwsgi/ssl/cert.key
+#
