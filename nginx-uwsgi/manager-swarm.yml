@@ -10,8 +10,8 @@ services:
         published: 5672
         protocol: tcp
         mode: host
-      - target: 15672
-        published: 15672
+      - target: 25672
+        published: 25672
         protocol: tcp
         mode: host
     networks:
@@ -22,10 +22,13 @@ services:
         constraints: [node.role == manager] #[node.platform.os == linux]
 
   # Docker GUI management
-  portainer:
+  gui:
     image: portainer/portainer
     ports:
-      - "33333:9000"
+      - target: 9000
+        published: 33333
+        protocol: tcp
+        mode: host
     volumes:
       - portainer_data:/data
     depends_on:
@@ -63,5 +66,4 @@ volumes:
 
 networks:
   portainer_agent:
-    driver: overlay
-    attachable: true
+    external: true

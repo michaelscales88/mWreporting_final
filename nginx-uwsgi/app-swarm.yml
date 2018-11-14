@@ -31,8 +31,8 @@ services:
   worker:
     image: flask_base:latest
     env_file: envs/app.env
-    volumes_from:
-      - uwsgi
+    volumes:
+      - app_instance:/var/instance
     networks:
       - portainer_network
     working_dir: /var/www
@@ -49,8 +49,8 @@ services:
   flower:
     image: flask_base:latest
     env_file: envs/app.env
-    volumes_from:
-      - uwsgi
+    volumes:
+      - app_instance:/var/instance
     networks:
       - portainer_network
       - proxy_network

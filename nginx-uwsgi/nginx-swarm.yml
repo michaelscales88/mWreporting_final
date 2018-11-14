@@ -64,5 +64,4 @@ configs:
 
 networks:
   proxy_network:
-    driver: overlay
-    attachable: true
+    external: true
