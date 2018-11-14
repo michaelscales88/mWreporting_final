@@ -32,8 +32,8 @@ services:
     env_file: envs/app.env
     volumes:
       - app_instance:/var/instance
-    working_dir: /var/www
-    command: celery -A app.celery worker --beat -l debug
+    working_dir: /var
+    command: celery -A modules.celery worker --beat -l debug
     deploy:
       mode: replicated
       replicas: 1
@@ -52,8 +52,8 @@ services:
       - proxy_network
     ports:
       - "5555"
-    working_dir: /var/www
-    command: celery flower -A app.celery
+    working_dir: /var
+    command: celery flower -A modules.celery
     deploy:
       mode: replicated
       replicas: 1
