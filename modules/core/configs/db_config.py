@@ -13,7 +13,7 @@ DB_HOST = os.getenv('DB_HOST', '')
 DB_NAME = os.getenv('DB_NAME', '')
 DB_PORT = os.getenv('DB_PORT', '')
 
-SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}:{port}'.format(
+SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}:{port}/{name}'.format(
     type=DB_TYPE, user=DB_USER, pwd=DB_PASSWORD, host=DB_HOST, name=DB_NAME, port=DB_PORT
 ) if DB_TYPE else 'sqlite:///' + os.environ.get(
     'SQLALCHEMY_DATABASE_URI',
