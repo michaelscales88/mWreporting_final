@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pandas as pd
 
-from ..models import ClientModel
+from modules.report.models import ClientModel
 
 SUM_COLS = [
     'I/C Presented',

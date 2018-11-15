@@ -1,7 +1,6 @@
 import datetime
 
 from flask import Markup
-from flask_security import current_user
 from pandas import DataFrame
 from wtforms.validators import DataRequired
 
@@ -44,14 +43,3 @@ class SLASummaryReportView(BaseView):
         'data': _data_formatter
     }
 
-    def is_accessible(self):
-        if super().is_accessible():
-            return True
-
-        if current_user.has_role('_permissions | manager'):
-            self.can_create = False
-            self.can_edit = True
-            self.can_delete = False
-            return True
-
-        return False

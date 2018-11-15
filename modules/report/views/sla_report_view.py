@@ -2,7 +2,6 @@ import datetime
 
 import pytz
 from flask import Markup, flash
-from flask_security import current_user
 from pandas import DataFrame
 from wtforms.validators import DataRequired
 
@@ -19,16 +18,16 @@ class SLAReportView(BaseView):
         start_time=dict(
             label='Start Time',
             default=(
-                    datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
-                    - datetime.timedelta(days=1)
+                datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
+                - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         ),
         end_time=dict(
             label='End Time',
             default=(
-                    datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
-                    - datetime.timedelta(days=1)
+                datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
+                - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         )
@@ -51,21 +50,9 @@ class SLAReportView(BaseView):
             tz=pytz.timezone("US/Central")),
     }
 
-    def is_accessible(self):
-        if super().is_accessible():
-            return True
-
-        if current_user.has_role('_permissions | manager'):
-            self.can_create = False
-            self.can_edit = True
-            self.can_delete = False
-            return True
-
-        return False
-
     def validate_form(self, form):
         """ Custom validation code that checks dates """
-        if form.start_time.data > form.end_time.data:
+        if hasattr(form, "start_time") and form.start_time.data > form.end_time.data:
             flash("start time cannot be greater than end time!")
             return False
         return super().validate_form(form)

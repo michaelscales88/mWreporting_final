@@ -1,12 +1,12 @@
 # report/services/sla_report.py
 import datetime
-from flask import current_app
 from sqlalchemy.sql import or_, and_
 
 from modules.celery_worker import celery
 from modules.celery_tasks import task_logger as logger
-from ..builders import build_sla_data, build_summary_sla_data
-from ..models import SlaReportModel, SummarySLAReportModel
+from modules.report.builders import build_sla_data, build_summary_sla_data
+from modules.report.models import SlaReportModel, SummarySLAReportModel
+from .helpers import utc_now
 
 
 @celery.task(name='report.utilities.make_sla_report')
@@ -47,7 +47,7 @@ def make_sla_report(*args, start_time=None, end_time=None):
         )
         return False
 
-    report.update(data=report_data, completed_on=datetime.datetime.utcnow())
+    report.update(data=report_data, completed_on=utc_now())
     SlaReportModel.session.commit()
     logger.warning(
         "Completed: Make SLA report - {start} to {end}".format(
@@ -59,62 +59,40 @@ def make_sla_report(*args, start_time=None, end_time=None):
 
 @celery.task(name='report.utilities.report_loader')
 def report_loader(*args):
-    logger.warning("Started: Report loader")
-    limit = current_app.config.get('MAX_INTERVAL', 6)
-    reports_query = SlaReportModel.query.filter(
-        SlaReportModel.completed_on.is_(None)
-    )
-
-    reports_query = reports_query.filter(
+    logger.warning("Started: Report loader {}".format(utc_now()))
+    next_report = SlaReportModel.query.filter(
         or_(
-            SlaReportModel.last_updated.is_(None),
+            SlaReportModel.last_updated.is_(None),  # If the report has never been run
             and_(
+                # If the report was run, but didn't succeed
                 SlaReportModel.completed_on.is_(None),
-                datetime.datetime.utcnow() - SlaReportModel.last_updated > datetime.timedelta(minutes=limit)
+                SlaReportModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
             )
         )
-    )
+    ).first()
 
-    # Minimize stressing the system by preventing massive queries
-    reports_query = reports_query.limit(limit).all()
-
-    reports_to_make = []
-    for report_model in reports_query:
-        report_model.update(last_updated=datetime.datetime.utcnow().replace(microsecond=0))
-        reports_to_make.append((report_model.start_time, report_model.end_time))
-    SlaReportModel.session.commit()
-
-    if not len(reports_query) > 0:
+    if not next_report:
         logger.info("No reports to load.")
         return "Success: No reports to load."
+    else:
+        next_report.update(last_updated=utc_now())
+        next_report.session.commit()
 
-    for start_time, end_time in reports_to_make:
-        if make_sla_report(start_time=start_time, end_time=end_time):
-            logger.info(
-                "Successfully finished making report for: "
-                "{start} to {end}".format(start=start_time, end=end_time)
-            )
-        else:
-            logger.error(
-                "Error: Failed to make report for: "
-                "{start} to {end}".format(start=start_time, end=end_time)
-            )
+    start_time = next_report.start_time
+    end_time = next_report.end_time
+
+    if make_sla_report(start_time=start_time, end_time=end_time):
+        logger.info(
+            "Successfully finished making report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
+    else:
+        logger.error(
+            "Error: Failed to make report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
 
     logger.warning("Completed: Report loader")
-
-
-@celery.task(name='report.utilities.report_scheduler')
-def report_scheduler(*args):
-    logger.warning("Started: Report scheduler.")
-    start = datetime.datetime.strptime("09/01/18 07:00", "%m/%d/%y %H:%M")
-    end = start + datetime.timedelta(days=30)
-    while start < end:
-        end_dt = start + datetime.timedelta(hours=12)
-        if SlaReportModel.get(start, end_dt) is None:
-            SlaReportModel.create(start_time=start, end_time=end_dt)
-        start = end_dt
-    SlaReportModel.session.commit()
-    logger.warning("Completed: Report scheduler.")
 
 
 @celery.task(name='report.utilities.make_summary_sla_report')
@@ -173,61 +151,34 @@ def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=Non
 
 @celery.task(name='report.utilities.summary_report_loader')
 def summary_report_loader(*args):
-    logger.warning("Started: Summary report loader.")
-    summary_report_query = SummarySLAReportModel.query.filter(
-        SummarySLAReportModel.completed_on.is_(None)
-    )
-
-    report_model = summary_report_query.filter(
+    logger.warning("Started: Summary report loader {}".format(utc_now()))
+    next_report = SummarySLAReportModel.query.filter(
         or_(
-            SummarySLAReportModel.last_updated.is_(None),
-            SummarySLAReportModel.last_updated < (
-                datetime.datetime.utcnow() + datetime.timedelta(minutes=2)
+            SummarySLAReportModel.last_updated.is_(None),  # If the report has never been run
+            and_(
+                # If the report was run, but didn't succeed
+                SummarySLAReportModel.completed_on.is_(None),
+                SummarySLAReportModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
             )
         )
     ).first()
 
-    if report_model:
-        start_time = report_model.start_time
-        end_time = report_model.end_time
-        frequency = report_model.frequency
-        report_model.update(last_updated=datetime.datetime.utcnow().replace(microsecond=0))
-        SummarySLAReportModel.session.commit()
-
-        if not make_summary_sla_report(
-            start_time=start_time, end_time=end_time, frequency=frequency
-        ):
-            logger.error(
-                "Error: Failed to make report for: "
-                "{start} to {end}".format(start=start_time, end=end_time)
-            )
-    else:
+    if not next_report:
         logger.info("No summary reports to run.")
+        return "Success: No summary reports to load."
+    else:
+        next_report.update(last_updated=utc_now())
+        next_report.session.commit()
+
+    start_time = next_report.start_time
+    end_time = next_report.end_time
+    frequency = next_report.frequency
+
+    if not make_summary_sla_report(
+        start_time=start_time, end_time=end_time, frequency=frequency
+    ):
+        logger.error(
+            "Error: Failed to make report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
     logger.warning("Completed: Summary report loader.")
-
-
-def email_reports(start_time, end_time, interval='D', period=1):
-    # td = get_td(interval, period)
-    # filename = "test_report.xlsx"
-    # # output = io.BytesIO()
-    # # writer = pd.ExcelWriter(filename,
-    # #                         engine='xlsxwriter',
-    # #                         datetime_format='mmm d yyyy hh:mm:ss',
-    # #                         date_format='mmmm dd yyyy')
-    # while start_time <= end_time:
-    #     report = report_loader(start_time, start_time + td)
-    #     with report as report:
-    #         print(report)
-    #         msg = Message(
-    #             "Report Test",
-    #             recipients=[current_app.config['MAIL_USERNAME']],
-    #             # attachments=Attachment(
-    #             #     filename=filename,
-    #             #     data=report.to_excel(writer)
-    #             # )
-    #         )
-    #         msg.attach(filename, "xlsx", export_excel(report))
-    #         # send_async_email(msg)
-    #     # report.to_excel(writer)
-    #     start_time += td
-    return True

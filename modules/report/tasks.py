@@ -24,22 +24,10 @@ def register_default_report_tasks(server_instance):
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )
     }
-    server_instance.config['CELERYBEAT_SCHEDULE']['schedule_loading_data'] = {
-        'task': 'report.utilities.data_scheduler',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
 
     """ SLA Report """
     server_instance.config['CELERYBEAT_SCHEDULE']['load_report'] = {
         'task': 'report.utilities.report_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
-    server_instance.config['CELERYBEAT_SCHEDULE']['schedule_loading_report'] = {
-        'task': 'report.utilities.report_scheduler',
         'schedule': crontab(
             **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
         )

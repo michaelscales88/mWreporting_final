@@ -1,14 +1,15 @@
 # data/services/loaders.py
-from json import dumps
-from datetime import datetime, timedelta
+import datetime
+
 from flask import current_app
+from json import dumps
 from sqlalchemy.sql import func, or_
 
-from .data_helpers import get_external_session
-from modules.core import get_pk
-from modules.celery_worker import celery
 from modules.celery_tasks import task_logger as logger
-from ..models import TablesLoadedModel, CallTableModel, EventTableModel
+from modules.celery_worker import celery
+from modules.core import get_pk
+from modules.report.models import TablesLoadedModel, CallTableModel, EventTableModel
+from .helpers import get_external_session, utc_now
 
 
 @celery.task(name='report.utilities.data_loader')
@@ -27,39 +28,19 @@ def data_loader(*args):
     )
     # Filter to fresh dates or dates with grace time to prevent
     # multiple loads for the same date
-    dates_query = dates_query.filter(
+    date_to_load = dates_query.filter(
         or_(
             TablesLoadedModel.last_updated.is_(None),
-            TablesLoadedModel.last_updated + timedelta(minutes=2) < datetime.now()
+            TablesLoadedModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
         )
-    )
-    # Minimize stressing the system by preventing massive queries
-    dates_to_load = dates_query.limit(
-        current_app.config.get('MAX_INTERVAL', 3)
-    ).all()
+    ).first()
 
-    for tl_model in dates_to_load:
-        tl_model.update(last_updated=datetime.utcnow().replace(microsecond=0))
-    TablesLoadedModel.session.commit()
-
-    if not len(dates_to_load) > 0:
+    if not date_to_load:
         logger.info("No tables to load.")
         return "Success: No tasks."
-
-    logger.info(dumps({
-        "Message": "Loading data.",
-        "Load Interval": ", ".join([str(tl_model.loaded_date) for tl_model in dates_to_load])
-    }, indent=2, default=str))
-
-    # Check if events and calls are needed for that date
-    calls_interval = [
-        tl_model.loaded_date
-        for tl_model in dates_to_load if tl_model.calls_loaded == False
-    ]
-    call_events_interval = [
-        tl_model.loaded_date
-        for tl_model in dates_to_load if tl_model.events_loaded == False
-    ]
+    else:
+        date_to_load.update(last_updated=utc_now())
+        date_to_load.session.commit()
 
     ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
     if not ext_uri:
@@ -71,13 +52,13 @@ def data_loader(*args):
     ext_session = get_external_session(ext_uri)
 
     load_info = {
-        CallTableModel: calls_interval, EventTableModel: call_events_interval
+        CallTableModel: date_to_load.loaded_date, EventTableModel: date_to_load.loaded_date
     }
     try:
-        for table, loading_interval in load_info.items():
+        for table, loaded_date in load_info.items():
             # Get the data from the source database
             results = ext_session.query(table).filter(
-                func.DATE(table.start_time).in_(loading_interval)
+                func.DATE(table.start_time) == loaded_date
             )
             # Slice the data up by date to keep track of dates loaded
             grouped_data = {}
@@ -128,24 +109,7 @@ def data_loader(*args):
         return "Success: Tables loaded."
     finally:
         # Always close the connection to the external database
-        CallTableModel.session.remove()
         ext_session.close()
         logger.info("Closed external data connection.")
 
         logger.warning("Completed: Summary report loader.")
-
-
-@celery.task(name='report.utilities.data_scheduler')
-def data_scheduler(*args):
-    """
-    Add days to load to the system.
-    :param args:
-    :return:
-    """
-    logger.warning("Started: Data scheduler.")
-    end = datetime.today().date()
-    start = end - timedelta(days=40)
-    for date in TablesLoadedModel.not_loaded_when2when(start, end):
-        TablesLoadedModel.create(loaded_date=date)
-    TablesLoadedModel.session.commit()
-    logger.warning("Completed: Data scheduler.")
