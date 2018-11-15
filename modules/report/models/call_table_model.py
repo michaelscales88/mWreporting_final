@@ -12,14 +12,14 @@ class CallTableModel(db.Model):
 
     call_id = db.Column(db.Integer(), primary_key=True)
     call_direction = db.Column(db.Integer())
-    calling_party_number = db.Column(db.String())
-    dialed_party_number = db.Column(db.String())
-    account_code = db.Column(db.String())
+    calling_party_number = db.Column(db.String(50))
+    dialed_party_number = db.Column(db.String(50))
+    account_code = db.Column(db.String(10))
     start_time = db.Column(db.DateTime())
     end_time = db.Column(db.DateTime())
     system_id = db.Column(db.Integer())
-    caller_id = db.Column(db.String())
-    inbound_route = db.Column(db.String())
+    caller_id = db.Column(db.String(50))
+    inbound_route = db.Column(db.String(50))
     events = db.relationship("EventTableModel", lazy="dynamic")
 
     @hybrid_property
