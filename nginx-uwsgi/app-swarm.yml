@@ -33,7 +33,9 @@ services:
     volumes:
       - app_instance:/var/instance
     working_dir: /var
-    command: celery -A modules.celery worker --beat -l debug
+    networks:
+      - proxy_network
+    command: celery worker -A modules.celery_worker.celery --beat -l debug
     deploy:
       mode: replicated
       replicas: 1
@@ -53,7 +55,7 @@ services:
     ports:
       - "5555"
     working_dir: /var
-    command: celery flower -A modules.celery
+    command: celery flower -A modules.celery_worker.celery
     deploy:
       mode: replicated
       replicas: 1
@@ -67,10 +69,7 @@ services:
     image: rabbitmq:3.6.6-management
     env_file: envs/app.env
     ports:
-    - target: 5672
-      published: 5672
-      protocol: tcp
-      mode: host
+    - "5672"
     - target: 25672
       published: 25672
       protocol: tcp
@@ -92,6 +91,6 @@ networks:
 
 configs:
   start_flask:
-    file: ./nginx-uwsgi/start_flask.sh
+    file: ./start_flask.sh
   uwsgi_ini:
-    file: ./nginx-uwsgi/uwsgi.ini
+    file: ./uwsgi.ini
