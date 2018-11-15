@@ -85,6 +85,11 @@ class JSONEncodedDict(TypeDecorator):
 
 
 class MutableDict(Mutable, dict):
+
+    def __init__(self, max_length):
+        self.length = max_length
+        super().__init__()
+
     @classmethod
     def coerce(cls, key, value):
         """Convert plain dictionaries to MutableDict."""
@@ -110,9 +115,6 @@ class MutableDict(Mutable, dict):
 
         dict.__delitem__(self, key)
         self.changed()
-
-
-json_type = MutableDict.as_mutable(JSONEncodedDict)
 
 
 class DeltaTemplate(Template):

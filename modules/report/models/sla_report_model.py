@@ -2,7 +2,7 @@
 import datetime
 from sqlalchemy.sql import and_
 
-from modules.encoders import json_type
+from modules.encoders import JSONEncodedDict
 from modules.extensions import db
 
 
@@ -13,7 +13,7 @@ class SlaReportModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
-    data = db.Column(json_type)
+    data = db.Column(JSONEncodedDict(500))
 
     date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
     last_updated = db.Column(db.DateTime)
