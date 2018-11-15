@@ -7,14 +7,14 @@ BASE_DIR = os.path.abspath(
 
 # SQLAlchemy Settings
 DB_TYPE = os.getenv("DB_TYPE", "")
-POSTGRES_USER = os.getenv('POSTGRES_USER', '')
-POSTGRES_PW = os.getenv('POSTGRES_PASSWORD', '')
+DB_USER = os.getenv('DB_USER', '')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
 DB_HOST = os.getenv('DB_HOST', '')
-POSTGRES_DB = os.getenv('POSTGRES_DB', '')
+DB_NAME = os.getenv('DB_NAME', '')
 DB_PORT = os.getenv('DB_PORT', '')
 
-SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}:{port}/{name}'.format(
-    type=DB_TYPE, user=POSTGRES_USER, pwd=POSTGRES_PW, host=DB_HOST, name=POSTGRES_DB, port=DB_PORT
+SQLALCHEMY_DATABASE_URI = '{type}://{user}:{pwd}@{host}:{port}'.format(
+    type=DB_TYPE, user=DB_USER, pwd=DB_PASSWORD, host=DB_HOST, name=DB_NAME, port=DB_PORT
 ) if DB_TYPE else 'sqlite:///' + os.environ.get(
     'SQLALCHEMY_DATABASE_URI',
     os.path.join(BASE_DIR, 'instance/development_app.db')
