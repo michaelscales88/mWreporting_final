@@ -2,7 +2,7 @@
 import datetime
 from sqlalchemy.sql import and_
 from sqlalchemy.ext.hybrid import hybrid_property
-from modules.encoders import json_type
+from modules.encoders import JSONEncodedDict
 from modules.extensions import db
 from .sla_report_model import SlaReportModel
 
@@ -15,7 +15,7 @@ class SummarySLAReportModel(db.Model):
     start_time = db.Column(db.DateTime(timezone=True), nullable=False)
     end_time = db.Column(db.DateTime(timezone=True), nullable=False)
     frequency = db.Column(db.Integer, default=86400)
-    data = db.Column(json_type)
+    data = db.Column(JSONEncodedDict(500))
 
     date_requested = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now())
     last_updated = db.Column(db.DateTime(timezone=True))
