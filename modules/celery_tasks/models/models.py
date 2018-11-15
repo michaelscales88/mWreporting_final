@@ -23,7 +23,7 @@ class ScheduleDispatchItemModel(db.Model):
     end_time = db.Column(db.Time(), nullable=False)
 
     """ Activity by __tablename__"""
-    what_to_run = db.Column(db.String())
+    what_to_run = db.Column(db.String(10))
 
     def __str__(self):
         return self.name
