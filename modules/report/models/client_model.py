@@ -8,7 +8,7 @@ class ClientModel(db.Model):
     __repr_attrs__ = ['name', 'active']
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     ext = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, default=True)
 

@@ -13,13 +13,13 @@ class EventTableModel(db.Model):
 
     event_id = db.Column(db.Integer, primary_key=True)
     event_type = db.Column(db.Integer, nullable=False)
-    calling_party = db.Column(db.String)
-    receiving_party = db.Column(db.String)
-    hunt_group = db.Column(db.String)
-    is_conference = db.Column(db.String)
+    calling_party = db.Column(db.String(50))
+    receiving_party = db.Column(db.String(50))
+    hunt_group = db.Column(db.String(10))
+    is_conference = db.Column(db.String(10))
     start_time = db.Column(db.DateTime(timezone=True), nullable=False)
     end_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    tag = db.Column(db.String)
+    tag = db.Column(db.String(10))
     recording_rule = db.Column(db.Integer)
     call_id = db.Column(db.Integer, db.ForeignKey(CallTableModel.call_id))
 
