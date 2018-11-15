@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # Change for different build configuration
 ENV BUILD nginx-flask
@@ -9,12 +9,12 @@ ENV TZ UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install build dependencies & get latest root certificates
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     uwsgi-plugin-python3 \
     ca-certificates \
     python3-pip python3-dev build-essential \
     libssl-dev libffi-dev   \
-    iputils-ping vim net-tools
+    iputils-ping vim net-tools python3-yaml
 RUN update-ca-certificates
 
 # Inject python package dependencies
@@ -27,10 +27,11 @@ RUN rm -f /tmp/requirements.txt
 RUN mkdir -p /uwsgi/logs
 ADD main.py /var
 ADD prepopulate.py /var
+ADD client_list.yml /var
 
 ADD modules /var/modules
 ADD static /var/static
 ADD templates /var/templates
 
 # Lowest permissions by default
-USER nobody
+#USER nobody
