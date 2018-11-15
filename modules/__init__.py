@@ -2,12 +2,12 @@
 from flask import Flask
 from flask_assets import Bundle
 
-import templates  # Templates directory functions as a frontend
+import frontend  # Templates directory functions as a frontend
 from .extensions import (
     admin, bootstrap, mail,
     moment, health, babel,
     db, serializer, assets,
-    debugger, register_app_cdn, BaseModel
+    debugger, register_app_cdn
 )
 from .encoders import AppJSONEncoder
 from .server import build_routes
@@ -15,16 +15,19 @@ from .server import build_routes
 """ Create the app """
 app = Flask(
     __name__,
-    template_folder='../templates',
+    template_folder='../frontend',
     static_folder="../static",
 )
 
-""" Bind config + security settings to app """
+""" App Security + Settings """
 import modules.core as app_core
 
 
 """ Init + Bind extensions to app """
-# Ordering is important.
+# Enable/Disable development extensions
+if app.debug:
+    debugger.init_app(app)
+
 admin.init_app(app)
 babel.init_app(app)
 bootstrap.init_app(app)
@@ -33,27 +36,18 @@ serializer.init_app(app)
 mail.init_app(app)
 moment.init_app(app)
 health.init_app(app, "/healthcheck")
-register_app_cdn(app)
 assets.init_app(app)   # Manage JavaScript bundles
-templates.nav.init_app(app)
-
-# Inject db session into all models
-BaseModel.set_session(db.session)
-
-# Enable/Disable development extensions
-if app.debug:
-    debugger.init_app(app)
-
-# Module imports
-app_core.after_db_init()
-import modules.celery_tasks
-import modules.report
-
-# Add local HTML
-app.register_blueprint(templates.frontend_bp)
 
 # Register JSON encoder
 app.json_encoder = AppJSONEncoder
+
+""" Submodule Imports """
+import modules.celery_tasks
+import modules.report
+
+""" Register HTML """
+# Register external CDNs
+register_app_cdn(app)
 
 # Add server's static files to be bundled and minified
 js = Bundle(
@@ -67,3 +61,11 @@ css = Bundle(
 )
 assets.register('js_all', js)
 assets.register('css_all', css)
+
+# Nav Settings
+nav = frontend.get_nav()
+nav.init_app(app)
+frontend.register_nav_renderers(app)
+
+# Register HTML endpoints
+app.register_blueprint(frontend.frontend_bp)

@@ -1,4 +1,4 @@
-# services/custom_db.py
+# base_model.py
 from flask_sqlalchemy.model import BindMetaMixin
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
@@ -32,7 +32,6 @@ Base = declarative_base(metaclass=NoNameMeta, name='Model')
 
 class BaseModel(Base, AllFeaturesMixin):
     __abstract__ = True
-    pass
 
     @hybrid_property
     def headers(self):

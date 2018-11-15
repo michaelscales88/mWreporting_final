@@ -11,7 +11,7 @@
                 <p>
                     Manage users, roles, schedules.<BR>
                     Go back to
-                    <a href="{{ url_for('frontend_bp.serve_pages', page="index") }}">reports</a>.
+                    <a href="{{ url_for('frontend.index') }}">reports</a>.
                 </p>
                 {% if not current_user.is_authenticated %}
                     <p>

@@ -10,7 +10,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from healthcheck import HealthCheck
 
-from .base_model import BaseModel
+from modules.base_model import BaseModel
 from .cdn_registration import register_app_cdn
 
 # Services

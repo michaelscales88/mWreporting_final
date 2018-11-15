@@ -5,7 +5,7 @@ from dateutil.parser import parse
 from json import loads
 from flask_sqlalchemy import Model
 from sqlalchemy.inspection import inspect
-from modules.extensions.base_model import BaseModel
+from modules.base_model import BaseModel
 
 
 def to_datetime(value, name, *args):

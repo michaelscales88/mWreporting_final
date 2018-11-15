@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "secret")  # Uses env variable in prod
 CSRF_ENABLED = os.getenv("CSRF_ENABLED", True)
 ROWS_PER_PAGE = 50
 
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Mike1234")
+DEFAULT_PASSWORD = os.getenv("DEFAULT_PASSWORD", "Mike1234")
 MAIL_USERNAME = os.getenv('MAIL_USERNAME', 'youremail@example.com')
 MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', '"Default" <{email}>'.format(email=MAIL_USERNAME))
 

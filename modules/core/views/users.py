@@ -1,5 +1,7 @@
+from flask import flash
 from modules.base_view import BaseView
-from ..models import UserModel
+from modules.core.models import UserModel
+from .forms import CustomPasswordField
 
 
 class UsersView(BaseView):
@@ -10,9 +12,17 @@ class UsersView(BaseView):
         'username', UserModel.username
     )
     form_columns = ('email', 'first_name', 'last_name', 'username', 'password', 'roles', 'active')
-    form_widget_args = {
-        'password': {
-            'style': 'color: red',
-            'minlength': '8'
-        }
-    }
+    form_overrides = dict(password=CustomPasswordField)
+    form_widget_args = dict(
+        password=dict(
+            placeholder='Enter new password here to change password'
+        )
+    )
+
+    def delete_model(self, model):
+        if model.id == 1:
+            flash("Cannot delete [ {} ] user.".format(model.name), category="warning")
+            return False
+        return super().delete_model(model)
+
+
