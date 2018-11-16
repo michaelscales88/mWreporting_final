@@ -16,7 +16,7 @@ services:
     networks:
       - proxy_network
     ports:
-      - "8001"
+      - "5000:8001"
     command: sh /var/start_flask.sh
     deploy:
       mode: replicated
@@ -35,7 +35,7 @@ services:
     working_dir: /var
     networks:
       - proxy_network
-    command: celery worker -A modules.celery_worker.celery --beat -l debug
+    command: celery worker -A modules.celery_worker.celery --beat -l info
     deploy:
       mode: replicated
       replicas: 1
