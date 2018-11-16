@@ -19,8 +19,8 @@ app = Flask(
     static_folder="../static",
 )
 
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 299
-app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 800
+
 
 """ App Security + Settings """
 import modules.core as app_core
