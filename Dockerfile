@@ -29,6 +29,8 @@ RUN mkdir -p /uwsgi/logs
 ADD main.py /var
 ADD prepopulate.py /var
 ADD client_list.yml /var
+ADD seed_sla_reports.py /var
+ADD seed_load_dates.py /var
 
 ADD modules /var/modules
 ADD static /var/static

@@ -1,4 +1,6 @@
 import yaml
+import datetime
+
 from modules import app, db
 from modules.core import get_model_by_tablename
 
@@ -25,6 +27,7 @@ def seed_db():
             mng.clients.append(client)
 
         db.session.commit()
+
 
 
 if __name__ == '__main__':
