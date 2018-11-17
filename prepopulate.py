@@ -18,6 +18,14 @@ def seed_db():
                     client_model.create(name=name, ext=ext)
             db.session.commit()
 
+        manager = get_model_by_tablename("client_manager")
+        mng = manager.create(user_id=1)
+
+        for client in client_model.all():
+            mng.clients.append(client)
+
+        db.session.commit()
+
 
 if __name__ == '__main__':
     seed_db()
