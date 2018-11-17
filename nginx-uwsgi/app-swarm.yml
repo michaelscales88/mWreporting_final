@@ -62,7 +62,6 @@ services:
       placement:
         constraints: [node.role == manager]
 
-
   # Task Broker GUI management
   flower:
     image: flask_base:latest
