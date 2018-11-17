@@ -45,22 +45,22 @@ services:
         constraints: [node.role == manager]
 
   # Worker Process for worker threads
-  worker:
-    image: flask_base:latest
-    env_file: envs/app.env
-    volumes:
-      - app_instance:/var/instance
-    working_dir: /var
-    networks:
-      - proxy_network
-    command: celery worker -A modules.celery_worker.celery --concurrency=5 -l info -n worker@%h
-    deploy:
-      mode: replicated
-      replicas: 2celer
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.role == manager]
+#  worker:
+#    image: flask_base:latest
+#    env_file: envs/app.env
+#    volumes:
+#      - app_instance:/var/instance
+#    working_dir: /var
+#    networks:
+#      - proxy_network
+#    command: celery worker -A modules.celery_worker.celery --concurrency=5 -l info -n worker@%h
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+#      placement:
+#        constraints: [node.role == manager]
 
   # Task Broker GUI management
   flower:
