@@ -35,7 +35,7 @@ services:
     working_dir: /var
     networks:
       - proxy_network
-    command: celery worker -A modules.celery_worker.celery --beat -l info
+    command: celery worker -A modules.celery_worker.celery --beat -l info -n beat@%h
     deploy:
       mode: replicated
       replicas: 1
@@ -53,7 +53,7 @@ services:
     working_dir: /var
     networks:
       - proxy_network
-    command: celery worker -A modules.celery_worker.celery --concurrency=5 -l info
+    command: celery worker -A modules.celery_worker.celery --concurrency=5 -l info -n worker@%h
     deploy:
       mode: replicated
       replicas: 2celer

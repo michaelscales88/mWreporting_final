@@ -1,24 +1,29 @@
 #
 from modules.core import get_model_by_tablename
-from modules.extensions import db
+
+from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy.orm import relationship
+
+from modules.extensions import BaseModel
+
 from .client_model import ClientModel
 
 user_model = get_model_by_tablename("user")
 
-client_user_association = db.Table(
-    'client_manager_association', db.metadata,
-    db.Column('client_manager_id', db.Integer, db.ForeignKey('client_manager.id')),
-    db.Column('client_model_id', db.Integer, db.ForeignKey('client_model.id'))
+client_user_association = Table(
+    'client_manager_association', BaseModel.metadata,
+    Column('client_manager_id', Integer, ForeignKey('client_manager.id')),
+    Column('client_model_id', Integer, ForeignKey('client_model.id'))
 )
 
 
-class ClientManager(db.Model):
+class ClientManager(BaseModel):
     __tablename__ = 'client_manager'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'))
-    manager = db.relationship(user_model, backref="clients")
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer(), ForeignKey('user.id'))
+    manager = relationship(user_model, backref="clients")
 
-    clients = db.relationship(
+    clients = relationship(
         ClientModel,
         secondary=client_user_association,
         cascade='all'

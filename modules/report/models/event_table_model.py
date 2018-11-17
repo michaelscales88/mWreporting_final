@@ -1,27 +1,29 @@
 # data/models.py
 import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from modules.extensions import db
+from modules.extensions import BaseModel
 from .call_table_model import CallTableModel
 
 
-class EventTableModel(db.Model):
+class EventTableModel(BaseModel):
     __tablename__ = 'c_event'
     __repr_attrs__ = ['event_id', 'event_type', 'calling_party', 'receiving_party',
                       'is_conference', 'start_time', 'end_time', 'call_id']
 
-    event_id = db.Column(db.Integer, primary_key=True)
-    event_type = db.Column(db.Integer, nullable=False)
-    calling_party = db.Column(db.String(50))
-    receiving_party = db.Column(db.String(50))
-    hunt_group = db.Column(db.String(10))
-    is_conference = db.Column(db.String(10))
-    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    tag = db.Column(db.String(10))
-    recording_rule = db.Column(db.Integer)
-    call_id = db.Column(db.Integer, db.ForeignKey(CallTableModel.call_id))
+    event_id = Column(Integer, primary_key=True)
+    event_type = Column(Integer, nullable=False)
+    calling_party = Column(String(50))
+    receiving_party = Column(String(50))
+    hunt_group = Column(String(10))
+    is_conference = Column(String(10))
+    start_time = Column(DateTime(timezone=True), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=False)
+    tag = Column(String(10))
+    recording_rule = Column(Integer)
+    call_id = Column(Integer, ForeignKey(CallTableModel.call_id))
 
     @hybrid_property
     def length(self):

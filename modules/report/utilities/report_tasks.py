@@ -2,11 +2,11 @@
 import datetime
 from sqlalchemy.sql import or_, and_
 
+from modules.core import utc_now
 from modules.celery_worker import celery
 from modules.celery_tasks import task_logger as logger
 from modules.report.builders import build_sla_data, build_summary_sla_data
 from modules.report.models import SlaReportModel, SummarySLAReportModel
-from .helpers import utc_now
 
 
 @celery.task(name='report.utilities.make_sla_report')
@@ -49,6 +49,7 @@ def make_sla_report(*args, start_time=None, end_time=None):
 
     report.update(data=report_data, completed_on=utc_now())
     SlaReportModel.session.commit()
+    SlaReportModel.session.remove()
     logger.warning(
         "Completed: Make SLA report - {start} to {end}".format(
             start=start_time, end=end_time
@@ -60,23 +61,28 @@ def make_sla_report(*args, start_time=None, end_time=None):
 @celery.task(name='report.utilities.report_loader')
 def report_loader(*args):
     logger.warning("Started: Report loader {}".format(utc_now()))
-    next_report = SlaReportModel.query.filter(
-        or_(
-            SlaReportModel.last_updated.is_(None),  # If the report has never been run
-            and_(
-                # If the report was run, but didn't succeed
-                SlaReportModel.completed_on.is_(None),
-                SlaReportModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
-            )
-        )
-    ).first()
 
-    if not next_report:
-        logger.info("No reports to load.")
-        return "Success: No reports to load."
-    else:
+    # TODO: Convert to a working query
+    next_report = None
+
+    for report in SlaReportModel.all():
+        print(report)
+        if not report.completed_on:
+            if report.last_updated:
+                if report.last_updated < utc_now() - datetime.timedelta(minutes=5):
+                    next_report = report
+                    break
+            else:
+                # Untouched report
+                next_report = report
+                break
+
+    if next_report:
         next_report.update(last_updated=utc_now())
         next_report.session.commit()
+    else:
+        logger.info("No reports to load.")
+        return "Success: No reports to load."
 
     start_time = next_report.start_time
     end_time = next_report.end_time
@@ -141,8 +147,9 @@ def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=Non
         logger.error(report_data)
         return
 
-    report.update(data=report_data, completed_on=datetime.datetime.utcnow().replace(microsecond=0))
-    SummarySLAReportModel.session.commit()
+    report.update(data=report_data, completed_on=utc_now())
+    report.session.commit()
+    report.session.remove()
     logger.warning(
         "Successfully finished making report for: "
         "{start} to {end}".format(start=start_time, end=end_time)
@@ -154,10 +161,10 @@ def summary_report_loader(*args):
     logger.warning("Started: Summary report loader {}".format(utc_now()))
     next_report = SummarySLAReportModel.query.filter(
         or_(
-            SummarySLAReportModel.last_updated.is_(None),  # If the report has never been run
+            SummarySLAReportModel.last_updated == None,  # If the report has never been run
             and_(
                 # If the report was run, but didn't succeed
-                SummarySLAReportModel.completed_on.is_(None),
+                SummarySLAReportModel.completed_on == None,
                 SummarySLAReportModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
             )
         )

@@ -1,42 +1,45 @@
 #
 import datetime
 
+from sqlalchemy import Column, Integer, DateTime, Date, Boolean, func
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from modules.extensions import db
+from modules.extensions import BaseModel
+from modules.core import utc_now
 
 
-class TablesLoadedModel(db.Model):
+class TablesLoadedModel(BaseModel):
 
     __tablename__ = 'loaded_tables'
     __repr_attrs__ = ['loaded_date', 'last_updated', 'complete']
 
-    id = db.Column(db.Integer, primary_key=True)
-    loaded_date = db.Column(db.Date, nullable=False, unique=True)
+    id = Column(Integer, primary_key=True)
+    loaded_date = Column(Date, nullable=False, unique=True)
 
-    date_requested = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now())
-    last_updated = db.Column(db.DateTime(timezone=True))
+    date_requested = Column(DateTime(timezone=True), default=utc_now())
+    last_updated = Column(DateTime(timezone=True))
 
-    calls_loaded = db.Column(db.Boolean, default=False)
-    events_loaded = db.Column(db.Boolean, default=False)
+    calls_loaded = Column(Boolean, default=False)
+    events_loaded = Column(Boolean, default=False)
 
     @hybrid_property
     def complete(self):
-        # TODO: evaluate whether this is the best strategy
-        return self.is_loaded(self.loaded_date)
+        if isinstance(self.loaded_date, datetime.date):
+            return self.is_loaded(self.loaded_date)
+        else:
+            return False
 
     @classmethod
     def find(cls, date):
-        return cls.query.filter(
-            cls.loaded_date == date
-        ).first()
+        return cls.query.filter(cls.loaded_date == func.date(date)).first()
 
     @classmethod
     def is_loaded(cls, date):
-        record = cls.find(
-            date.date() if isinstance(date, datetime.datetime) else date
-        )
-        return record and record.calls_loaded and record.events_loaded
+        record = cls.find(date)
+        if record:
+            return record and record.calls_loaded and record.events_loaded
+        else:
+            return False
 
     @classmethod
     def interval_is_loaded(cls, start_time, end_time):
@@ -46,6 +49,7 @@ class TablesLoadedModel(db.Model):
         """
         while start_time < end_time:
             if not cls.is_loaded(start_time):
+                print("is not loaded", start_time)
                 return False
             start_time += datetime.timedelta(days=1)
         return True

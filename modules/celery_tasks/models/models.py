@@ -1,29 +1,31 @@
 # tasks/model.py
 import datetime
-from modules.extensions import db
+from sqlalchemy import Column, Integer, DateTime, String, Boolean, Text, Time
+
+from modules.extensions import BaseModel
 
 
-class ScheduleDispatchItemModel(db.Model):
+class ScheduleDispatchItemModel(BaseModel):
     __tablename__ = 'scheduled_items'
     __repr_attrs__ = ['name']
 
     """ View information """
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    description = db.Column(db.Text)
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(80), unique=True, nullable=False)
+    description = Column(Text)
 
     """ Housekeeping """
-    active = db.Column(db.Boolean(), nullable=False)
-    date_created = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
-    last_active = db.Column(db.DateTime(timezone=True))
+    active = Column(Boolean(), nullable=False)
+    date_created = Column(DateTime(timezone=True), default=datetime.datetime.utcnow())
+    last_active = Column(DateTime(timezone=True))
 
     """ Interval Information """
-    when_to_run = db.Column(db.String(1), default='D')
-    start_time = db.Column(db.Time(), nullable=False)
-    end_time = db.Column(db.Time(), nullable=False)
+    when_to_run = Column(String(1), default='D')
+    start_time = Column(Time(), nullable=False)
+    end_time = Column(Time(), nullable=False)
 
     """ Activity by __tablename__"""
-    what_to_run = db.Column(db.String(10))
+    what_to_run = Column(String(10))
 
     def __str__(self):
         return self.name

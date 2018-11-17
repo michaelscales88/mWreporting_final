@@ -16,9 +16,17 @@ start_rabbit:
 stop_rabbit:
 	rabbitmqctl stop
 
-# Celery worker thread start up commands --autoscale=10,3
-start_worker:
-	celery worker -A modules.celery_worker.celery -l info --beat -l info
+start_beat:
+	celery beat -A modules.celery_worker.celery -l info
+
+start_worker1:
+	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker1@%h
+
+start_worker2:
+	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker2@%h
+
+start_worker3:
+	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker3@%h
 
 stop_worker:
 	pkill -9 -f 'celery worker'

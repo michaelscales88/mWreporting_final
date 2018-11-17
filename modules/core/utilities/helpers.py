@@ -1,5 +1,7 @@
 # services/tasks.py
 import io
+import datetime
+
 import pandas as pd
 from dateutil.parser import parse
 from json import loads
@@ -62,3 +64,7 @@ def save_xls(list_dfs, xls_path):
     for n, df in enumerate(list_dfs):
         df.to_excel(writer, '{sheet_name}'.format(sheet_name=df.name))
     writer.save()
+
+
+def utc_now():
+    return datetime.datetime.utcnow().replace(microsecond=0)

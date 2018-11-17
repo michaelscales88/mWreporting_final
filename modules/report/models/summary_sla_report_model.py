@@ -1,25 +1,27 @@
 # report/models.py
 import datetime
 from sqlalchemy.sql import and_
-from sqlalchemy.ext.hybrid import hybrid_property
 from modules.encoders import JSONEncodedDict
-from modules.extensions import db
+from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy.ext.hybrid import hybrid_property
+
+from modules.extensions import BaseModel
 from .sla_report_model import SlaReportModel
 
 
-class SummarySLAReportModel(db.Model):
+class SummarySLAReportModel(BaseModel):
     __tablename__ = 'sla_summary_report'
     __repr_attrs__ = ['id', 'start_time', 'end_time', 'interval']
 
-    id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    end_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    frequency = db.Column(db.Integer, default=86400)
-    data = db.Column(JSONEncodedDict(500))
+    id = Column(Integer, primary_key=True)
+    start_time = Column(DateTime(timezone=True), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=False)
+    frequency = Column(Integer, default=86400)
+    data = Column(JSONEncodedDict(500))
 
-    date_requested = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now())
-    last_updated = db.Column(db.DateTime(timezone=True))
-    completed_on = db.Column(db.DateTime(timezone=True))
+    date_requested = Column(DateTime(timezone=True), default=datetime.datetime.now())
+    last_updated = Column(DateTime(timezone=True))
+    completed_on = Column(DateTime(timezone=True))
 
     @hybrid_property
     def interval(self):

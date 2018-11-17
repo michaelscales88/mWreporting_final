@@ -34,12 +34,12 @@ def register_default_report_tasks(server_instance):
     }
 
     """ Summary SLA Report """
-    server_instance.config['CELERYBEAT_SCHEDULE']['load_summary_report'] = {
-        'task': 'report.utilities.summary_report_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
+    # server_instance.config['CELERYBEAT_SCHEDULE']['load_summary_report'] = {
+    #     'task': 'report.utilities.summary_report_loader',
+    #     'schedule': crontab(
+    #         **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
+    #     )
+    # }
 
 
 def get_sla_report(start_time, end_time, clients=()):

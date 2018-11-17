@@ -1,18 +1,20 @@
 # client/models.py
-from modules.extensions import db
+from sqlalchemy import Column, Integer, String, Boolean, Text
+
+from modules.extensions import BaseModel
 
 
-class ClientModel(db.Model):
+class ClientModel(BaseModel):
 
     __tablename__ = 'client_model'
     __repr_attrs__ = ['name', 'active']
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    ext = db.Column(db.Integer, nullable=False)
-    active = db.Column(db.Boolean, default=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    ext = Column(Integer, nullable=False)
+    active = Column(Boolean, default=True)
 
-    notes = db.Column(db.Text)
+    notes = Column(Text)
 
     def __str__(self):
         return self.name

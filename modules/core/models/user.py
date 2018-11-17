@@ -1,32 +1,34 @@
 # security/models.py
 from flask_security import UserMixin
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import relationship
 
-from modules.extensions import db
+from modules.extensions import BaseModel
 from .associations import users_roles_association
 from .roles import RolesModel
 
 
-class UserModel(db.Model, UserMixin):
+class UserModel(BaseModel, UserMixin):
     """ User Model for storing user related details """
     __tablename__ = "user"
     __repr_attrs__ = ['username']
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     # User authentication information
-    username = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False, server_default='')
+    username = Column(String(50), nullable=False, unique=True)
+    password = Column(String(255), nullable=False, server_default='')
 
     # User email information
-    email = db.Column(db.String(255), unique=True)
-    confirmed_at = db.Column(db.DateTime(timezone=True))
+    email = Column(String(255), unique=True)
+    confirmed_at = Column(DateTime(timezone=True))
 
     # User information
-    active = db.Column('is_active', db.Boolean(), nullable=False, default=True)
-    first_name = db.Column(db.String(100), nullable=False, server_default='')
-    last_name = db.Column(db.String(100), nullable=False, server_default='')
+    active = Column('is_active', Boolean(), nullable=False, default=True)
+    first_name = Column(String(100), nullable=False, server_default='')
+    last_name = Column(String(100), nullable=False, server_default='')
 
-    roles = db.relationship(
+    roles = relationship(
         RolesModel,
         secondary=users_roles_association,
         backref="users",

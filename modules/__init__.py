@@ -4,13 +4,14 @@ from flask_assets import Bundle
 
 import frontend  # Templates directory functions as a frontend
 from .extensions import (
-    admin, bootstrap, mail,
+    admin, bootstrap, mail, BaseModel,
     moment, health, babel,
-    db, serializer, assets,
-    debugger, register_app_cdn
+    init_db, get_session, serializer,
+    assets, debugger, register_app_cdn,
 )
 from .encoders import AppJSONEncoder
 from .server import build_routes
+
 
 """ Create the app """
 app = Flask(
@@ -18,8 +19,6 @@ app = Flask(
     template_folder='../frontend',
     static_folder="../static",
 )
-
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 800
 
 
 """ App Security + Settings """
@@ -34,7 +33,6 @@ if app.debug:
 admin.init_app(app)
 babel.init_app(app)
 bootstrap.init_app(app)
-db.init_app(app)
 serializer.init_app(app)
 mail.init_app(app)
 moment.init_app(app)
@@ -72,3 +70,8 @@ frontend.register_nav_renderers(app)
 
 # Register HTML endpoints
 app.register_blueprint(frontend.frontend_bp)
+
+# DB
+engine, session = get_session(app)
+BaseModel.set_session(session)
+init_db(app, engine, session)

@@ -1,26 +1,29 @@
 # data/models.py
 import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
-from modules.extensions import db
+from modules.extensions import BaseModel
 
 
-class CallTableModel(db.Model):
+class CallTableModel(BaseModel):
     __tablename__ = 'c_call'
     __repr_attrs__ = ['call_id', 'calling_party_number', 'dialed_party_number',
                       'start_time', 'end_time', 'caller_id']
 
-    call_id = db.Column(db.Integer(), primary_key=True)
-    call_direction = db.Column(db.Integer())
-    calling_party_number = db.Column(db.String(50))
-    dialed_party_number = db.Column(db.String(50))
-    account_code = db.Column(db.String(10))
-    start_time = db.Column(db.DateTime())
-    end_time = db.Column(db.DateTime())
-    system_id = db.Column(db.Integer())
-    caller_id = db.Column(db.String(50))
-    inbound_route = db.Column(db.String(50))
-    events = db.relationship("EventTableModel", lazy="dynamic")
+    call_id = Column(Integer(), primary_key=True)
+    call_direction = Column(Integer())
+    calling_party_number = Column(String(50))
+    dialed_party_number = Column(String(50))
+    account_code = Column(String(10))
+    start_time = Column(DateTime())
+    end_time = Column(DateTime())
+    system_id = Column(Integer())
+    caller_id = Column(String(50))
+    inbound_route = Column(String(50))
+    events = relationship("EventTableModel", lazy="dynamic")
 
     @hybrid_property
     def length(self):

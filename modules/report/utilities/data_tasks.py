@@ -3,13 +3,13 @@ import datetime
 
 from flask import current_app
 from json import dumps
-from sqlalchemy.sql import func, or_
+from sqlalchemy.sql import func
 
 from modules.celery_tasks import task_logger as logger
 from modules.celery_worker import celery
-from modules.core import get_pk
+from modules.core import get_pk, utc_now
 from modules.report.models import TablesLoadedModel, CallTableModel, EventTableModel
-from .helpers import get_external_session, utc_now
+from .helpers import get_external_session
 
 
 @celery.task(name='report.utilities.data_loader')
@@ -18,29 +18,26 @@ def data_loader(*args):
 
     """
     logger.warning("Started: Data loader.")
-    # Get dates that aren't fully loaded
-    dates_query = TablesLoadedModel.query.filter(
-        or_(
-            TablesLoadedModel.calls_loaded.is_(False),
-            TablesLoadedModel.events_loaded.is_(False),
-            TablesLoadedModel.complete == False
-        )
-    )
-    # Filter to fresh dates or dates with grace time to prevent
-    # multiple loads for the same date
-    date_to_load = dates_query.filter(
-        or_(
-            TablesLoadedModel.last_updated.is_(None),
-            TablesLoadedModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
-        )
-    ).first()
 
-    if not date_to_load:
+    # TODO: Convert to a working query
+    dates_query = None
+
+    for report in TablesLoadedModel.all():
+        if not report.complete:
+            if report.last_updated:
+                if report.last_updated < utc_now() - datetime.timedelta(minutes=5):
+                    dates_query = report
+                    break
+            else:
+                dates_query = report
+                break
+
+    if dates_query:
+        dates_query.update(last_updated=utc_now())
+        dates_query.session.commit()
+    else:
         logger.info("No tables to load.")
         return "Success: No tasks."
-    else:
-        date_to_load.update(last_updated=utc_now())
-        date_to_load.session.commit()
 
     ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
     if not ext_uri:
@@ -52,7 +49,7 @@ def data_loader(*args):
     ext_session = get_external_session(ext_uri)
 
     load_info = {
-        CallTableModel: date_to_load.loaded_date, EventTableModel: date_to_load.loaded_date
+        CallTableModel: dates_query.loaded_date, EventTableModel: dates_query.loaded_date
     }
     try:
         for table, loaded_date in load_info.items():
@@ -99,7 +96,9 @@ def data_loader(*args):
                 if table.__tablename__ == "c_event":
                     tl_model.update(events_loaded=True)
                 TablesLoadedModel.session.commit()
+
             table.session.commit()
+            table.session.remove()
 
     except Exception as err:
         logger.error("Error: Major failure loading data.")
@@ -110,6 +109,7 @@ def data_loader(*args):
     finally:
         # Always close the connection to the external database
         ext_session.close()
+
         logger.info("Closed external data connection.")
 
         logger.warning("Completed: Summary report loader.")

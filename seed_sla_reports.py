@@ -6,7 +6,7 @@ from modules.core import get_model_by_tablename
 def add_reports():
 
     with app.app_context():
-        start_dt = datetime.datetime.strptime(str(input("What date to start?")), "%d/%m/%Y")
+        start_dt = datetime.datetime.strptime(str(input("What date to start?")), "%m/%d/%Y")
         days_to_load = int(input("How many days to load from the start time?"))
         counter = 0
 
@@ -21,6 +21,7 @@ def add_reports():
             counter += 1
 
         sla_report_model.session.commit()
+        sla_report_model.session.remove()
 
 
 if __name__ == '__main__':

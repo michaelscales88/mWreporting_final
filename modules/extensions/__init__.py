@@ -7,16 +7,14 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_mail import Mail
 from flask_marshmallow import Marshmallow
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
 from healthcheck import HealthCheck
 
-from modules.base_model import BaseModel
+from .database import BaseModel, init_db, get_session
 from .cdn_registration import register_app_cdn
 
 # Services
 admin = Admin(template_mode='bootstrap3', base_template="admin_layout.html")
 babel = Babel()
-db = SQLAlchemy(model_class=BaseModel)  # Database manager
 mail = Mail()                           # Mailer
 bootstrap = Bootstrap()                 # Styles
 moment = Moment()                       # MomentJS

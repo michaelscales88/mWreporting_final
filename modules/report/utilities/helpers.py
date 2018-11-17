@@ -1,14 +1,8 @@
 # data/services/data.py
-import datetime
-
 from sqlalchemy.sql import and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from modules.core import get_model_by_tablename
-
-
-def utc_now():
-    return datetime.datetime.utcnow().replace(microsecond=0).replace(microsecond=0)
 
 
 def get_data_for_table(table_name, start_time, end_time):

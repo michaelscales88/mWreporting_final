@@ -1,23 +1,25 @@
 # report/models.py
 import datetime
+
+from sqlalchemy import Column, Integer, DateTime
 from sqlalchemy.sql import and_
 
 from modules.encoders import JSONEncodedDict
-from modules.extensions import db
+from modules.extensions import BaseModel
 
 
-class SlaReportModel(db.Model):
+class SlaReportModel(BaseModel):
     __tablename__ = 'sla_report'
     __repr_attrs__ = ['id', 'start_time', 'end_time', 'completed_on']
 
-    id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
-    data = db.Column(JSONEncodedDict(500))
+    id = Column(Integer, primary_key=True)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+    data = Column(JSONEncodedDict(500))
 
-    date_requested = db.Column(db.DateTime, default=datetime.datetime.now())
-    last_updated = db.Column(db.DateTime)
-    completed_on = db.Column(db.DateTime)
+    date_requested = Column(DateTime, default=datetime.datetime.utcnow().replace(microsecond=0))
+    last_updated = Column(DateTime)
+    completed_on = Column(DateTime)
 
     @classmethod
     def headers(cls):

@@ -4,16 +4,12 @@ from flask_restful import Api
 from flask_security import logout_user
 
 from modules import app
-from modules.base_model import BaseModel
-from modules.extensions import admin, db, health
+from modules.extensions import admin, get_session, health
 from modules.server import build_routes
 from .utilities import ExtendedLoginForm, ExtendedRegisterForm, check_local_db, set_logger
 
 # Configure app settings
 import modules.core.config_runner
-
-db.init_app(app)
-BaseModel.set_session(db.session)
 
 # Add security
 import modules.core.security
@@ -43,18 +39,17 @@ with app.app_context():
     import modules.core.models
     import modules.core.views
 
-    # Creates any models that have been imported
-    db.create_all()
-
     # Register the admin views to the extension
     admin.add_view(
         views.UsersView(
-            models.UserModel, db.session, name='Manage Users', category='User Admin'
+            models.UserModel, get_session(app)[1],
+            name='Manage Users', category='User Admin'
         )
     )
     admin.add_view(
         views.RolesView(
-            models.RolesModel, db.session, name='Manage Privileges', category='User Admin'
+            models.RolesModel, get_session(app)[1],
+            name='Manage Privileges', category='User Admin'
         )
     )
 
