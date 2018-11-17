@@ -28,7 +28,6 @@ def seed_db():
             )
 
             user_model.session.commit()
-            user_model.session.remove()
 
         # Add clients
         client_model = get_model_by_tablename("client_model")
@@ -48,8 +47,8 @@ def seed_db():
         for client in client_model.all():
             mng.clients.append(client)
 
-        client_model.session.commit()
-        client_model.session.remove()
+        mng.session.commit()
+        mng.session.remove()
 
 
 if __name__ == '__main__':
