@@ -3,10 +3,10 @@ from flask import jsonify
 from flask_restful import Resource, reqparse
 from flask_security import current_user
 
-from modules.report.tasks import get_summary_sla_report, get_sla_report
 from modules.core import to_datetime, to_list, to_bool
 from .models import ClientModel, ClientManager
 from .serializers import ClientModelSchema
+from .tasks import get_summary_sla_report, get_sla_report
 
 
 class SummaryReportAPI(Resource):
@@ -29,17 +29,11 @@ class SummaryReportAPI(Resource):
         super().__init__()
 
     def post(self):
-        report_frame = get_summary_sla_report(
+        return get_summary_sla_report(
             start_time=self.args['start_time'],
             end_time=self.args['end_time'],
             clients=self.args['clients']
         )
-        # return jsonify(
-        #     data=[]
-        #     if report_frame.empty
-        #     else report_frame.to_dict(orient='split')['data']
-        # )
-        return report_frame
 
 
 class SLAReportAPI(Resource):

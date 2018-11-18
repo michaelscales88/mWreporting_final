@@ -2,44 +2,15 @@
 import logging
 
 import pandas as pd
-from celery.schedules import crontab
 
 from modules.core import save_xls
-from .models import SlaReportModel, SummarySLAReportModel
-from .utilities import (
-    make_summary_sla_report,
-    # run_reports, email_reports,
-    make_sla_report, add_client_names, compute_avgs,
-    format_df, make_summary,
+from modules.report.models import SlaReportModel, SummarySLAReportModel
+from modules.report.utilities import (
+    add_client_names, compute_avgs, format_df, make_summary
 )
+from .report_tasks import make_sla_report, make_summary_sla_report
 
 logger = logging.getLogger("app")
-
-
-def register_default_report_tasks(server_instance):
-    """ Report Data """
-    server_instance.config['CELERYBEAT_SCHEDULE']['load_report_data'] = {
-        'task': 'report.utilities.data_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
-
-    """ SLA Report """
-    server_instance.config['CELERYBEAT_SCHEDULE']['load_report'] = {
-        'task': 'report.utilities.report_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
-
-    """ Summary SLA Report """
-    # server_instance.config['CELERYBEAT_SCHEDULE']['load_summary_report'] = {
-    #     'task': 'report.utilities.summary_report_loader',
-    #     'schedule': crontab(
-    #         **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-    #     )
-    # }
 
 
 def get_sla_report(start_time, end_time, clients=()):
@@ -99,9 +70,6 @@ def get_sla_report(start_time, end_time, clients=()):
 
 
 def get_summary_sla_report(start_time, end_time, clients=()):
-    # TODO: make each client a separate page -> make the frontend create the tables
-    if not clients:
-        clients = ("7559",)
 
     # Check if summary model exists
     report = SummarySLAReportModel.get(start_time, end_time, frequency=43200)

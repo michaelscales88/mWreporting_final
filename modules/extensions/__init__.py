@@ -9,7 +9,6 @@ from flask_marshmallow import Marshmallow
 from flask_moment import Moment
 from healthcheck import HealthCheck
 
-from .database import BaseModel, init_db, get_session
 from .cdn_registration import register_app_cdn
 
 # Services
@@ -22,3 +21,5 @@ health = HealthCheck()                  # Resource information
 serializer = Marshmallow()              # Serialization Schema
 assets = Environment()                  # Static JS bundling and minification
 debugger = DebugToolbarExtension()
+
+from .database import BaseModel, init_db, get_session

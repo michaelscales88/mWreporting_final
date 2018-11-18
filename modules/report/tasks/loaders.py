@@ -1,15 +1,19 @@
 # data/services/loaders.py
 import datetime
+from json import dumps
 
 from flask import current_app
-from json import dumps
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, or_, and_
 
 from modules.celery_tasks import task_logger as logger
 from modules.celery_worker import celery
 from modules.core import get_pk, utc_now
-from modules.report.models import TablesLoadedModel, CallTableModel, EventTableModel
-from .helpers import get_external_session
+from modules.report.models import (
+    TablesLoadedModel, CallTableModel, EventTableModel, SlaReportModel,
+    SummarySLAReportModel
+)
+from modules.report.utilities import get_external_session
+from .report_tasks import make_summary_sla_report, make_sla_report
 
 
 @celery.task(name='report.utilities.data_loader')
@@ -98,7 +102,7 @@ def data_loader(*args):
                 TablesLoadedModel.session.commit()
 
             table.session.commit()
-            table.session.remove()
+            table.session.close()
 
     except Exception as err:
         logger.error("Error: Major failure loading data.")
@@ -113,3 +117,80 @@ def data_loader(*args):
         logger.info("Closed external data connection.")
 
         logger.warning("Completed: Summary report loader.")
+
+
+@celery.task(name='report.utilities.report_loader')
+def report_loader(*args):
+    logger.warning("Started: Report loader {}".format(utc_now()))
+
+    # TODO: Convert to a working query
+    next_report = None
+
+    for report in SlaReportModel.all():
+        if not report.completed_on:
+            if report.last_updated:
+                if report.last_updated < utc_now() - datetime.timedelta(minutes=5):
+                    next_report = report
+                    break
+            else:
+                # Untouched report
+                next_report = report
+                break
+
+    if next_report:
+        next_report.update(last_updated=utc_now())
+        next_report.session.commit()
+    else:
+        logger.info("No reports to load.")
+        return "Success: No reports to load."
+
+    start_time = next_report.start_time
+    end_time = next_report.end_time
+
+    if make_sla_report(start_time=start_time, end_time=end_time):
+        logger.info(
+            "Successfully finished making report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
+    else:
+        logger.error(
+            "Error: Failed to make report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
+
+    logger.warning("Completed: Report loader")
+
+
+@celery.task(name='report.utilities.summary_report_loader')
+def summary_report_loader(*args):
+    logger.warning("Started: Summary report loader {}".format(utc_now()))
+    next_report = SummarySLAReportModel.query.filter(
+        or_(
+            SummarySLAReportModel.last_updated == None,  # If the report has never been run
+            and_(
+                # If the report was run, but didn't succeed
+                SummarySLAReportModel.completed_on == None,
+                SummarySLAReportModel.last_updated < (utc_now() - datetime.timedelta(minutes=5))
+            )
+        )
+    ).first()
+
+    if not next_report:
+        logger.info("No summary reports to run.")
+        return "Success: No summary reports to load."
+    else:
+        next_report.update(last_updated=utc_now())
+        next_report.session.commit()
+
+    start_time = next_report.start_time
+    end_time = next_report.end_time
+    frequency = next_report.frequency
+
+    if not make_summary_sla_report(
+        start_time=start_time, end_time=end_time, frequency=frequency
+    ):
+        logger.error(
+            "Error: Failed to make report for: "
+            "{start} to {end}".format(start=start_time, end=end_time)
+        )
+    logger.warning("Completed: Summary report loader.")

@@ -16,11 +16,8 @@ start_rabbit:
 stop_rabbit:
 	rabbitmqctl stop
 
-start_beat:
-	celery beat -A modules.celery_worker.celery -l info
-
 start_worker1:
-	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker1@%h
+	celery worker -A modules.celery_worker.celery -E --beat --concurrency=10 -l info -n worker1@%h
 
 start_worker2:
 	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker2@%h
