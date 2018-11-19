@@ -1,20 +1,65 @@
 # tasks/views.py
+import logging
+
+from celery.schedules import crontab
+from flask import current_app
+from wtforms.validators import DataRequired
+
 from modules.base_view import BaseView
-from flask_security import current_user
+from .forms import CustomSelectField
+from .utilities import scheduled_time_options, task_type_options
+
+logger = logging.getLogger("app")
 
 
 class ScheduleDispatchItemView(BaseView):
-    column_exclude_list = ['active']
-    form_excluded_columns = ['active']
+    column_list = [
+        'name', 'task_type', 'scheduled_time', 'start_time',
+        'end_time', 'date_created', 'active'
+    ]
+    form_columns = [
+        'name', 'model_type', 'description', 'when_to_run', 'time_to_run',
+        'start_time', 'end_time', 'active'
+    ]
+    form_extra_fields = dict(
+        when_to_run=CustomSelectField(
+            'Schedule Type',
+            choices=scheduled_time_options(),
+            validators=[DataRequired()]
+        ),
+        model_type=CustomSelectField(
+            'Task Type',
+            choices=task_type_options(),
+            validators=[DataRequired()]
+        )
+    )
 
-    def is_accessible(self):
-        if super().is_accessible():
-            return True
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
+                'task': '{type}.custom.{name}'.format(
+                    type=form.data['model_type'],
+                    name=form.data['name']
+                ),
+                'schedule': crontab(
+                    **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
+                )
+            }
+        else:
+            # Update if there's a change
+            if form.data.get("name") != model.name:
+                del current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']]
+                current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
+                    'task': '{type}.custom.{name}'.format(
+                        type=form.data['model_type'],
+                        name=form.data['name']
+                    ),
+                    'schedule': crontab(
+                        **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
+                    )
+                }
+        super().on_model_change(form, model, is_created)
 
-        if current_user.has_role('_permissions | manager'):
-            self.can_create = True
-            self.can_edit = True
-            self.can_delete = True
-            return True
-
-        return False
+    def delete_model(self, model):
+        del current_app.config['CELERYBEAT_SCHEDULE'][model.name]
+        super().delete_model(model)

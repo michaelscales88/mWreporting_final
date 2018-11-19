@@ -5,13 +5,10 @@ from flask_assets import Bundle
 import frontend  # Templates directory functions as a frontend
 from .extensions import (
     admin, bootstrap, mail, BaseModel,
-    moment, health, babel,
-    init_db, get_session, serializer,
-    assets, debugger, register_app_cdn,
+    moment, health, babel, init_db,
+    get_session, serializer, assets,
+    debugger, register_app_cdn,
 )
-from .encoders import AppJSONEncoder
-from .server import build_routes
-
 
 """ Create the app """
 app = Flask(
@@ -22,7 +19,7 @@ app = Flask(
 
 
 """ App Security + Settings """
-import modules.core as app_core
+import modules.core
 
 
 """ Init + Bind extensions to app """
@@ -39,12 +36,10 @@ moment.init_app(app)
 health.init_app(app, "/healthcheck")
 assets.init_app(app)   # Manage JavaScript bundles
 
-# Register JSON encoder
-app.json_encoder = AppJSONEncoder
-
-""" Submodule Imports """
-import modules.celery_tasks
+""" Sub module Imports """
 import modules.report
+import modules.celery_tasks     # Create tasks from other subs
+
 
 """ Register HTML """
 # Register external CDNs
@@ -52,7 +47,8 @@ register_app_cdn(app)
 
 # Add server's static files to be bundled and minified
 js = Bundle(
-    'js/selectBox.js', 'js/gridArea.js',
+    'js/selectBox.js',
+    'js/gridArea.js',
     'js/dtSelector.js',
     filters='jsmin', output='gen/packed.js'
 )

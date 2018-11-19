@@ -29,6 +29,17 @@ def to_bool(value):
     return loads(value) is True
 
 
+def get_schedulable_models():
+    for c in BaseModel._decl_class_registry.values():
+        conditions = [
+            hasattr(c, '__tablename__'),
+            hasattr(c, "is_schedulable"),
+
+        ]
+        if all(conditions) and c.is_schedulable:
+            yield c
+
+
 def get_model_by_tablename(tablename):
     for c in BaseModel._decl_class_registry.values():
         if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
@@ -37,7 +48,7 @@ def get_model_by_tablename(tablename):
 
 def get_model_headers(model_name=None):
     model = get_model_by_tablename(model_name)
-    return list(model.headers) if model else None
+    return list(model.headers) if isinstance(BaseModel, model) else None
 
 
 def get_pk(table):

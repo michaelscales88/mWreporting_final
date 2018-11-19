@@ -9,10 +9,10 @@ from modules.base_view import BaseView
 
 
 class SLAReportView(BaseView):
-    column_searchable_list = ("start_time", "end_time",)
-    column_exclude_list = ('date_requested', 'data',)
+    column_searchable_list = ("start_time", "end_time", "last_updated", "completed_on")
+    column_list = ('start_time', 'end_time', "last_updated", "completed_on")
+    form_columns = ('start_time', 'end_time')
     column_details_list = ['data']
-    form_excluded_columns = ('last_updated', 'completed_on')
     column_default_sort = ('start_time', True)
     form_args = dict(
         start_time=dict(
@@ -49,6 +49,11 @@ class SLAReportView(BaseView):
         else m.completed_on.replace(tzinfo=pytz.utc).astimezone(
             tz=pytz.timezone("US/Central")),
     }
+
+    def is_accessible(self):
+        status = super().is_accessible()
+        self.can_edit = False   # Reports can only be viewed after creation
+        return status
 
     def validate_form(self, form):
         """ Custom validation code that checks dates """

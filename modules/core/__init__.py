@@ -3,16 +3,15 @@ from flask import url_for, Blueprint, flash, redirect
 from flask_restful import Api
 from flask_security import logout_user
 
-from modules import app
-from modules.extensions import admin, get_session, health
-from modules.server import build_routes
-from .utilities import ExtendedLoginForm, ExtendedRegisterForm, check_local_db, set_logger
-
 # Configure app settings
 import modules.core.config_runner
-
 # Add security
 import modules.core.security
+from modules import app
+from modules.utilities.server import build_routes
+from modules.extensions import admin, get_session, health
+from modules.utilities import check_local_db, set_logger
+from .encoders import AppJSONEncoder
 
 security_bp = Blueprint('user_bp', __name__)
 security_api = Api(security_bp)
@@ -53,6 +52,9 @@ with app.app_context():
         )
     )
 
+    # Register JSON encoder
+    app.json_encoder = AppJSONEncoder
+
 app.register_blueprint(security_bp)
 
 # Inject module routes
@@ -61,4 +63,3 @@ build_routes(app, security_api, "core")
 # Register system checks
 health.add_check(check_local_db)
 
-from .utilities import *

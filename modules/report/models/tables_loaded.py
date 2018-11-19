@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, DateTime, Date, Boolean, func
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from modules.extensions import BaseModel
-from modules.core import utc_now
+from modules.utilities import utc_now
 
 
 class TablesLoadedModel(BaseModel):
@@ -18,9 +18,14 @@ class TablesLoadedModel(BaseModel):
 
     date_requested = Column(DateTime(timezone=True), default=utc_now())
     last_updated = Column(DateTime(timezone=True))
+    is_schedulable = Column(Boolean, default=True)
 
     calls_loaded = Column(Boolean, default=False)
     events_loaded = Column(Boolean, default=False)
+
+    @staticmethod
+    def opt_name():
+        return "Raw Data Loader"
 
     @hybrid_property
     def complete(self):

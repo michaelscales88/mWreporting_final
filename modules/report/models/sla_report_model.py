@@ -1,11 +1,12 @@
 # report/models.py
 import datetime
 
-from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy import Column, Integer, DateTime, Boolean
 from sqlalchemy.sql import and_
 
-from modules.encoders import JSONEncodedDict
+from modules.core.encoders import JSONEncodedDict
 from modules.extensions import BaseModel
+from modules.utilities import utc_now
 
 
 class SlaReportModel(BaseModel):
@@ -16,10 +17,15 @@ class SlaReportModel(BaseModel):
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
     data = Column(JSONEncodedDict(500))
+    is_schedulable = Column(Boolean, default=True)
 
-    date_requested = Column(DateTime, default=datetime.datetime.utcnow().replace(microsecond=0))
+    date_requested = Column(DateTime, default=utc_now())
     last_updated = Column(DateTime)
     completed_on = Column(DateTime)
+
+    @staticmethod
+    def opt_name():
+        return "SLA Report"
 
     @classmethod
     def headers(cls):

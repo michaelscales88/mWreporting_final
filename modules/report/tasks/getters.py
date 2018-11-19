@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 
-from modules.core import save_xls
+from modules.utilities import save_xls
 from modules.report.models import SlaReportModel, SummarySLAReportModel
 from modules.report.utilities import (
     add_client_names, compute_avgs, format_df, make_summary

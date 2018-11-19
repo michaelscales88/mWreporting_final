@@ -1,7 +1,8 @@
 import yaml
 
 from modules import app
-from modules.core import get_model_by_tablename, security
+from modules.core import security
+from modules.utilities import get_model_by_tablename
 from flask_security.utils import hash_password
 
 
@@ -48,7 +49,7 @@ def seed_db():
             mng.clients.append(client)
 
         mng.session.commit()
-        mng.session.remove()
+        mng.session.close()
 
 
 if __name__ == '__main__':

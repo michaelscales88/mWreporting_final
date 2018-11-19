@@ -3,20 +3,13 @@ from datetime import datetime, timedelta
 
 import jwt
 from flask import jsonify, current_app, abort
-from flask_restful import Resource, reqparse
 
+from modules.base_resource import BaseResource
+from modules.utilities import authenticate
 from .models import RolesModel
-from .utilities import authenticate
 
 
-class Authorize(Resource):
-
-    def __init__(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username")
-        parser.add_argument("password")
-        self.args = parser.parse_args()
-        super().__init__()
+class Authorize(BaseResource):
 
     def post(self):
         try:
@@ -52,13 +45,7 @@ class Authorize(Resource):
             )
 
 
-class RefreshToken(Resource):
-
-    def __init__(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("Authorization", location="headers")
-        self.args = parser.parse_args()
-        super().__init__()
+class RefreshToken(BaseResource):
 
     def get(self):
         try:

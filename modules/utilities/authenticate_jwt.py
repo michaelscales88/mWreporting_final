@@ -1,7 +1,7 @@
 # user/utilities.py
 from flask_security.utils import verify_password
 
-from ..models import UserModel
+from modules.core.models import UserModel
 
 
 def authenticate(username, password):

@@ -1,5 +1,5 @@
 #
-from modules.core import get_model_by_tablename
+from modules.utilities import get_model_by_tablename
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
@@ -20,7 +20,7 @@ client_user_association = Table(
 class ClientManager(BaseModel):
     __tablename__ = 'client_manager'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer(), ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     manager = relationship(user_model, backref="clients")
 
     clients = relationship(

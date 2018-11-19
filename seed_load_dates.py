@@ -1,6 +1,6 @@
 import datetime
 from modules import app
-from modules.core import get_model_by_tablename
+from modules.utilities import get_model_by_tablename
 
 
 def add_dates():
@@ -17,7 +17,7 @@ def add_dates():
             counter += 1
 
         load_table.session.commit()
-        load_table.session.remove()
+        load_table.session.close()
 
 
 if __name__ == '__main__':

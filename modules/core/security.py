@@ -5,9 +5,8 @@ from flask_security import Security, SQLAlchemyUserDatastore
 
 from modules import app
 from modules.extensions import admin, BaseModel
+from modules.utilities import ExtendedLoginForm, ExtendedRegisterForm
 from .models import UserModel, RolesModel
-from .utilities import ExtendedLoginForm, ExtendedRegisterForm
-
 
 user_datastore = SQLAlchemyUserDatastore(BaseModel, UserModel, RolesModel)
 

@@ -1,6 +1,6 @@
 import datetime
 from modules import app
-from modules.core import get_model_by_tablename
+from modules.utilities import get_model_by_tablename
 
 
 def add_reports():
@@ -21,7 +21,7 @@ def add_reports():
             counter += 1
 
         sla_report_model.session.commit()
-        sla_report_model.session.remove()
+        sla_report_model.session.close()
 
 
 if __name__ == '__main__':

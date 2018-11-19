@@ -24,7 +24,7 @@ class UserModel(BaseModel, UserMixin):
     confirmed_at = Column(DateTime(timezone=True))
 
     # User information
-    active = Column('is_active', Boolean(), nullable=False, default=True)
+    active = Column('is_active', Boolean, nullable=False, default=True)
     first_name = Column(String(100), nullable=False, server_default='')
     last_name = Column(String(100), nullable=False, server_default='')
 

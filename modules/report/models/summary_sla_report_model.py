@@ -1,10 +1,10 @@
 # report/models.py
 import datetime
 from sqlalchemy.sql import and_
-from modules.encoders import JSONEncodedDict
-from sqlalchemy import Column, Integer, DateTime
+from modules.core.encoders import JSONEncodedDict
+from sqlalchemy import Column, Integer, DateTime, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from modules.utilities import utc_now
 from modules.extensions import BaseModel
 from .sla_report_model import SlaReportModel
 
@@ -18,10 +18,15 @@ class SummarySLAReportModel(BaseModel):
     end_time = Column(DateTime(timezone=True), nullable=False)
     frequency = Column(Integer, default=86400)
     data = Column(JSONEncodedDict(500))
+    is_schedulable = Column(Boolean, default=True)
 
-    date_requested = Column(DateTime(timezone=True), default=datetime.datetime.now())
+    date_requested = Column(DateTime(timezone=True), default=utc_now())
     last_updated = Column(DateTime(timezone=True))
     completed_on = Column(DateTime(timezone=True))
+
+    @staticmethod
+    def opt_name():
+        return "SLA Summary Report"
 
     @hybrid_property
     def interval(self):
