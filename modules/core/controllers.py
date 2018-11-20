@@ -5,7 +5,7 @@ import jwt
 from flask import jsonify, current_app, abort
 
 from modules.base_resource import BaseResource
-from modules.utilities import authenticate
+from modules.utilities.authenticate_jwt import authenticate
 from .models import RolesModel
 
 

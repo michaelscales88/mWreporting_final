@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, DateTime, Date, Boolean, func
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from modules.extensions import BaseModel
-from modules.utilities import utc_now
+from modules.utilities.helpers import utc_now
 
 
 class TablesLoadedModel(BaseModel):

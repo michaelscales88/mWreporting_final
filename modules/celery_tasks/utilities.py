@@ -1,4 +1,4 @@
-from modules.utilities import get_schedulable_models
+from modules.utilities.helpers import get_schedulable_models
 
 
 def scheduled_time_options():

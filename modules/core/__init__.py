@@ -3,14 +3,13 @@ from flask import url_for, Blueprint, flash, redirect
 from flask_restful import Api
 from flask_security import logout_user
 
-# Configure app settings
-import modules.core.config_runner
 # Add security
 import modules.core.security
 from modules import app
+from modules.extensions import admin, health
+from modules.utilities.health_check import check_local_db
+from modules.utilities.logger import set_logger
 from modules.utilities.server import build_routes
-from modules.extensions import admin, health, get_session
-from modules.utilities import check_local_db, set_logger
 from .encoders import AppJSONEncoder
 
 security_bp = Blueprint('user_bp', __name__)
@@ -38,20 +37,22 @@ with app.app_context():
     import modules.core.models
     import modules.core.views
 
-    session = get_session(app)[1]
+    # session = get_session(app)[1]
 
     # from modules import session
 
     # Register the admin views to the extension
     admin.add_view(
         views.UsersView(
-            models.UserModel, session,
+            models.UserModel,
+            models.UserModel.session,
             name='Manage Users', category='User Admin'
         )
     )
     admin.add_view(
         views.RolesView(
-            models.RolesModel, session,
+            models.RolesModel,
+            models.RolesModel.session,
             name='Manage Privileges', category='User Admin'
         )
     )

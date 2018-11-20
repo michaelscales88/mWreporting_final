@@ -18,7 +18,6 @@ def get_session(app):
 def init_db(app, engine, session):
 
     BaseModel.query = session.query_property()
-    BaseModel.set_session(session)  # Inject session
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):

@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask_security import current_user
 
-from .utilities import to_datetime, to_list, to_bool
+from .utilities.helpers import to_datetime, to_list, to_bool
 
 
 class BaseResource(Resource):

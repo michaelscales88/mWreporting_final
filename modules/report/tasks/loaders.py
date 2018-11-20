@@ -7,7 +7,7 @@ from sqlalchemy.sql import func, or_, and_
 
 from modules.celery_tasks import task_logger as logger
 from modules.celery_worker import celery
-from modules.utilities import get_pk, utc_now
+from modules.utilities.helpers import get_pk, utc_now
 from modules.report.models import (
     TablesLoadedModel, CallTableModel, EventTableModel, SlaReportModel,
     SummarySLAReportModel

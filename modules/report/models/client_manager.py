@@ -1,5 +1,5 @@
 #
-from modules.utilities import get_model_by_tablename
+from modules.utilities.helpers import get_model_by_tablename
 
 from sqlalchemy import Column, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship

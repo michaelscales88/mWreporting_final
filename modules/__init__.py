@@ -4,7 +4,7 @@ from flask_assets import Bundle
 
 import frontend  # Templates directory functions as a frontend
 from .extensions import (
-    admin, bootstrap, mail,
+    admin, bootstrap, mail, BaseModel,
     moment, health, babel, init_db,
     get_session, serializer, assets,
     debugger, register_app_cdn,
@@ -17,10 +17,21 @@ app = Flask(
     static_folder="../static",
 )
 
+# Configure app settings
+import modules.utilities.config_runner
+
+# DB
+engine, session = get_session(app)
+BaseModel.set_session(session)
 
 """ App Security + Settings """
 import modules.core
 
+""" Sub module Imports """
+import modules.report
+import modules.celery_tasks     # Create tasks from other subs
+
+init_db(app, engine, session)
 
 """ Init + Bind extensions to app """
 # Enable/Disable development extensions
@@ -35,11 +46,6 @@ mail.init_app(app)
 moment.init_app(app)
 health.init_app(app, "/healthcheck")
 assets.init_app(app)   # Manage JavaScript bundles
-
-""" Sub module Imports """
-import modules.report
-import modules.celery_tasks     # Create tasks from other subs
-
 
 """ Register HTML """
 # Register external CDNs
@@ -66,11 +72,6 @@ frontend.register_nav_renderers(app)
 
 # Register HTML endpoints
 app.register_blueprint(frontend.frontend_bp)
-
-# DB
-engine, session = get_session(app)
-# BaseModel.set_session(session)
-init_db(app, engine, session)
 
 #
 # @app.teardown_request

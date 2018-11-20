@@ -7,7 +7,7 @@ from sqlalchemy.sql import and_
 
 from modules.celery_tasks import task_logger as logger
 from modules.celery_worker import celery
-from modules.utilities import utc_now
+from modules.utilities.helpers import utc_now
 from modules.report.models import SlaReportModel, SummarySLAReportModel, TablesLoadedModel, CallTableModel
 
 

@@ -2,7 +2,7 @@
 from sqlalchemy.sql import and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from modules.utilities import get_model_by_tablename
+from modules.utilities.helpers import get_model_by_tablename
 
 
 def get_data_for_table(table_name, start_time, end_time):

@@ -6,7 +6,7 @@ from sqlalchemy.sql import and_
 
 from modules.core.encoders import JSONEncodedDict
 from modules.extensions import BaseModel
-from modules.utilities import utc_now
+from modules.utilities.helpers import utc_now
 
 
 class SlaReportModel(BaseModel):
