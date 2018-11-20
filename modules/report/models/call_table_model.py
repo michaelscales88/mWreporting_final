@@ -15,14 +15,14 @@ class CallTableModel(BaseModel):
 
     call_id = Column(Integer, primary_key=True)
     call_direction = Column(Integer)
-    calling_party_number = Column(String(50))
-    dialed_party_number = Column(String(50))
-    account_code = Column(String(10))
+    calling_party_number = Column(String(100))
+    dialed_party_number = Column(String(100))
+    account_code = Column(String(100))
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     system_id = Column(Integer)
-    caller_id = Column(String(50))
-    inbound_route = Column(String(50))
+    caller_id = Column(String(100))
+    inbound_route = Column(String(100))
     events = relationship("EventTableModel", lazy="dynamic")
 
     @hybrid_property

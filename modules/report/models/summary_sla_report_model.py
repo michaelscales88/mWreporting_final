@@ -17,7 +17,7 @@ class SummarySLAReportModel(BaseModel):
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     frequency = Column(Integer, default=86400)
-    data = Column(JSONEncodedDict(500))
+    data = Column(JSONEncodedDict(1024))
     is_schedulable = Column(Boolean, default=True)
 
     date_requested = Column(DateTime(timezone=True), default=utc_now())
