@@ -9,7 +9,7 @@ import modules.core.config_runner
 import modules.core.security
 from modules import app
 from modules.utilities.server import build_routes
-from modules.extensions import admin, get_session, health
+from modules.extensions import admin, health, get_session
 from modules.utilities import check_local_db, set_logger
 from .encoders import AppJSONEncoder
 
@@ -39,6 +39,8 @@ with app.app_context():
     import modules.core.views
 
     session = get_session(app)[1]
+
+    # from modules import session
 
     # Register the admin views to the extension
     admin.add_view(

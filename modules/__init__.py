@@ -4,7 +4,7 @@ from flask_assets import Bundle
 
 import frontend  # Templates directory functions as a frontend
 from .extensions import (
-    admin, bootstrap, mail, BaseModel,
+    admin, bootstrap, mail,
     moment, health, babel, init_db,
     get_session, serializer, assets,
     debugger, register_app_cdn,
@@ -69,12 +69,12 @@ app.register_blueprint(frontend.frontend_bp)
 
 # DB
 engine, session = get_session(app)
-BaseModel.set_session(session)
+# BaseModel.set_session(session)
 init_db(app, engine, session)
 
-
-@app.teardown_request
-def remove_session(exception):
-    if exception:
-        print("Closing session on exception:", exception)
-    BaseModel.session.remove()
+#
+# @app.teardown_request
+# def remove_session(exception):
+#     if exception:
+#         print("Closing session on exception:", exception)
+#     BaseModel.session.remove()

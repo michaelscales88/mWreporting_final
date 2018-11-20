@@ -22,7 +22,6 @@ def init_db(app, engine, session):
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        # session.remove()
-        session.close()
+        session.remove()
 
     BaseModel.metadata.create_all(bind=engine)
