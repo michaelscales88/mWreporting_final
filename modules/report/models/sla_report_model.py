@@ -16,7 +16,7 @@ class SlaReportModel(BaseModel):
     id = Column(Integer, primary_key=True)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
-    data = Column(JSONEncodedDict(1024))
+    data = Column(JSONEncodedDict(5000))
     is_schedulable = Column(Boolean, default=True)
 
     date_requested = Column(DateTime, default=utc_now())
