@@ -54,20 +54,20 @@ class BaseView(ModelView):
                 )
             )
 
-    def after_model_change(self, form, model, is_created):
-        """
-            Perform some actions after a model was created or updated and
-            committed to the database.
-
-            Called from create_model after successful database commit.
-
-            By default does nothing.
-
-            :param form:
-                Form used to create/update model
-            :param model:
-                Model that was created/updated
-            :param is_created:
-                True if model was created, False if model was updated
-        """
-        model.session.close()
+    # def after_model_change(self, form, model, is_created):
+    #     """
+    #         Perform some actions after a model was created or updated and
+    #         committed to the database.
+    #
+    #         Called from create_model after successful database commit.
+    #
+    #         By default does nothing.
+    #
+    #         :param form:
+    #             Form used to create/update model
+    #         :param model:
+    #             Model that was created/updated
+    #         :param is_created:
+    #             True if model was created, False if model was updated
+    #     """
+    #     # model.session.remove()

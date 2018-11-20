@@ -18,11 +18,12 @@ with app.app_context():
     import modules.celery_tasks.views
     import modules.celery_tasks.models
     # Creates any models that have been imported
+    session = get_session(app)[1]
 
     # Register the admin views to the extension
     admin.add_view(
         views.ScheduleDispatchItemView(
-            models.ScheduleDispatchItemModel, get_session(app)[1],
+            models.ScheduleDispatchItemModel, session,
             name='Scheduled Tasks'
         )
     )

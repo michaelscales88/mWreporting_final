@@ -17,7 +17,7 @@ def add_dates():
             counter += 1
 
         load_table.session.commit()
-        load_table.session.close()
+        load_table.session.remove()
 
 
 if __name__ == '__main__':

@@ -38,16 +38,18 @@ with app.app_context():
     import modules.core.models
     import modules.core.views
 
+    session = get_session(app)[1]
+
     # Register the admin views to the extension
     admin.add_view(
         views.UsersView(
-            models.UserModel, get_session(app)[1],
+            models.UserModel, session,
             name='Manage Users', category='User Admin'
         )
     )
     admin.add_view(
         views.RolesView(
-            models.RolesModel, get_session(app)[1],
+            models.RolesModel, session,
             name='Manage Privileges', category='User Admin'
         )
     )

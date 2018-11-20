@@ -71,3 +71,10 @@ app.register_blueprint(frontend.frontend_bp)
 engine, session = get_session(app)
 BaseModel.set_session(session)
 init_db(app, engine, session)
+
+
+@app.teardown_request
+def remove_session(exception):
+    if exception:
+        print("Closing session on exception:", exception)
+    BaseModel.session.remove()

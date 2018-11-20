@@ -49,7 +49,7 @@ def seed_db():
             mng.clients.append(client)
 
         mng.session.commit()
-        mng.session.close()
+        mng.session.remove()
 
 
 if __name__ == '__main__':

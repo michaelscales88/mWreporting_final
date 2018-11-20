@@ -21,7 +21,7 @@ def add_reports():
             counter += 1
 
         sla_report_model.session.commit()
-        sla_report_model.session.close()
+        sla_report_model.session.remove()
 
 
 if __name__ == '__main__':

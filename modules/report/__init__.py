@@ -19,16 +19,18 @@ with app.app_context():
     # Init task scheduling
     register_report_tasks(app)
 
+    session = get_session(app)[1]
+
     # Report Views: All
     admin.add_view(
         views.SLAReportView(
-            models.SlaReportModel, get_session(app)[1],
+            models.SlaReportModel, session,
             name='SLA Reports', category="SLA Admin"
         )
     )
     admin.add_view(
         views.SLASummaryReportView(
-            models.SummarySLAReportModel, get_session(app)[1],
+            models.SummarySLAReportModel, session,
             name='Summary Reports', category="SLA Admin"
         )
     )
@@ -36,7 +38,7 @@ with app.app_context():
     # Client Manager Views: Manager Area
     admin.add_view(
         views.ClientManagerView(
-            models.ClientManager, get_session(app)[1],
+            models.ClientManager, session,
             name="Client Managers", category="User Admin"
         )
     )
@@ -44,7 +46,7 @@ with app.app_context():
     # Client Manager Views: Admin Area
     admin.add_view(
         views.ClientView(
-            models.ClientModel, get_session(app)[1],
+            models.ClientModel, session,
             name='Add/Remove Clients', category="SLA Admin"
         )
     )
@@ -52,19 +54,19 @@ with app.app_context():
     # Report Data Views: Admin Area
     admin.add_view(
         views.TablesLoadedView(
-            models.TablesLoadedModel, get_session(app)[1],
+            models.TablesLoadedModel, session,
             name='Report Data', category="SLA Admin"
         )
     )
     admin.add_view(
         views.CallDataView(
-            models.CallTableModel, get_session(app)[1],
+            models.CallTableModel, session,
             name='Raw Call Data', category="SLA Admin"
         )
     )
     admin.add_view(
         views.EventDataView(
-            models.EventTableModel, get_session(app)[1],
+            models.EventTableModel, session,
             name='Raw Event Data', category="SLA Admin"
         )
     )
