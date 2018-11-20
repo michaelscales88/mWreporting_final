@@ -31,13 +31,17 @@ class ClientManager(BaseModel):
     managers = relationship(
         user_model,
         secondary=user_manager_association,
-        cascade='all'
+        backref="clients",
+        lazy="dynamic"
+
     )
 
     clients = relationship(
         ClientModel,
         secondary=client_user_association,
-        cascade='all'
+        backref="managers",
+        lazy="dynamic"
+
     )
 
     def __str__(self):
