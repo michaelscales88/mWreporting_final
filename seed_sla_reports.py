@@ -1,6 +1,6 @@
 import datetime
 from modules import app
-from modules.utilities import get_model_by_tablename
+from modules.utilities.helpers import get_model_by_tablename
 
 
 def add_reports():

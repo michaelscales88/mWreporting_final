@@ -2,7 +2,7 @@ import yaml
 
 from modules import app
 from modules.core import security
-from modules.utilities import get_model_by_tablename
+from modules.utilities.helpers import get_model_by_tablename
 from flask_security.utils import hash_password
 
 
@@ -28,6 +28,14 @@ def seed_db():
                 roles=[su]
             )
 
+            security.user_datastore.create_user(
+                username='keith',
+                first_name="Keith",
+                last_name="Clark",
+                password=hash_password('secretpassword'),
+                roles=[su]
+            )
+
             user_model.session.commit()
 
         # Add clients
@@ -43,7 +51,7 @@ def seed_db():
             client_model.session.commit()
 
         manager = get_model_by_tablename("client_manager")
-        mng = manager.create(user_id=1)
+        mng = manager.create(user_id=2)
 
         for client in client_model.all():
             mng.clients.append(client)
