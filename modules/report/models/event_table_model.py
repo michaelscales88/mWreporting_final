@@ -18,10 +18,10 @@ class EventTableModel(BaseModel):
     calling_party = Column(String(100))
     receiving_party = Column(String(100))
     hunt_group = Column(String(100))
-    is_conference = Column(String(10))
+    is_conference = Column(String(100))
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
-    tag = Column(String(10))
+    tag = Column(String(100))
     recording_rule = Column(Integer)
     call_id = Column(Integer, ForeignKey(CallTableModel.call_id))
 
