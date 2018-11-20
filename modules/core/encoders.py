@@ -1,7 +1,7 @@
 # services/app_json.py
 from datetime import datetime, timedelta
 from flask import json
-from sqlalchemy.types import TypeDecorator, VARCHAR
+from sqlalchemy.types import TypeDecorator, Text
 from sqlalchemy.ext.mutable import Mutable
 from string import Template
 
@@ -63,7 +63,7 @@ class JSONEncodedDict(TypeDecorator):
         JSONEncodedDict(255)
 
     """
-    impl = VARCHAR
+    impl = Text
 
     @property
     def python_type(self):
