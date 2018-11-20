@@ -51,7 +51,7 @@ def seed_db():
             client_model.session.commit()
 
         manager = get_model_by_tablename("client_manager")
-        mng = manager.create(user_id=2)
+        mng = manager.create(name='superuser')
 
         for client in client_model.all():
             mng.clients.append(client)
