@@ -17,7 +17,7 @@ class EventTableModel(BaseModel):
     event_type = Column(Integer, nullable=False)
     calling_party = Column(String(50))
     receiving_party = Column(String(50))
-    hunt_group = Column(String(10))
+    hunt_group = Column(String(50))
     is_conference = Column(String(10))
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
