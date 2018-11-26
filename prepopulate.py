@@ -46,7 +46,8 @@ def seed_db():
             clients = file.get("clients")
             if clients:
                 for name, ext in clients.items():
-                    client_model.create(name=name, ext=ext)
+                    if not client_model.find_by_name(name):
+                        client_model.create(name=name, ext=ext)
 
             client_model.session.commit()
 

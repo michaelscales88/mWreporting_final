@@ -36,3 +36,7 @@ class BaseModel(Base, AllFeaturesMixin):
     @hybrid_property
     def headers(self):
         return self.__repr_attrs__
+
+    @classmethod
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()

@@ -2,4 +2,4 @@ from modules.base_view import BaseView
 
 
 class ClientView(BaseView):
-    pass
+    column_default_sort = 'name'
