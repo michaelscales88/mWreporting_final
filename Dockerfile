@@ -9,7 +9,7 @@ ENV TZ UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install build dependencies & get latest root certificates
-RUN apt update && apt install -y \
+RUN apt-get update && apt-get install -y \
     uwsgi-plugin-python3 \
     ca-certificates \
     python3-pip python3-dev build-essential \
@@ -37,4 +37,4 @@ ADD static /var/static
 ADD frontend /var/frontend
 
 # Lowest permissions by default
-#USER nobody
+USER nobody

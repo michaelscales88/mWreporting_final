@@ -4,7 +4,7 @@ from flask_restful import Api
 from celery.utils.log import get_task_logger
 
 from modules import app
-from modules.extensions import admin, get_session
+from modules.extensions import admin
 
 
 scheduled_tasks_bp = Blueprint('tasks_bp', __name__)
@@ -17,8 +17,6 @@ task_logger = get_task_logger(__name__)
 with app.app_context():
     import modules.celery_tasks.views
     import modules.celery_tasks.models
-    # Creates any models that have been imported
-    # session = get_session(app)[1]
 
     # Register the admin views to the extension
     admin.add_view(

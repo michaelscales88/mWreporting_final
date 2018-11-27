@@ -72,10 +72,3 @@ frontend.register_nav_renderers(app)
 
 # Register HTML endpoints
 app.register_blueprint(frontend.frontend_bp)
-
-#
-# @app.teardown_request
-# def remove_session(exception):
-#     if exception:
-#         print("Closing session on exception:", exception)
-#     BaseModel.session.remove()

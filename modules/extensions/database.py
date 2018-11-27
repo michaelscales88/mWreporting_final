@@ -21,6 +21,8 @@ def init_db(app, engine, session):
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
+        if exception:
+            session.rollback()
         session.remove()
 
     BaseModel.metadata.create_all(bind=engine)

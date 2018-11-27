@@ -26,20 +26,13 @@ def logout():
 with app.app_context():
     # Enable production/development settings
     if not app.debug:
-        # Application logger: rotates every 30 days
         set_logger("INFO")
-        # SQLAlchemy logger: long term to show history of DB modifications
-        set_logger("INFO", name="sqlalchemy.engine", rotating=False)
-        # SQLAlchemy logger: long term to show history of DB modifications
-        set_logger("INFO", name="app.sqlalchemy", rotating=False)
+    else:
+        set_logger("DEBUG")
 
     """ Bind models and views to db """
     import modules.core.models
     import modules.core.views
-
-    # session = get_session(app)[1]
-
-    # from modules import session
 
     # Register the admin views to the extension
     admin.add_view(

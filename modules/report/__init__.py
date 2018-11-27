@@ -3,7 +3,7 @@ from flask import Blueprint
 from flask_restful import Api
 
 from modules import app
-from modules.extensions import admin, get_session
+from modules.extensions import admin
 from modules.utilities.server import build_routes
 from .tasks import register_report_tasks
 
@@ -18,8 +18,6 @@ with app.app_context():
 
     # Init task scheduling
     register_report_tasks(app)
-
-    # session = get_session(app)[1]
 
     # Report Views: All
     admin.add_view(
