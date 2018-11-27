@@ -3,7 +3,7 @@ version: '3.6'
 services:
   # Application
   uwsgi:
-    image: flask_base:latest
+    image: amityhorror/flask_base:latest
     env_file: envs/app.env
     volumes:
       - app_instance:/var/instance
@@ -27,15 +27,15 @@ services:
         constraints: [node.role == manager]
 
   # Schedule process for worker threads
-  beat_worker:
-    image: flask_base:latest
+  beat:
+    image: amityhorror/flask_base:latest
     env_file: envs/app.env
     volumes:
       - app_instance:/var/instance
     working_dir: /var
     networks:
       - proxy_network
-    command: celery worker -A modules.celery_worker.celery --beat -l info -n beat@%h
+    command: celery -A modules.celery_worker.celery beat -s /var/instance/celerybeat-schedule
     deploy:
       mode: replicated
       replicas: 1
@@ -48,12 +48,10 @@ services:
   worker:
     image: flask_base:latest
     env_file: envs/app.env
-    volumes:
-      - app_instance:/var/instance
     working_dir: /var
     networks:
       - proxy_network
-    command: celery worker -A modules.celery_worker.celery --concurrency=10 -l info -n worker@%h
+    command: celery worker -A modules.celery_worker.celery -Ofair --concurrency=10 -l info
     deploy:
       mode: replicated
       replicas: 1
@@ -64,7 +62,7 @@ services:
 
   # Task Broker GUI management
   flower:
-    image: flask_base:latest
+    image: amityhorror/flask_base:latest
     env_file: envs/app.env
     volumes:
       - app_instance:/var/instance

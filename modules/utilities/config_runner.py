@@ -9,10 +9,6 @@ def get_log_dir(log_name):
     return log_dir
 
 
-""" Make a folder for non-production dBs """
-os.makedirs("instance/", exist_ok=True)
-
-
 for root, dirs, files in os.walk("."):
     # Venv should be the last directory
     # Don't read any of the configs from the virtual env

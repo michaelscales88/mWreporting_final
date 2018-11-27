@@ -37,4 +37,4 @@ ADD static /var/static
 ADD frontend /var/frontend
 
 # Lowest permissions by default
-USER nobody
+#USER nobody

@@ -24,11 +24,11 @@ def logout():
 
 
 with app.app_context():
-    # Enable production/development settings
-    if not app.debug:
-        set_logger("INFO")
-    else:
-        set_logger("DEBUG")
+    # # Enable production/development settings
+    # if not app.debug:
+    #     set_logger("INFO")
+    # else:
+    #     set_logger("DEBUG")
 
     """ Bind models and views to db """
     import modules.core.models
