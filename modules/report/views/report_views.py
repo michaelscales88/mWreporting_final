@@ -1,8 +1,9 @@
 import datetime
 
 import pytz
-from flask import Markup
-from flask import flash
+from flask import Markup, flash
+from flask_admin.actions import action
+from flask_admin.babel import gettext, ngettext
 from pandas import DataFrame
 from wtforms.validators import DataRequired
 
@@ -27,16 +28,16 @@ class SLAReportView(BaseView):
         start_time=dict(
             label='Start Time',
             default=(
-                datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
-                - datetime.timedelta(days=1)
+                    datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
+                    - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         ),
         end_time=dict(
             label='End Time',
             default=(
-                datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
-                - datetime.timedelta(days=1)
+                    datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
+                    - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         )
@@ -59,9 +60,20 @@ class SLAReportView(BaseView):
             tz=pytz.timezone("US/Central")),
     }
 
+    @action('export', 'Export', 'Do you want to export all these reports?')
+    def action_approve(self, ids):
+        try:
+            query = self.model.query.filter(self.model.id.in_(ids)).all()
+            print(query)
+            flash(ngettext('Reports were successfully downloaded.'))
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            flash(gettext('Failed to approve users. %(error)s', error=str(ex)), 'error')
+
     def is_accessible(self):
         status = super().is_accessible()
-        self.can_edit = False   # Reports can only be viewed after creation
+        self.can_edit = False  # Reports can only be viewed after creation
         return status
 
     def validate_form(self, form):
@@ -102,5 +114,5 @@ class SLASummaryReportView(BaseView):
 
     def is_accessible(self):
         status = super().is_accessible()
-        self.can_edit = False   # Reports can only be viewed after creation
+        self.can_edit = False  # Reports can only be viewed after creation
         return status
