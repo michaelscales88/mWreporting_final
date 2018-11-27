@@ -246,7 +246,7 @@ def make_sla_report(*args, start_time=None, end_time=None):
 
     report.update(data=report_data, completed_on=utc_now())
     report.session.commit()
-    report.session.close()
+    report.session.remove()
     logger.warning(
         "Completed: Make SLA report - {start} to {end}".format(
             start=start_time, end=end_time
@@ -304,7 +304,7 @@ def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=Non
 
     report.update(data=report_data, completed_on=utc_now())
     report.session.commit()
-    report.session.close()
+    report.session.remove()
     logger.warning(
         "Successfully finished making report for: "
         "{start} to {end}".format(start=start_time, end=end_time)

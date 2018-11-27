@@ -15,8 +15,8 @@ def add_reports():
         while counter < days_to_load:
             date = start_dt + datetime.timedelta(days=counter)
             sla_report_model.create(
-                start_time=date.replace(hour=7, minute=0, second=0, microsecond=0),
-                end_time=date.replace(hour=19, minute=0, second=0, microsecond=0)
+                start_time=date.replace(hour=0, minute=0, second=0, microsecond=0),
+                end_time=date.replace(hour=23, minute=59, second=0, microsecond=0)
             )
             counter += 1
 
