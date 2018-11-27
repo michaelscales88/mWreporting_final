@@ -35,7 +35,7 @@ services:
     working_dir: /var
     networks:
       - proxy_network
-    command: celery -A modules.celery_worker.celery beat -s /var/instance/celerybeat-schedule
+    command: celery -A modules.celery_worker.celery beat -s /tmp/celerybeat-schedule
     deploy:
       mode: replicated
       replicas: 1
@@ -46,7 +46,7 @@ services:
 
   # Worker Process for worker threads
   worker:
-    image: flask_base:latest
+    image: amityhorror/flask_base:latest
     env_file: envs/app.env
     working_dir: /var
     networks:
