@@ -18,7 +18,7 @@
 {% block head %}
     {{ super() }}
 
-    {# fixes for legacy browsers. #}
+    <!-- fixes for legacy browsers -->
     {{ fixes.ie8() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 {%- endblock %}
