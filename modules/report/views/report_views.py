@@ -28,16 +28,16 @@ class SLAReportView(BaseView):
         start_time=dict(
             label='Start Time',
             default=(
-                    datetime.datetime.today().replace(hour=7, minute=0, second=0, microsecond=0)
-                    - datetime.timedelta(days=1)
+                datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+                - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         ),
         end_time=dict(
             label='End Time',
             default=(
-                    datetime.datetime.today().replace(hour=19, minute=0, second=0, microsecond=0)
-                    - datetime.timedelta(days=1)
+                datetime.datetime.today().replace(hour=23, minute=59, second=0, microsecond=0)
+                - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         )
@@ -60,7 +60,7 @@ class SLAReportView(BaseView):
             tz=pytz.timezone("US/Central")),
     }
 
-    @action('export', 'Export', 'Do you want to export all these reports?')
+    @action('export_all', 'Export Selected: Individually', 'Do you want to export all these reports?')
     def action_approve(self, ids):
         try:
             query = self.model.query.filter(self.model.id.in_(ids)).all()
@@ -69,7 +69,7 @@ class SLAReportView(BaseView):
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
-            flash(gettext('Failed to approve users. %(error)s', error=str(ex)), 'error')
+            flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
 
     def is_accessible(self):
         status = super().is_accessible()
@@ -97,8 +97,8 @@ class SLASummaryReportView(BaseView):
         start_time=dict(
             label='Start Time',
             default=(
-                    datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-                    - datetime.timedelta(days=1)
+                datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+                - datetime.timedelta(days=1)
             ),
             validators=[DataRequired()]
         ),
