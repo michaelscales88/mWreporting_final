@@ -27,8 +27,8 @@ class SlaReportModel(BaseModel):
     def opt_name():
         return "SLA Report"
 
-    @classmethod
-    def headers(cls):
+    @staticmethod
+    def view_headers():
         return [
             'I/C Presented',
             'I/C Live Answered',
@@ -48,6 +48,48 @@ class SlaReportModel(BaseModel):
             'Call Ans + 999',
             'Longest Waiting Answered',
             'PCA'
+        ]
+
+    @classmethod
+    def default_row(cls):
+        return zip(cls.view_headers(), cls.default_row_vals())
+
+    @staticmethod
+    def data_headers():
+        return [
+            'I/C Presented',
+            'I/C Live Answered',
+            'I/C Lost',
+            'Voice Mails',
+            'Answered Incoming Duration',
+            'Answered Wait Duration',
+            'Lost Wait Duration',
+            'Calls Ans Within 15',
+            'Calls Ans Within 30',
+            'Calls Ans Within 45',
+            'Calls Ans Within 60',
+            'Calls Ans Within 999',
+            'Call Ans + 999',
+            'Longest Waiting Answered'
+        ]
+
+    @staticmethod
+    def default_row_vals():
+        return [
+            0,  # 'I/C Presented'
+            0,  # 'I/C Live Answered'
+            0,  # 'I/C Abandoned'
+            0,  # 'Voice Mails'
+            datetime.timedelta(0),  # Answered Incoming Duration
+            datetime.timedelta(0),  # Answered Wait Duration
+            datetime.timedelta(0),  # Lost Wait Duration
+            0,  # 'Calls Ans Within 15'
+            0,  # 'Calls Ans Within 30'
+            0,  # 'Calls Ans Within 45'
+            0,  # 'Calls Ans Within 60'
+            0,  # 'Calls Ans Within 999'
+            0,  # 'Call Ans + 999'
+            datetime.timedelta(0)  # 'Longest Waiting Answered'
         ]
 
     @classmethod

@@ -71,6 +71,17 @@ class SLAReportView(BaseView):
                 raise
             flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
 
+    @action('export_all_wb', 'Export Selected: As workbook', 'Export these reports into a single workbook?')
+    def action_approve(self, ids):
+        try:
+            query = self.model.query.filter(self.model.id.in_(ids)).all()
+            print(query)
+            flash(ngettext('Reports were successfully downloaded.'))
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
+
     def is_accessible(self):
         status = super().is_accessible()
         self.can_edit = False  # Reports can only be viewed after creation

@@ -59,12 +59,12 @@ def get_sla_report(start_time, end_time, clients=()):
         df = compute_avgs(df)
 
         # Filter out columns containing raw data
-        df = df[['Client'] + SlaReportModel.headers()]
+        df = df[['Client'] + SlaReportModel.view_headers()]
 
         # Prettify percentages
         df = df.applymap(format_df)
     else:
-        df = pd.DataFrame(columns=['Client'] + SlaReportModel.headers())
+        df = pd.DataFrame(columns=['Client'] + SlaReportModel.view_headers())
 
     return df
 
@@ -122,7 +122,7 @@ def get_summary_sla_report(start_time, end_time, clients=()):
         t_df = compute_avgs(t_df)
 
         # Filter out columns containing raw data
-        t_df = t_df[SlaReportModel.headers()]
+        t_df = t_df[SlaReportModel.view_headers()]
 
         # Prettify percentages
         t_df = t_df.applymap(format_df)

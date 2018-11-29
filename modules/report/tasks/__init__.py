@@ -1,6 +1,6 @@
 from celery.schedules import crontab
 from .getters import *
-from .loaders import *
+from .loader_tasks import *
 from .report_tasks import *
 
 

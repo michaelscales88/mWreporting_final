@@ -3,23 +3,7 @@ from datetime import timedelta
 
 import pandas as pd
 
-from modules.report.models import ClientModel
-
-SUM_COLS = [
-    'I/C Presented',
-    'I/C Live Answered',
-    'I/C Lost',
-    'Voice Mails',
-    'Answered Incoming Duration',
-    'Answered Wait Duration',
-    'Lost Wait Duration',
-    'Calls Ans Within 15',
-    'Calls Ans Within 30',
-    'Calls Ans Within 45',
-    'Calls Ans Within 60',
-    'Calls Ans Within 999',
-    'Call Ans + 999'
-]
+from modules.report.models import ClientModel, SlaReportModel
 
 
 def get_td(interval, period):
@@ -35,13 +19,17 @@ def get_td(interval, period):
 
 
 def make_summary(df):
-    # Create row of sums
-
+    # Create summary row
     summary_frame = pd.DataFrame(
-        [df[SUM_COLS].sum()], columns=SUM_COLS, index=['Summary']
+        [df[SlaReportModel.data_headers()].sum()],
+        columns=SlaReportModel.data_headers(),
+        index=['Summary']
     )
+
+    # Add summary label to row names (clients)
     summary_frame.insert(0, 'Client', ['Summary'])
-    # Append column with max timedelta
+
+    # Add the max timedelta to the summary
     summary_frame['Longest Waiting Answered'] = pd.Series(
         df['Longest Waiting Answered'].max(), index=summary_frame.index
     )
@@ -49,12 +37,13 @@ def make_summary(df):
 
 
 def compute_avgs(df):
-    # Percentages
+    # Defaults
     df['Incoming Live Answered (%)'] = 1.0
     df['Incoming Received (%)'] = 1.0
     df['Incoming Abandoned (%)'] = 0.0
     df['PCA'] = 1.0
 
+    # Calculate the percentages by row
     df['Incoming Live Answered (%)'] = df['Incoming Live Answered (%)'].where(
         df['I/C Presented'] == 0,
         other=df['I/C Live Answered'].divide(df['I/C Presented'], fill_value=0),
@@ -118,7 +107,6 @@ def add_client_names(frame):
         for index in list(frame.index):
             client = ClientModel.query.filter(ClientModel.ext == index).first()
             if client:
-                # aliases.append("{name} ({ext})".format(name=client.name, ext=client.ext))
                 aliases.append("{name}".format(name=client.name))
             else:
                 aliases.append(index)
