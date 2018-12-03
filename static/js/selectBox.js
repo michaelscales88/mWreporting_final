@@ -1,6 +1,6 @@
 function sortOptions(selector) {
     let my_options = $(selector + " option");
-    my_options.sort(function(a,b) {
+    my_options.sort(function (a, b) {
         if (a.text > b.text) return 1;
         else if (a.text < b.text) return -1;
         else return 0;
@@ -35,6 +35,8 @@ function initSelectBox(url, select_tag) {
         method: "POST",
         success: function (results, textStatus) {
             if (textStatus === 'success') {
+                console.log("loading my clients");
+                console.log(results);
                 $.each(results.data, function () {
                     $(selectedOpts).append(
                         $("<option></option>")
@@ -46,21 +48,23 @@ function initSelectBox(url, select_tag) {
                 sortOptions(selectedOpts);
             }
             $selector.selectpicker("refresh");
+            alert("loaded my options");
         }
     });
 
-    $.get(url).done(function() {
+    $.get(url).done(function () {
         // Ajax success
         $.ajax({
             url: url,
             data: {active: true},
             success: function (results, textStatus) {
                 if (textStatus === 'success') {
+                    console.log("loading all clients");
+                    console.log(results);
                     $.each(results.data, function () {
                         let selectedOpt = $("#report-select option[value='" + this['ext'] + "']");
-                        if(selectedOpt.length === 0)
-                        {
-                           $(otherOpts).append(
+                        if (selectedOpt.length === 0) {
+                            $(otherOpts).append(
                                 $("<option></option>")
                                     .val(this['ext'])
                                     .html(this['name'])
@@ -70,6 +74,7 @@ function initSelectBox(url, select_tag) {
                     sortOptions(otherOpts);
                 }
                 $selector.selectpicker("refresh");
+                alert("loaded non selected options");
             }
         });
     });
