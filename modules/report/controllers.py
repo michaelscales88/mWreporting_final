@@ -39,6 +39,7 @@ class SLAClientAPI(BaseResource):
 
     def get(self):
         all_clients = ClientModel.query.filter(ClientModel.active == self.args['active']).all()
+        print(all_clients)
         return jsonify(
             data=self.schema.dump(all_clients).data
         )
