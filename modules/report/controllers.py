@@ -40,15 +40,18 @@ class SLAClientAPI(BaseResource):
             data=clients_schema.dump(all_clients).data
         )
 
-    @user_auth
+    # @user_auth
     def post(self):
-        print(request.form['_user_id'])
+        # print(request.form['_user_id'])
+        return jsonify(
+            data=[]
+        )
         # if self.current_user_id:
-        if False:
-            manager = ClientManager.find(self.current_user_id)
-            managers_clients = manager.clients if manager else []
-            return jsonify(
-                data=clients_schema.dump(managers_clients).data
-            )
-        else:
-            return abort(404, "No clients for current user.")
+        # if False:
+        #     manager = ClientManager.find(self.current_user_id)
+        #     managers_clients = manager.clients if manager else []
+        #     return jsonify(
+        #         data=clients_schema.dump(managers_clients).data
+        #     )
+        # else:
+        #     return abort(404, "No clients for current user.")
