@@ -36,10 +36,7 @@ def data_loader(*args):
                 dates_query = report
                 break
 
-    if dates_query:
-        dates_query.update(last_updated=utc_now())
-        dates_query.session.commit()
-    else:
+    if not dates_query:
         logger.info("No tables to load.")
         return "Success: No tasks."
 
@@ -99,10 +96,11 @@ def data_loader(*args):
                     tl_model.update(calls_loaded=True)
                 if table.__tablename__ == "c_event":
                     tl_model.update(events_loaded=True)
-                TablesLoadedModel.session.commit()
+                tl_model.update(last_updated=utc_now())
+                # tl_model.session.commit()
+                table.session.commit()
 
-            table.session.commit()
-            table.session.close()
+        # table.session.remove()
 
     except Exception as err:
         logger.error("Error: Major failure loading data.")
@@ -113,6 +111,7 @@ def data_loader(*args):
     finally:
         # Always close the connection to the external database
         ext_session.close()
+        TablesLoadedModel.session.remove()
 
         logger.info("Closed external data connection.")
 
@@ -137,10 +136,7 @@ def report_loader(*args):
                 next_report = report
                 break
 
-    if next_report:
-        next_report.update(last_updated=utc_now())
-        next_report.session.commit()
-    else:
+    if not next_report:
         logger.info("No reports to load.")
         return "Success: No reports to load."
 

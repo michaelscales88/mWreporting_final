@@ -48,7 +48,7 @@ def get_model_by_tablename(tablename):
 
 def get_model_headers(model_name=None):
     model = get_model_by_tablename(model_name)
-    return list(model.headers) if isinstance(BaseModel, model) else None
+    return list(model.view_headers) if isinstance(BaseModel, model) else None
 
 
 def get_pk(table):

@@ -99,9 +99,38 @@
             // Set all our ajax calls to have the necessary headers for the server.
             $.ajaxSetup({
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=utf-8");
+                    xhr.setRequestHeader(
+                        'Authorization', sessionStorage.getItem('access_key')
+                    );
+                    xhr.setRequestHeader(
+                        "Content-type",
+                        "application/x-www-form-urlencoded; charset=utf-8"
+                    );
                 }
             });
+
+            {#function onLoad() {#}
+            {#    $.ajax({#}
+            {#        type: 'post',#}
+            {#        url: '/refresh-token',#}
+            {#        success: function (response) {#}
+            {#            // If the auth_token is present put it in session storage#}
+            {#            // make the call again in 25 seconds to refresh the token.#}
+            {#            if (response && response.hasOwnProperty("auth_token")) {#}
+            {#                sessionStorage.setItem('access_key', response['auth_token']);#}
+            {#                setTimeout(onLoad, 25000);#}
+            {#            } else {#}
+            {#                // If you're not logged in, redirect to login. Note / defaults to login#}
+            {#                if (window.location.pathname !== '/' && window.location.pathname !== '/login') {#}
+            {#                    window.location.replace("/");#}
+            {#                }#}
+            {#            }#}
+            {#        }#}
+            {#    });#}
+            {# }#}
+
+            // Make initial call on document load.
+            {# onLoad();#}
         });
     </script>
 {% endblock scripts %}

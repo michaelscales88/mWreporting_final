@@ -6,6 +6,7 @@ from .models import CallTableModel, EventTableModel, SlaReportModel, ClientModel
 
 class ClientModelSchema(serializer.ModelSchema):
     class Meta:
+        fields = ("ext", "name")
         model = ClientModel
 
 
@@ -22,3 +23,6 @@ class EventTableModelSchema(serializer.ModelSchema):
 class CallTableModelSchema(serializer.ModelSchema):
     class Meta:
         model = CallTableModel
+
+
+clients_schema = ClientModelSchema(many=True)

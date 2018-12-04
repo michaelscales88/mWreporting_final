@@ -38,7 +38,7 @@ class SummarySLAReportModel(BaseModel):
 
     @classmethod
     def headers(cls):
-        return SlaReportModel.headers()
+        return SlaReportModel.view_headers()
 
     @classmethod
     def get(cls, start_time, end_time, frequency):
