@@ -1,11 +1,12 @@
 # report/api.py
-from flask import jsonify
+from flask import jsonify, abort, request
 
 from modules.base_resource import BaseResource
 
 from .models import ClientModel, ClientManager
-from .serializers import ClientModelSchema
+from .serializers import clients_schema
 from .tasks import get_summary_sla_report, get_sla_report
+from modules.core.security import user_auth
 
 
 class SummaryReportAPI(BaseResource):
@@ -33,20 +34,21 @@ class SLAReportAPI(BaseResource):
 
 class SLAClientAPI(BaseResource):
 
-    def __init__(self):
-        self.schema = ClientModelSchema(many=True)
-        super().__init__()
-
     def get(self):
         all_clients = ClientModel.query.filter(ClientModel.active == self.args['active']).all()
-        print(all_clients)
         return jsonify(
-            data=self.schema.dump(all_clients).data
+            data=clients_schema.dump(all_clients).data
         )
 
+    @user_auth
     def post(self):
-        manager = ClientManager.find(self.current_user)
-        managers_clients = manager.clients if manager else []
-        return jsonify(
-            data=self.schema.dump(managers_clients).data
-        )
+        print(request.form['_user_id'])
+        # if self.current_user_id:
+        if False:
+            manager = ClientManager.find(self.current_user_id)
+            managers_clients = manager.clients if manager else []
+            return jsonify(
+                data=clients_schema.dump(managers_clients).data
+            )
+        else:
+            return abort(404, "No clients for current user.")

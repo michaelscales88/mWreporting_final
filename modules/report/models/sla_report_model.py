@@ -52,7 +52,7 @@ class SlaReportModel(BaseModel):
 
     @classmethod
     def default_row(cls):
-        return zip(cls.view_headers(), cls.default_row_vals())
+        return zip(cls.data_headers(), cls.default_row_vals())
 
     @staticmethod
     def data_headers():
