@@ -17,7 +17,8 @@ function initSelectBox(url, select_tag) {
     $selector.addClass("selectpicker");
     $selector.selectpicker({
         size: 4,
-        width: "100%"
+        width: "100%",
+        actionsBox: true
     });
 
     $selector.append(
@@ -25,6 +26,7 @@ function initSelectBox(url, select_tag) {
             .attr("id", "filtered-" + select_tag)
             .attr("label", "Your clients")
     );
+    $selector.append('<option data-divider="true"></option>');
     $selector.append(
         $('<optgroup></optgroup>')
             .attr("id", "all-" + select_tag)
@@ -35,8 +37,6 @@ function initSelectBox(url, select_tag) {
         method: "POST",
         success: function (results, textStatus) {
             if (textStatus === 'success') {
-                console.log("loading my clients");
-                console.log(results);
                 $.each(results.data, function () {
                     $(selectedOpts).append(
                         $("<option></option>")
@@ -48,7 +48,6 @@ function initSelectBox(url, select_tag) {
                 sortOptions(selectedOpts);
             }
             $selector.selectpicker("refresh");
-            alert("loaded my options");
         }
     });
 
@@ -59,8 +58,6 @@ function initSelectBox(url, select_tag) {
             data: {active: true},
             success: function (results, textStatus) {
                 if (textStatus === 'success') {
-                    console.log("loading all clients");
-                    console.log(results);
                     $.each(results.data, function () {
                         let selectedOpt = $("#report-select option[value='" + this['ext'] + "']");
                         if (selectedOpt.length === 0) {
@@ -74,7 +71,6 @@ function initSelectBox(url, select_tag) {
                     sortOptions(otherOpts);
                 }
                 $selector.selectpicker("refresh");
-                alert("loaded non selected options");
             }
         });
     });
