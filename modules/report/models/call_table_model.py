@@ -3,15 +3,17 @@ import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
 
 from modules.extensions import BaseModel
+from .event_table_model import EventTableModel
 
 
 class CallTableModel(BaseModel):
     __tablename__ = 'c_call'
-    __repr_attrs__ = ['call_id', 'calling_party_number', 'dialed_party_number',
-                      'start_time', 'end_time', 'caller_id']
+    __repr_attrs__ = [
+        'call_id', 'calling_party_number', 'dialed_party_number',
+        'start_time', 'end_time', 'caller_id'
+    ]
 
     call_id = Column(Integer, primary_key=True)
     call_direction = Column(Integer)
@@ -23,7 +25,6 @@ class CallTableModel(BaseModel):
     system_id = Column(Integer)
     caller_id = Column(String(100))
     inbound_route = Column(String(100))
-    events = relationship("EventTableModel", lazy="dynamic")
 
     @hybrid_property
     def length(self):
@@ -34,3 +35,7 @@ class CallTableModel(BaseModel):
     def set_empty(cls, model):
         model.data = {}
         return model
+
+    @hybrid_property
+    def events(self):
+        return EventTableModel.query.filter_by(call_id=self.call_id).all()

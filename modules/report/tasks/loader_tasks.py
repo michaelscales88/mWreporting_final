@@ -97,7 +97,6 @@ def data_loader(*args):
                 if table.__tablename__ == "c_event":
                     tl_model.update(events_loaded=True)
                 tl_model.update(last_updated=utc_now())
-                # tl_model.session.commit()
                 table.session.commit()
 
         # table.session.remove()
