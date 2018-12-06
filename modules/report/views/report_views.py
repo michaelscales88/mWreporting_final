@@ -8,6 +8,7 @@ from pandas import DataFrame
 from wtforms.validators import DataRequired
 
 from modules.base_view import BaseView
+from modules.report.tasks import report_loader
 
 
 def _data_formatter(view, context, model, name):
@@ -93,6 +94,10 @@ class SLAReportView(BaseView):
             flash("start time cannot be greater than end time!")
             return False
         return super().validate_form(form)
+
+    def after_model_change(self, form, model, is_created):
+        if is_created:
+            report_loader.delay()
 
 
 class SLASummaryReportView(BaseView):
