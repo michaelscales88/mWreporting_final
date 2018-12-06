@@ -101,9 +101,7 @@ class SLASummaryReportView(BaseView):
     form_columns = ('start_time', 'end_time')
     column_details_list = ['data']
     column_default_sort = ('start_time', True)
-    column_formatters = {
-        'data': _data_formatter
-    }
+    column_formatters = {'data': _data_formatter}
     form_args = dict(
         start_time=dict(
             label='Start Time',
