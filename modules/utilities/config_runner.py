@@ -22,6 +22,6 @@ for root, dirs, files in os.walk("."):
                 path = os.path.abspath(os.path.join(root, file))
                 app.config.from_pyfile(path)
             except FileNotFoundError:
-                print("Failed to load [ {module_name} ] module settings.".format(module_name=module))
+                print("Failed to load [ {module_name} ] settings.".format(module_name=module))
             else:
-                print("Loaded [ {module_name} ] module settings.".format(module_name=module))
+                print("Loaded [ {module_name} ] settings.".format(module_name=module))

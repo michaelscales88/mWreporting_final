@@ -7,7 +7,7 @@ from flask_admin.babel import gettext, ngettext
 from pandas import DataFrame
 from wtforms.validators import DataRequired
 
-from modules.base_view import BaseView
+from modules.base.base_view import BaseView
 from modules.report.tasks import report_loader
 
 

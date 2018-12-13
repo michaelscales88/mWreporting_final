@@ -29,7 +29,7 @@ import modules.core
 
 """ Sub module Imports """
 import modules.report
-import modules.celery_tasks     # Create tasks from other subs
+import modules.worker     # Create tasks from other subs
 
 init_db(app, engine, session)
 

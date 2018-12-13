@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from sqlalchemy.sql import and_
 
-from modules.celery_tasks import task_logger as logger
+from modules.worker import task_logger as logger
 from modules.report.models import TablesLoadedModel, CallTableModel, SlaReportModel
 
 

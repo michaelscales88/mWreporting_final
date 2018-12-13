@@ -5,7 +5,7 @@ from celery.schedules import crontab
 from flask import current_app
 from wtforms.validators import DataRequired
 
-from modules.base_view import BaseView
+from modules.base.base_view import BaseView
 from .forms import CustomSelectField
 from .utilities import scheduled_time_options, task_type_options
 

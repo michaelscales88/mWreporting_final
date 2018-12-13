@@ -4,7 +4,7 @@ from flask_restful import Api
 
 from modules import app
 from modules.extensions import admin
-from modules.utilities.server import build_routes
+from modules.utilities.route_builder import build_routes
 from .tasks import register_report_tasks
 
 sla_report_bp = Blueprint('sla_report_bp', __name__)

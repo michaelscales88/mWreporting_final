@@ -1,12 +1,11 @@
 # report/api.py
-from flask import jsonify, abort, request
+from flask import jsonify
 
-from modules.base_resource import BaseResource
+from modules.base.base_resource import BaseResource
 
-from .models import ClientModel, ClientManager
+from .models import ClientModel
 from .serializers import clients_schema
 from .tasks import get_summary_sla_report, get_sla_report
-from modules.core.security import user_auth
 
 
 class SummaryReportAPI(BaseResource):

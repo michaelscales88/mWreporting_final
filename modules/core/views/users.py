@@ -1,5 +1,5 @@
 from flask import flash
-from modules.base_view import BaseView
+from modules.base.base_view import BaseView
 from modules.core.models import UserModel
 from .forms import CustomPasswordField
 

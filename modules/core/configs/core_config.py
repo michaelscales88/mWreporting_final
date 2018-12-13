@@ -1,37 +1,27 @@
-# app/core/core_config.py
+# modules/core/core_config.py
 import os
 
-CORE_MODULE_ROUTES = {
-    "Authorize": {
-        "url": "/api/security/get-token",
-        "methods": {}
-    },
-    "RefreshToken": {
-        "url": "/api/security/refresh-token",
-        "methods": {}
-    }
-}
+# Application Settings
+SITE_NAME = os.getenv("SITE_NAME", "MW_REPORTING")
+BASE_DIR = os.path.abspath(
+    os.path.dirname(os.getenv("FLASK_APP", "app"))  # Find the root path
 
-SECURITY_INTERVAL = os.getenv("SECURITY_INTERVAL", 90)
+)
+SECRET_KEY = os.getenv("SECRET_KEY", "secret")  # Uses env variable in prod
+CSRF_ENABLED = os.getenv("CSRF_ENABLED", True)
+ROWS_PER_PAGE = 50
 
-# Flask-Security config
-SECURITY_URL_PREFIX = os.getenv("SECURITY_URL_PREFIX", "/admin")
-SECURITY_PASSWORD_HASH = os.getenv("SECURITY_PASSWORD_HASH", "pbkdf2_sha512")
-SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT", "AJBOELjvisLDkvzi")
-SECURITY_USER_IDENTITY_ATTRIBUTES = ("username", "email")
+DEFAULT_PASSWORD = os.getenv("DEFAULT_PASSWORD", "Mike1234")
+MAIL_USERNAME = os.getenv('MAIL_USERNAME', 'youremail@example.com')
+MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', '"Default" <{email}>'.format(email=MAIL_USERNAME))
 
-# Flask-Security URLs, overridden because they don't put a / at the end
-SECURITY_LOGIN_URL = os.getenv("SECURITY_LOGIN_URL", "/login/")
-SECURITY_LOGOUT_URL = os.getenv("SECURITY_LOGOUT_URL", "/logout/")
-SECURITY_REGISTER_URL = os.getenv("SECURITY_REGISTER_URL", "/register/")
-SECURITY_RESET_URL = os.getenv("SECURITY_RESET_URL", "/reset/")
+# administrator list
+ADMINS = [MAIL_DEFAULT_SENDER, '"Mike Scales" michael.scales88@gmail.com']
 
-SECURITY_POST_LOGIN_VIEW = os.getenv("SECURITY_POST_LOGIN_VIEW", "/admin/")
-SECURITY_POST_LOGOUT_VIEW = os.getenv("SECURITY_POST_LOGOUT_VIEW", "/admin/")
-SECURITY_POST_REGISTER_VIEW = os.getenv("SECURITY_POST_REGISTER_VIEW", "/admin/")
-SECURITY_POST_RESET_VIEW = os.getenv("SECURITY_POST_RESET_VIEW", "/admin/")
-
-# Flask-Security features
-SECURITY_REGISTERABLE = os.getenv("SECURITY_REGISTERABLE", True)
-SECURITY_SEND_REGISTER_EMAIL = os.getenv("SECURITY_SEND_REGISTER_EMAIL", False)
-SECURITY_RECOVERABLE = os.getenv("SECURITY_RECOVERABLE", True)
+# Development Settings
+PRODUCTION_MODE = os.getenv("FLASK_ENV", "development") == 'production'
+DEBUG = not PRODUCTION_MODE  # Toggle off during release
+DEBUG_TOOLBAR_ENABLED = not PRODUCTION_MODE  # Gives information about routes
+NOISY_ERROR = PRODUCTION_MODE
+USE_LOGGERS = os.getenv("USE_LOGGERS", False) or PRODUCTION_MODE
+LOGS_DIR = os.getenv("LOGS_DIR", "instance/logs")

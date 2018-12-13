@@ -1,5 +1,5 @@
 # report/services/sla_report.py
-from modules.celery_tasks import task_logger as logger
+from modules.worker import task_logger as logger
 from modules.report.models import SlaReportModel
 
 

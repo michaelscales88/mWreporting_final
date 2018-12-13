@@ -15,8 +15,8 @@ task_logger = get_task_logger(__name__)
 
 """ Create models for module in dB """
 with app.app_context():
-    import modules.celery_tasks.views
-    import modules.celery_tasks.models
+    import modules.worker.views
+    import modules.worker.models
 
     # Register the admin views to the extension
     admin.add_view(

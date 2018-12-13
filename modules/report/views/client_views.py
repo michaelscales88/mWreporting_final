@@ -1,4 +1,4 @@
-from modules.base_view import BaseView
+from modules.base.base_view import BaseView
 
 
 class ClientManagerView(BaseView):

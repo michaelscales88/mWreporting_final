@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import jwt
 from flask import jsonify, current_app, abort
 
-from modules.base_resource import BaseResource
+from modules.base.base_resource import BaseResource
 from modules.utilities.authenticate_jwt import authenticate
 from .models import RolesModel
 

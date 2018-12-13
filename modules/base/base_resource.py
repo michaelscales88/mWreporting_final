@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 
-from .utilities.helpers import to_datetime, to_list, to_bool
-from .core.security import jwt_required
+from modules.utilities.helpers import to_datetime, to_list, to_bool
+from modules.core.security import jwt_required
 
 
 class BaseResource(Resource):

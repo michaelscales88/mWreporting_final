@@ -1,6 +1,6 @@
 # report/services/sla_report.py
-from modules.celery_tasks import task_logger as logger
-from modules.celery_worker import celery
+from modules.worker import task_logger as logger
+from modules.worker.celery_worker import celery
 from modules.report.models import SlaReportModel, SummarySLAReportModel
 from modules.utilities.helpers import utc_now
 from .reports import build_sla_data, build_summary_sla_data

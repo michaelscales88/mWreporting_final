@@ -1,4 +1,4 @@
-from modules.base_view import BaseView
+from modules.base.base_view import BaseView
 from modules.report.tasks import data_loader
 
 
@@ -10,6 +10,11 @@ class TablesLoadedView(BaseView):
     def after_model_change(self, form, model, is_created):
         if is_created:
             data_loader.delay()
+
+    def is_accessible(self):
+        status = super().is_accessible()
+        self.can_edit = False  # Reports can only be viewed after creation
+        return status
 
 
 class CallDataView(BaseView):
