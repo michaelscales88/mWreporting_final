@@ -1,8 +1,7 @@
-from modules import app
 from celery import Celery
 
 
-with app.app_context():
+def get_celery(app):
     celery = Celery(__name__, broker=app.config['CELERY_BROKER_URL'])
     celery.conf.update(app.config)
 
@@ -14,3 +13,4 @@ with app.app_context():
                 return super().__call__(self, *args, **kwargs)
 
     celery.Task = ContextTask
+    return celery

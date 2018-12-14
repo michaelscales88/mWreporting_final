@@ -5,6 +5,7 @@ from celery.utils.log import get_task_logger
 
 from modules import app
 from modules.extensions import admin
+from .celery_worker import get_celery
 
 
 scheduled_tasks_bp = Blueprint('tasks_bp', __name__)
@@ -26,6 +27,7 @@ with app.app_context():
             name='Scheduled Tasks'
         )
     )
+    celery = get_celery(app)
 
 
 app.register_blueprint(scheduled_tasks_bp)

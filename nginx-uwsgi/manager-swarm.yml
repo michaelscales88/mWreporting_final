@@ -3,7 +3,7 @@ version: '3.6'
 services:
   # Docker GUI management
   gui:
-    image: portainer/portainer
+    image: portainer/portainer:latest
     ports:
     - target: 9000
       published: 33333
@@ -23,7 +23,7 @@ services:
 
   # Management's connection to Docker
   agent:
-    image: portainer/agent
+    image: portainer/agent:latest
     environment:
       AGENT_CLUSTER_ADDR: tasks.agent
     ports:

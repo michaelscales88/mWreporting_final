@@ -10,7 +10,7 @@ services:
     ports:
     - "5001:5555"
     working_dir: /var
-    command: celery flower -A modules.celery_worker.celery
+    command: celery flower -A modules.worker.celery
     deploy:
       mode: replicated
       replicas: 1
