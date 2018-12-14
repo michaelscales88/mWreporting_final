@@ -8,7 +8,7 @@ from modules.report.models import SlaReportModel, SummarySLAReportModel
 from modules.report.utilities import (
     add_client_names, compute_avgs, format_df, make_summary
 )
-from .report_tasks import make_sla_report, make_summary_sla_report
+from .loaders import report_loader
 
 logger = logging.getLogger("app")
 
@@ -25,7 +25,7 @@ def get_sla_report(start_time, end_time, clients=()):
                 start=start_time, end=end_time
             )
         )
-        report_made = make_sla_report(start_time=start_time, end_time=end_time)
+        report_made = report_loader(start_time, end_time)
         if not report_made:
             logger.error(
                 "Report could not be made for {start}"
@@ -76,23 +76,24 @@ def get_summary_sla_report(start_time, end_time, clients=()):
 
     # If the report does not exist make a report.
     if not report:
-        logger.info(
-            "Report for: {start} and {end} over interval {interval} "
-            "does not exist.\n".format(
-                start=start_time, end=end_time, interval=report.interval
-            )
-        )
-        report_made = make_summary_sla_report(start_time=start_time, end_time=end_time)
-        if not report_made:
-            logger.error(
-                "Report for: {start} and {end} over interval {interval} "
-                "could not be made.\n".format(
-                    start=start_time, end=end_time, interval=report.interval
-                )
-            )
-            report = SummarySLAReportModel.set_empty(SummarySLAReportModel())
-        else:
-            report = SummarySLAReportModel.get(start_time, end_time, frequency=43200)
+        pass
+        # logger.info(
+        #     "Report for: {start} and {end} over interval {interval} "
+        #     "does not exist.\n".format(
+        #         start=start_time, end=end_time, interval=report.interval
+        #     )
+        # )
+        # report_made = make_summary_sla_report(start_time=start_time, end_time=end_time)
+        # if not report_made:
+        #     logger.error(
+        #         "Report for: {start} and {end} over interval {interval} "
+        #         "could not be made.\n".format(
+        #             start=start_time, end=end_time, interval=report.interval
+        #         )
+        #     )
+        #     report = SummarySLAReportModel.set_empty(SummarySLAReportModel())
+        # else:
+        #     report = SummarySLAReportModel.get(start_time, end_time, frequency=43200)
     else:
         logger.info(
             "Report for: {start} and {end} over interval {interval} "

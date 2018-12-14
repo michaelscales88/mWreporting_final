@@ -8,7 +8,7 @@ from pandas import DataFrame
 from wtforms.validators import DataRequired
 
 from modules.base.base_view import BaseView
-from modules.report.tasks import report_loader
+from modules.report.tasks import report_task
 
 
 def _data_formatter(view, context, model, name):
@@ -97,7 +97,7 @@ class SLAReportView(BaseView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            report_loader.delay()
+            report_task.delay(model.start_time, model.end_time)
 
 
 class SLASummaryReportView(BaseView):

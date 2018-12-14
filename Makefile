@@ -2,7 +2,7 @@
 # Must be run with sudo for rabbitmq-server.
 
 # include environment variables for worker
-include nginx-uwsgi/envs/dev.env
+include nginx-uwsgi/envs/app.env
 export
 
 .PHONY: start_worker stop_worker \
@@ -17,7 +17,8 @@ stop_rabbit:
 	rabbitmqctl stop
 
 start_worker1:
-	celery worker -A modules.celery_worker.celery -E --beat --concurrency=10 -l info -n worker1@%h
+	celery worker -A modules.worker.celery_worker.celery -beat \
+    -s /tmp/celerybeat-schedule -Ofair --concurrency=10 -l info
 
 start_worker2:
 	celery worker -A modules.celery_worker.celery -E --concurrency=10 -l info -n worker2@%h

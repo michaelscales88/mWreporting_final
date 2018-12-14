@@ -1,30 +1,43 @@
-from celery.schedules import crontab
+from modules.worker.celery_worker import celery
 from .getters import *
-from .loader_tasks import *
-from .report_tasks import *
+from .loaders import *
 
 
-def register_report_tasks(server_instance):
-    """ Report Data """
-    server_instance.config['CELERYBEAT_SCHEDULE']['load_report_data'] = {
-        'task': 'report.utilities.data_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
+@celery.task(bind=True, max_retries=10)
+def call_data_task(self, *args, **kwargs):
+    logger.warning("Starting call data task.")
+    load_date = kwargs.pop("load_date")
+    try:
+        service_result = call_data_loader(load_date)
+        if not service_result:
+            raise AssertionError("Retry")
+    except Exception as err:
+        logger.warning(err)
+        self.retry(countdown=2 ** self.request.retries)
 
-    """ SLA Report """
-    server_instance.config['CELERYBEAT_SCHEDULE']['load_report'] = {
-        'task': 'report.utilities.report_loader',
-        'schedule': crontab(
-            **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-        )
-    }
 
-    """ Summary SLA Report """
-    # server_instance.config['CELERYBEAT_SCHEDULE']['load_summary_report'] = {
-    #     'task': 'report.utilities.summary_report_loader',
-    #     'schedule': crontab(
-    #         **{server_instance.config['BEAT_PERIOD']: server_instance.config['BEAT_RATE']}
-    #     )
-    # }
+@celery.task(bind=True, max_retries=10)
+def event_data_task(self, *args, **kwargs):
+    logger.warning("Starting event data task.")
+    load_date = kwargs.pop("load_date")
+    try:
+        service_result = event_data_loader(load_date)
+        if not service_result:
+            raise AssertionError("Retry")
+    except Exception as err:
+        logger.warning(err)
+        self.retry(countdown=2 ** self.request.retries)
+
+
+@celery.task(bind=True, max_retries=10)
+def report_task(self, *args, **kwargs):
+    logger.warning("Starting report data task.")
+    start_time = kwargs.pop("start_time")
+    end_time = kwargs.pop("end_time")
+    try:
+        service_result = event_data_loader(start_time, end_time)
+        if not service_result:
+            raise AssertionError("Retry")
+    except Exception as err:
+        logger.warning(err)
+        self.retry(countdown=2 ** self.request.retries)

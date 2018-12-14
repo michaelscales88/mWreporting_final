@@ -19,7 +19,7 @@ def no_endpoint_specified():
 @frontend_bp.route("/report")
 def index():
     return render_template(
-        'report/index.html',
+        'pages/index.html',
         title='Home'
     )
 
@@ -27,7 +27,7 @@ def index():
 @frontend_bp.route("/report/sla-report")
 def sla_report():
     return render_template(
-        'report/daily_report.html',
+        'pages/daily_report.html',
         title='Daily Report'
     )
 
@@ -35,6 +35,6 @@ def sla_report():
 @frontend_bp.route("/report/summary-report")
 def summary_report():
     return render_template(
-        'report/summary_report.html',
+        'pages/summary_report.html',
         title='Summary Report'
     )

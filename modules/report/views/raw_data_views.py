@@ -1,5 +1,5 @@
 from modules.base.base_view import BaseView
-from modules.report.tasks import data_loader
+from modules.report.tasks import call_data_task, event_data_task
 
 
 class TablesLoadedView(BaseView):
@@ -9,7 +9,8 @@ class TablesLoadedView(BaseView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            data_loader.delay()
+            call_data_task.delay(model.loaded_date)
+            event_data_task.delay(model.loaded_date)
 
     def is_accessible(self):
         status = super().is_accessible()

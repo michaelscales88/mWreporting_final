@@ -5,7 +5,6 @@ from flask_restful import Api
 from modules import app
 from modules.extensions import admin
 from modules.utilities.route_builder import build_routes
-from .tasks import register_report_tasks
 
 sla_report_bp = Blueprint('sla_report_bp', __name__)
 sla_report_api = Api(sla_report_bp)
@@ -15,9 +14,6 @@ sla_report_api = Api(sla_report_bp)
 with app.app_context():
     import modules.report.models
     import modules.report.views
-
-    # Init task scheduling
-    register_report_tasks(app)
 
     # Report Views: All
     admin.add_view(

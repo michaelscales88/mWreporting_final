@@ -36,7 +36,6 @@ broker_api = 'amqp://{user}:{pw}@{host}:{port}/api/'.format(
 
 # Enable debug logging
 logging = os.getenv('FLOWER_LOG_LEVEL', 'INFO')
-CELERYD_LOG_FILE = os.getenv('CELERY_LOGFILE', 'instance/celery-logs')
 
 """
 Celery Task Queue Management
@@ -58,9 +57,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 """
 Celery Beat Persistent Task Scheduler
 """
-CELERYBEAT_SCHEDULE_FILENAME = os.getenv(
-    'CELERYBEAT_SCHEDULE_FILENAME', 'instance/celerybeat-schedule'
-)
 CELERYBEAT_SCHEDULE = {}
 BEAT_PERIOD = os.getenv('BEAT_PERIOD', 'minute')
 BEAT_RATE = os.getenv('BEAT_RATE', '*/1')
