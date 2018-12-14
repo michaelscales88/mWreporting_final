@@ -34,32 +34,35 @@ class ScheduleDispatchItemView(BaseView):
         )
     )
 
-    def on_model_change(self, form, model, is_created):
+    def after_model_change(self, form, model, is_created):
         if is_created:
-            current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
-                'task': '{type}.custom.{name}'.format(
-                    type=form.data['model_type'],
-                    name=form.data['name']
-                ),
-                'schedule': crontab(
-                    **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
-                )
-            }
+            # Add the item to the schedule
+            # current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
+            #     'task': '{type}.custom.{name}'.format(
+            #         type=form.data['model_type'],
+            #         name=form.data['name']
+            #     ),
+            #     'schedule': crontab(
+            #         **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
+            #     )
+            # }
+            pass
         else:
             # Update if there's a change
-            if form.data.get("name") != model.name:
-                del current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']]
-                current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
-                    'task': '{type}.custom.{name}'.format(
-                        type=form.data['model_type'],
-                        name=form.data['name']
-                    ),
-                    'schedule': crontab(
-                        **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
-                    )
-                }
-        super().on_model_change(form, model, is_created)
+            pass
+            # if form.data.get("name") != model.name:
+            #     del current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']]
+            #     current_app.config['CELERYBEAT_SCHEDULE'][form.data['name']] = {
+            #         'task': '{type}.custom.{name}'.format(
+            #             type=form.data['model_type'],
+            #             name=form.data['name']
+            #         ),
+            #         'schedule': crontab(
+            #             **{current_app.config['BEAT_PERIOD']: current_app.config['BEAT_RATE']}
+            #         )
+            #     }
 
     def delete_model(self, model):
-        del current_app.config['CELERYBEAT_SCHEDULE'][model.name]
+        if current_app.config['CELERYBEAT_SCHEDULE'].get(model.name):
+            del current_app.config['CELERYBEAT_SCHEDULE'][model.name]
         super().delete_model(model)

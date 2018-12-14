@@ -1,4 +1,4 @@
-# scheduled_tasks/__init__.py
+# worker/__init__.py
 from flask import Blueprint
 from flask_restful import Api
 from celery.utils.log import get_task_logger

@@ -5,8 +5,6 @@ services:
   uwsgi:
     image: amityhorror/flask_base:latest
     env_file: envs/app.env
-    volumes:
-    - app_instance:/var/instance
     configs:
     - source: start_flask
       target: /var/start_flask.sh
@@ -45,47 +43,6 @@ services:
         condition: on-failure
       placement:
         constraints: [node.role == manager]
-
-  # Broker GUI management
-  flower:
-    image: amityhorror/flask_base:latest
-    env_file: envs/app.env
-    volumes:
-    - app_instance:/var/instance
-    networks:
-    - proxy_network
-    ports:
-    - "5001:5555"
-    working_dir: /var
-    command: celery flower -A modules.celery_worker.celery
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.role == manager]
-
-  # Message Broker
-  rabbit:
-    image: rabbitmq:3.6.6-management
-    env_file: envs/app.env
-    ports:
-    - "5672"
-    - target: 25672
-      published: 25672
-      protocol: tcp
-      mode: host
-    networks:
-    - proxy_network
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.role == manager]
-
-# Shared volume persists application information
-volumes:
-  app_instance:
 
 networks:
   proxy_network:

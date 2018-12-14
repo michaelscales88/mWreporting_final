@@ -21,7 +21,7 @@ services:
       placement:
         constraints: [node.role == manager]
 
-  # Connect GUI management to docker
+  # Management's connection to Docker
   agent:
     image: portainer/agent
     environment:
