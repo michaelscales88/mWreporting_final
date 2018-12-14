@@ -3,7 +3,7 @@ version: '3.6'
 services:
   # Broker GUI management
   flower:
-    image: amityhorror/flask_base:latest
+    image: amityhorror/flask_base
     env_file: envs/app.env
     networks:
     - proxy_network

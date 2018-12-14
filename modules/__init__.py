@@ -5,9 +5,9 @@ from flask_assets import Bundle
 import frontend  # Templates directory functions as a frontend
 from .extensions import (
     admin, bootstrap, mail, BaseModel,
-    moment, health, babel, init_db,
-    get_session, serializer, assets,
-    debugger, register_app_cdn,
+    moment, babel, init_db, get_session,
+    serializer, assets, debugger,
+    register_app_cdn,
 )
 
 """ Create the app """
@@ -29,7 +29,7 @@ import modules.core
 
 """ Sub module Imports """
 import modules.report
-import modules.worker     # Create tasks from other subs
+import modules.worker as worker     # Create tasks from other subs
 
 init_db(app, engine, session)
 
@@ -44,8 +44,7 @@ bootstrap.init_app(app)
 serializer.init_app(app)
 mail.init_app(app)
 moment.init_app(app)
-health.init_app(app, "/healthcheck")
-assets.init_app(app)   # Manage JavaScript bundles
+assets.init_app(app)                # Manage JavaScript bundles
 
 """ Register HTML """
 # Register external CDNs
