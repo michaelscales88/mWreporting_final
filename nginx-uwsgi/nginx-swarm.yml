@@ -11,7 +11,10 @@ services:
       published: 80
       protocol: tcp
       mode: host
-    - '5000:5000'
+    - target: 5000
+      published: 5000
+      protocol: tcp
+      mode: host
     - target: 443
       published: 443
       protocol: tcp

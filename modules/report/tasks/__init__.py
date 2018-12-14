@@ -1,4 +1,4 @@
-from modules.worker import celery
+from modules.celery_worker import celery
 from .getters import *
 from .loaders import *
 

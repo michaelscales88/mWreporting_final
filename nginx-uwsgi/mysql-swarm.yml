@@ -11,7 +11,10 @@ services:
     - source: my_cnf
       target: /etc/mysql/my.cnf
     ports:
-    - '3306'
+    - target: 3306
+      published: 3306
+      protocol: tcp
+      mode: ingress
     networks:
     - proxy_network
     deploy:

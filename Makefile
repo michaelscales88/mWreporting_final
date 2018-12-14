@@ -17,8 +17,7 @@ stop_rabbit:
 	rabbitmqctl stop
 
 start_worker:
-	celery worker -A modules.worker.celery -beat \
-    -s /tmp/celerybeat-schedule -Ofair --concurrency=10 -l info
+	celery worker -A modules.celery_worker.celery -beat -Ofair --concurrency=10 -l info
 
 stop_worker:
 	pkill -9 -f 'celery worker'

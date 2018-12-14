@@ -8,9 +8,12 @@ services:
     networks:
     - proxy_network
     ports:
-    - "5001:5555"
+    - target: 5555
+      published: 5001
+      protocol: tcp
+      mode: ingress
     working_dir: /var
-    command: celery flower -A modules.worker.celery
+    command: celery flower -A modules.celery_worker.celery
     deploy:
       mode: replicated
       replicas: 1
@@ -24,11 +27,14 @@ services:
     image: rabbitmq:3.6.6-management
     env_file: envs/app.env
     ports:
-    - "5672"
+    - target: 5672
+      published: 5672
+      protocol: tcp
+      mode: ingress
     - target: 25672
       published: 25672
       protocol: tcp
-      mode: host
+      mode: ingress
     networks:
     - proxy_network
     deploy:
