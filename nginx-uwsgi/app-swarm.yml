@@ -28,7 +28,6 @@ services:
   worker:
     image: amityhorror/flask_base:latest
     env_file: envs/app.env
-    working_dir: /var
     configs:
     - source: start_celery
       target: /var/start_celery.sh
