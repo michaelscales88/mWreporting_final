@@ -26,7 +26,6 @@ services:
       placement:
         constraints: [node.role == manager]
 
-  # Worker Process + Scheduler
   worker:
     image: amityhorror/flask_base:latest
     env_file: envs/app.env
