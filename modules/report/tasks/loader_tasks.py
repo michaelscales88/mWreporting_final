@@ -6,7 +6,7 @@ from flask import current_app
 from sqlalchemy.sql import func, or_, and_
 
 from modules.worker import task_logger as logger
-from modules.worker.celery_worker import celery
+from modules.celery_worker import celery
 from modules.utilities.helpers import get_pk, utc_now
 from modules.report.models import (
     TablesLoadedModel, CallTableModel, EventTableModel, SlaReportModel,
