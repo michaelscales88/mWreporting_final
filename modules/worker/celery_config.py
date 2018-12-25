@@ -17,7 +17,7 @@ accept_content = ['json']
 RabbitMQ Broker Management
 """
 # RabbitMQ task broker
-broker_url = 'amqp://{user}:{pw}@{host}:{port}'.format(
+BROKER_URL = 'amqp://{user}:{pw}@{host}:{port}'.format(
     user=AMQP_USERNAME,
     pw=AMQP_PASSWORD,
     host=AMQP_HOST,
@@ -25,7 +25,7 @@ broker_url = 'amqp://{user}:{pw}@{host}:{port}'.format(
 )
 
 # RabbitMQ management api
-broker_api = 'amqp://{user}:{pw}@{host}:{port}/api/'.format(
+BROKER_API = 'amqp://{user}:{pw}@{host}:{port}/api/'.format(
     user=AMQP_USERNAME,
     pw=AMQP_PASSWORD,
     host=AMQP_HOST,
@@ -48,6 +48,6 @@ result_backend = 'rpc://{user}:{pw}@{host}:{port}'.format(
 """
 Celery Beat Persistent Task Scheduler
 """
-beat_schedule = {}
+BEAT_SCHEDULE = {}
 BEAT_PERIOD = os.getenv('BEAT_PERIOD', 'minute')
 BEAT_RATE = os.getenv('BEAT_RATE', '*/1')

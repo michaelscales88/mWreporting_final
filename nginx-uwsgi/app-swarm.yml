@@ -3,19 +3,19 @@ version: '3.6'
 services:
   # Application
   uwsgi:
-    image: amityhorror/flask_base:latest
-    env_file: envs/app.env
+    image: amityhorror/flask_base:dev
+    env_file: envs/prod.env
     configs:
-    - source: start_flask
-      target: /var/start_flask.sh
-      mode: 0755
-    - source: uwsgi_ini
-      target: /uwsgi/uwsgi.ini
+      - source: start_uwsgi
+        target: /var/start_uwsgi.sh
+        mode: 0755
+      - source: uwsgi_ini
+        target: /uwsgi/uwsgi.ini
     networks:
-    - proxy_network
+      - proxy_network
     ports:
-    - "5000:8001"
-    command: sh /var/start_flask.sh
+      - "5000:8001"
+    command: sh /var/start_uwsgi.sh
     deploy:
       mode: replicated
       replicas: 1
@@ -26,15 +26,15 @@ services:
 
   # Worker Process + Scheduler
   worker:
-    image: amityhorror/flask_base:latest
-    env_file: envs/app.env
+    image: amityhorror/flask_base:dev
+    env_file: envs/prod.env
     configs:
-    - source: start_celery
-      target: /var/start_celery.sh
-      mode: 0755
+      - source: start_worker
+        target: /var/start_worker.sh
+        mode: 0755
     networks:
-    - proxy_network
-    command: sh /var/start_celery.sh
+      - proxy_network
+    command: sh /var/start_worker.sh
     deploy:
       mode: replicated
       replicas: 1
@@ -48,9 +48,9 @@ networks:
     external: true
 
 configs:
-  start_flask:
-    file: ./start_flask.sh
-  start_celery:
-    file: ./start_celery.sh
+  start_uwsgi:
+    file: ./configs/start_uwsgi.sh
+  start_worker:
+    file: ./configs/start_worker.sh
   uwsgi_ini:
-    file: ./uwsgi.ini
+    file: ./configs/uwsgi.ini

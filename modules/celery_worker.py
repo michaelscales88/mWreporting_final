@@ -3,7 +3,7 @@ from celery import Celery
 from modules import app
 
 with app.app_context():
-    celery = Celery(__name__, broker=app.config['broker_url'])
+    celery = Celery(__name__, broker=app.config['BROKER_URL'])
     celery.conf.update(app.config)
 
     class ContextTask(celery.Task):

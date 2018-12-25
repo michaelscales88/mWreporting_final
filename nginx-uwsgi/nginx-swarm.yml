@@ -7,31 +7,31 @@ services:
     command: -g "daemon off;" -c /etc/nginx/nginx.conf
     entrypoint: nginx
     ports:
-    - target: 80
-      published: 80
-      protocol: tcp
-      mode: host
-    - target: 5000
-      published: 5000
-      protocol: tcp
-      mode: host
-    - target: 443
-      published: 443
-      protocol: tcp
-      mode: host
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
     configs:
-    - source: proxy_params
-      target: /etc/nginx/proxy_params
-    - source: uwsgi_params
-      target: /etc/nginx/uwsgi_params
-    - source: nginx_conf
-      target: /etc/nginx/nginx.conf
-    - source: sla_conf
-      target: /etc/nginx/conf.d/sla.reporting.com.conf
-    - source: flower_conf
-      target: /etc/nginx/conf.d/flower.reporting.com.conf
+      - source: proxy_params
+        target: /etc/nginx/proxy_params
+      - source: uwsgi_params
+        target: /etc/nginx/uwsgi_params
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
+      - source: sla_conf
+        target: /etc/nginx/conf.d/sla.reporting.com.conf
+      - source: flower_conf
+        target: /etc/nginx/conf.d/flower.reporting.com.conf
     networks:
-    - proxy_network
+      - proxy_network
     deploy:
       mode: replicated
       replicas: 1
