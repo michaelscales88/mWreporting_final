@@ -1,0 +1,95 @@
+version: '3.6'
+
+services:
+  # Application
+  uwsgi:
+    image: amityhorror/flask_base:dev
+    env_file: envs/prod.env
+    configs:
+      - source: start_uwsgi
+        target: /var/start_uwsgi.sh
+        mode: 0755
+      - source: uwsgi_ini
+        target: /uwsgi/uwsgi.ini
+    networks:
+      - proxy_network
+    ports:
+      - "5000:8001"
+    command: sh /var/start_uwsgi.sh
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  # Worker Process + Scheduler
+  worker:
+    image: amityhorror/flask_base:dev
+    env_file: envs/prod.env
+    networks:
+      - proxy_network
+    working_dir: /var
+    command: celery worker -A modules.celery_worker.celery --autoscale=10,3 -l info
+    depends_on:
+      - rabbit
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  flower:
+    image: amityhorror/flask_base:dev
+    env_file: envs/prod.env
+    networks:
+      - proxy_network
+    ports:
+      - target: 5555
+        published: 5001
+        protocol: tcp
+        mode: ingress
+    working_dir: /var
+    command: celery flower -A modules.celery_worker.celery
+    depends_on:
+      - rabbit
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  # Message Broker
+  rabbit:
+    image: rabbitmq:3.6.6-management
+    env_file: envs/prod.env
+    ports:
+      - target: 5672
+        published: 5672
+        protocol: tcp
+        mode: ingress
+      - target: 25672
+        published: 25672
+        protocol: tcp
+        mode: ingress
+    networks:
+      - proxy_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  proxy_network:
+    external: true
+
+configs:
+  start_uwsgi:
+    file: ./configs/start_uwsgi.sh
+  uwsgi_ini:
+    file: ./configs/uwsgi.ini

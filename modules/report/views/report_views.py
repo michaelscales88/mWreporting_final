@@ -97,7 +97,7 @@ class SLAReportView(BaseView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            report_task.delay(model.start_time, model.end_time)
+            report_task.delay(start_time=model.start_time, end_time=model.end_time)
 
 
 class SLASummaryReportView(BaseView):

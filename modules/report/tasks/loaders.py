@@ -51,13 +51,12 @@ def call_data_loader(*args):
         results = ext_session.query(CallTableModel).filter(
             func.DATE(CallTableModel.start_time) == load_date
         ).all()
-        ext_session.remove()
 
         # Add the records from the external database to the local
         # database. Add record by record grouped by date. Check if
         # the record exists before adding.
         for result in results:
-            ext_primary_key = result.get('call_id')
+            ext_primary_key = result.call_id
             if not ext_primary_key:
                 logger.error("Could not identify primary key for foreign record.\n"
                              "{dump}".format(dump=dumps(result, indent=2, default=str)))
@@ -66,14 +65,21 @@ def call_data_loader(*args):
             record = CallTableModel.find(ext_primary_key)
             if not record:
                 CallTableModel.create(
-                    **{
-                        entry: result[entry]
-                        for entry in result.keys() if entry != '_sa_instance_state'
-                    }
+                    call_id=result.call_id,
+                    call_direction=result.call_direction,
+                    calling_party_number=result.calling_party_number,
+                    dialed_party_number=result.dialed_party_number,
+                    start_time=result.start_time,
+                    end_time=result.end_time,
+                    caller_id=result.caller_id,
+                    inbound_route=result.inbound_route
                 )
             else:
                 logger.warning("Record Exists: {rec}".format(rec=record))
 
+        CallTableModel.session.remove()
+
+        # Update the system that the interval is loaded
         tl_model = TablesLoadedModel.find(load_date)
         if load_date < utc_now().date():
             tl_model.update(calls_loaded=True)
@@ -126,13 +132,12 @@ def event_data_loader(*args):
         results = ext_session.query(EventTableModel).filter(
             func.DATE(EventTableModel.start_time) == load_date
         ).all()
-        ext_session.remove()
 
         # Add the records from the external database to the local
         # database. Add record by record grouped by date. Check if
         # the record exists before adding.
         for result in results:
-            ext_primary_key = result.get('event_id')
+            ext_primary_key = result.event_id
             if not ext_primary_key:
                 logger.error("Could not identify primary key for foreign record.\n"
                              "{dump}".format(dump=dumps(result, indent=2, default=str)))
@@ -141,14 +146,22 @@ def event_data_loader(*args):
             record = EventTableModel.find(ext_primary_key)
             if not record:
                 EventTableModel.create(
-                    **{
-                        entry: result[entry]
-                        for entry in result.keys() if entry != '_sa_instance_state'
-                    }
+                    event_id=result.event_id,
+                    event_type=result.event_type,
+                    calling_party=result.calling_party,
+                    receiving_party=result.receiving_party,
+                    hunt_group=result.hunt_group,
+                    is_conference=result.is_conference,
+                    start_time=result.start_time,
+                    end_time=result.end_time,
+                    call_id=result.call_id,
                 )
             else:
                 logger.warning("Record Exists: {rec}".format(rec=record))
 
+        EventTableModel.session.remove()
+
+        # Update the system that the interval is loaded
         if load_date < utc_now().date():
             tl_model.update(events_loaded=True)
         tl_model.update(last_updated=utc_now())
