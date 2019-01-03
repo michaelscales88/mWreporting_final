@@ -9,11 +9,12 @@ from modules.report.models import TablesLoadedModel, CallTableModel, SlaReportMo
 
 
 def build_sla_data(start_time, end_time):
-    logger.info(
+    logger.warning(
         "Started: Building SLA report data {start} to {end}".format(
             start=start_time, end=end_time
         )
     )
+
     # Check that the data has been loaded for the report date
     if not TablesLoadedModel.interval_is_loaded(start_time, end_time):
         logger.warning("Data not loaded for report interval.\n"
@@ -30,7 +31,7 @@ def build_sla_data(start_time, end_time):
     ).all()
 
     # Collate data for interval
-    sla_data = dict()
+    sla_data = OrderedDict()
     for call in inbound_calls:
 
         # Index on dialed party number

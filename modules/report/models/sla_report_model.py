@@ -102,6 +102,15 @@ class SlaReportModel(BaseModel):
         ).first()
 
     @classmethod
+    def worker_get(cls, session, start_time, end_time):
+        return session.query(cls).filter(
+            and_(
+                cls.start_time == start_time,
+                cls.end_time == end_time
+            )
+        ).first()
+
+    @classmethod
     def exists(cls, start_time, end_time):
         return cls.get(start_time, end_time) is not None
 

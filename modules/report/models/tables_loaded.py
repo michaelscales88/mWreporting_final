@@ -39,6 +39,10 @@ class TablesLoadedModel(BaseModel):
         return cls.query.filter(cls.loaded_date == func.date(date)).first()
 
     @classmethod
+    def worker_find(cls, session, date):
+        return session.query(cls).filter(cls.loaded_date == func.date(date)).first()
+
+    @classmethod
     def is_loaded(cls, date):
         record = cls.find(date)
         if record:

@@ -3,16 +3,71 @@ import datetime
 from json import dumps
 
 from flask import current_app
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import func
 
+from modules.extensions import get_session
 from modules.report.models import (
     TablesLoadedModel, CallTableModel, EventTableModel,
     SlaReportModel
 )
-from .reports import build_sla_data
 from modules.report.utilities import get_external_session
 from modules.utilities.helpers import utc_now
 from modules.worker import task_logger as logger
+from .reports import build_sla_data
+
+
+def load_call_data(session, results):
+    for r in results:
+        if not r.call_id:
+            logger.error("Could not identify primary key for foreign record.\n"
+                         "{dump}".format(dump=dumps(r, indent=2, default=str)))
+            continue
+
+        existing_rec = CallTableModel.find(r.call_id)
+        if existing_rec:
+            logger.warning("Record Exists: {rec}".format(rec=existing_rec))
+            continue
+
+        session.add(
+            CallTableModel(
+                call_id=r.call_id,
+                call_direction=r.call_direction,
+                calling_party_number=r.calling_party_number,
+                dialed_party_number=r.dialed_party_number,
+                start_time=r.start_time,
+                end_time=r.end_time,
+                caller_id=r.caller_id,
+                inbound_route=r.inbound_route
+            )
+        )
+
+
+def load_event_data(session, results):
+    for r in results:
+        if not r.event_id:
+            logger.error("Could not identify primary key for foreign record.\n"
+                         "{dump}".format(dump=dumps(r, indent=2, default=str)))
+            continue
+
+        existing_rec = EventTableModel.find(r.event_id)
+        if existing_rec:
+            logger.warning("Record Exists: {rec}".format(rec=existing_rec))
+            continue
+
+        session.add(
+            EventTableModel(
+                event_id=r.event_id,
+                event_type=r.event_type,
+                calling_party=r.calling_party,
+                receiving_party=r.receiving_party,
+                hunt_group=r.hunt_group,
+                is_conference=r.is_conference,
+                start_time=r.start_time,
+                end_time=r.end_time,
+                call_id=r.call_id,
+            )
+        )
 
 
 def call_data_loader(*args):
@@ -20,7 +75,8 @@ def call_data_loader(*args):
 
     # Args
     load_date = args[0]
-    if not load_date or isinstance(load_date, datetime.date):
+
+    if not isinstance(load_date, datetime.date):
         logger.warning(
             "Failed to start call data loader [ {} ].".format(load_date)
         )
@@ -35,65 +91,39 @@ def call_data_loader(*args):
         logger.error("Error: External database connection not set.\n"
                      "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
                      "the address to your database.")
-        return "Error: No external connection available."
+        return
 
-    tl_model = TablesLoadedModel.find(load_date)
+    session = get_session(current_app)[1]()
+
+    tl_model = TablesLoadedModel.worker_find(session, load_date)
     if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Call data for [ {} ] already loaded.".format(load_date)
         )
-        return True
+        return
 
+    # Get the data from the source database
+    ext_session = get_external_session(ext_uri)
     try:
-        ext_session = get_external_session(ext_uri)
-
-        # Get the data from the source database
         results = ext_session.query(CallTableModel).filter(
             func.DATE(CallTableModel.start_time) == load_date
         ).all()
-
-        # Add the records from the external database to the local
-        # database. Add record by record grouped by date. Check if
-        # the record exists before adding.
-        for result in results:
-            ext_primary_key = result.call_id
-            if not ext_primary_key:
-                logger.error("Could not identify primary key for foreign record.\n"
-                             "{dump}".format(dump=dumps(result, indent=2, default=str)))
-                continue
-
-            record = CallTableModel.find(ext_primary_key)
-            if not record:
-                CallTableModel.create(
-                    call_id=result.call_id,
-                    call_direction=result.call_direction,
-                    calling_party_number=result.calling_party_number,
-                    dialed_party_number=result.dialed_party_number,
-                    start_time=result.start_time,
-                    end_time=result.end_time,
-                    caller_id=result.caller_id,
-                    inbound_route=result.inbound_route
-                )
-            else:
-                logger.warning("Record Exists: {rec}".format(rec=record))
-
-        CallTableModel.session.remove()
-
-        # Update the system that the interval is loaded
-        tl_model = TablesLoadedModel.find(load_date)
-        if load_date < utc_now().date():
-            tl_model.update(calls_loaded=True)
-        tl_model.update(last_updated=utc_now())
-        tl_model.session.commit()
-        tl_model.session.remove()
-    except Exception as err:
-        logger.error("Encountered an error.", err)
-        raise err
+    except DatabaseError:
+        logger.error("Failed to get records from source database.")
     else:
-        logger.warning(
-            "Completed call data loader [ {} ].".format(load_date)
-        )
-        return True
+        # Insert data into target database
+        try:
+            load_call_data(session, results)
+
+            session.commit()
+        except DatabaseError:
+            logger.error("Error committing call records to target database.")
+            session.rollback()
+
+    logger.warning(
+        "Completed call data loader [ {} ].".format(load_date)
+    )
+    return True
 
 
 def event_data_loader(*args):
@@ -101,7 +131,9 @@ def event_data_loader(*args):
 
     # Args
     load_date = args[0]
-    if not load_date or isinstance(load_date, datetime.date):
+
+    # Check that load date is a date
+    if not isinstance(load_date, datetime.date):
         logger.warning(
             "Failed to start event data loader [ {} ].".format(load_date)
         )
@@ -116,65 +148,40 @@ def event_data_loader(*args):
         logger.error("Error: External database connection not set.\n"
                      "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
                      "the address to your database.")
-        return "Error: No external connection available."
+        return
 
-    tl_model = TablesLoadedModel.find(load_date)
-    if tl_model and tl_model.events_loaded:
+    session = get_session(current_app)[1]
+
+    tl_model = TablesLoadedModel.worker_find(session, load_date)
+    if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Event data for [ {} ] already loaded.".format(load_date)
         )
-        return True
+        return
+
+    # Get the data from the source database
+    ext_session = get_external_session(ext_uri)
 
     try:
-        ext_session = get_external_session(ext_uri)
-
-        # Get the data from the source database
         results = ext_session.query(EventTableModel).filter(
             func.DATE(EventTableModel.start_time) == load_date
         ).all()
-
-        # Add the records from the external database to the local
-        # database. Add record by record grouped by date. Check if
-        # the record exists before adding.
-        for result in results:
-            ext_primary_key = result.event_id
-            if not ext_primary_key:
-                logger.error("Could not identify primary key for foreign record.\n"
-                             "{dump}".format(dump=dumps(result, indent=2, default=str)))
-                continue
-
-            record = EventTableModel.find(ext_primary_key)
-            if not record:
-                EventTableModel.create(
-                    event_id=result.event_id,
-                    event_type=result.event_type,
-                    calling_party=result.calling_party,
-                    receiving_party=result.receiving_party,
-                    hunt_group=result.hunt_group,
-                    is_conference=result.is_conference,
-                    start_time=result.start_time,
-                    end_time=result.end_time,
-                    call_id=result.call_id,
-                )
-            else:
-                logger.warning("Record Exists: {rec}".format(rec=record))
-
-        EventTableModel.session.remove()
-
-        # Update the system that the interval is loaded
-        if load_date < utc_now().date():
-            tl_model.update(events_loaded=True)
-        tl_model.update(last_updated=utc_now())
-        tl_model.session.commit()
-        tl_model.session.remove()
-    except Exception as err:
-        logger.error("Encountered an error.", err)
-        raise err
+    except DatabaseError:
+        logger.error("Failed to get records from source database.")
     else:
-        logger.warning(
-            "Completed event data loader [ {} ].".format(load_date)
-        )
-        return True
+        # Insert data into target database
+        try:
+            load_event_data(session, results)
+
+            session.commit()
+        except DatabaseError:
+            logger.error("Error committing event records to target database.")
+            session.rollback()
+
+    logger.warning(
+        "Completed event data loader [ {} ].".format(load_date)
+    )
+    return True
 
 
 def report_loader(*args):
@@ -184,10 +191,10 @@ def report_loader(*args):
     start_time = args[0]
     end_time = args[1]
 
+    # Check that start and end times are datetime
     if (
-        not all([start_time, end_time])
-        and not isinstance(start_time, datetime.datetime)
-        and not isinstance(end_time, datetime.datetime)
+        not isinstance(start_time, datetime.datetime) and
+        not isinstance(end_time, datetime.datetime)
     ):
         logger.error(
             "Error: Report times: {start} and {end} are"
@@ -208,31 +215,28 @@ def report_loader(*args):
             )
         )
 
-    if not (start_time and end_time):
-        logger.error(
-            "Error: Report times: {start} and {end} are"
-            "not both provided.\n".format(
-                start=start_time, end=end_time
-            )
-        )
-        return False
+    session = get_session(current_app)[1]
 
-    report = SlaReportModel.get(start_time, end_time)
+    report = SlaReportModel.worker_get(session, start_time, end_time)
     if not report:
-        report = SlaReportModel.create(
+        report = SlaReportModel(
             start_time=start_time, end_time=end_time, last_updated=utc_now()
         )
     else:
-        report.update(last_updated=utc_now())
-    report.session.commit()
+        report.last_updated = utc_now()
 
+    # Add new report, or update last_updated
+    session.add(report)
+    session.commit()
+
+    # Get the report data
     if report.data:
         logger.info(
             "Report exists for {start} to {end}.\n".format(
                 start=start_time, end=end_time
             )
         )
-        return True
+        return
 
     report_data = build_sla_data(start_time, end_time)
 
@@ -242,20 +246,18 @@ def report_loader(*args):
                 start=start_time, end=end_time
             )
         )
-        return False
+        return
 
-    report.update(
-        data=report_data, last_updated=utc_now(), completed_on=utc_now()
-    )
-    report.session.commit()
-    report.session.remove()
+    # Finish the report and commit
+    report.data = report_data
+    session.add(report)
+    session.commit()
     logger.warning(
         "Completed: Make SLA report - {start} to {end}".format(
             start=start_time, end=end_time
         )
     )
     return True
-
 
 # def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=None):
 #     logger.warning(

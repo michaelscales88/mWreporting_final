@@ -7,8 +7,8 @@ from modules import app
 from modules.extensions import admin
 
 
-scheduled_tasks_bp = Blueprint('tasks_bp', __name__)
-scheduled_tasks_api = Api(scheduled_tasks_bp)
+worker_bp = Blueprint('worker_bp', __name__)
+worker_api = Api(worker_bp)
 
 task_logger = get_task_logger(__name__)
 
@@ -28,4 +28,4 @@ with app.app_context():
     )
 
 
-app.register_blueprint(scheduled_tasks_bp)
+app.register_blueprint(worker_bp)
