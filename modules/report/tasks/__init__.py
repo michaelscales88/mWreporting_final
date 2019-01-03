@@ -1,14 +1,16 @@
 from modules.celery_worker import celery
+from dateutil.parser import parse
 from .getters import *
 from .loaders import *
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=1)
 def call_data_task(self, *args, **kwargs):
     logger.warning("Starting call data task.")
-    load_date = datetime.datetime.strptime(
-        kwargs.pop("load_date"), '%Y-%m-%dT%H:%M:%S'
-    ).date()
+    logger.warning("Received arguments [ {} ]".format(
+        ",".join(["{}: {}".format(k, v) for k, v in kwargs.items()]))
+    )
+    load_date = parse(kwargs.pop("load_date")).date()
     try:
         service_result = call_data_loader(load_date)
         if not service_result:
@@ -16,23 +18,15 @@ def call_data_task(self, *args, **kwargs):
     except Exception as err:
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
-    else:
-        # Update the system that the interval is loaded
-        tl_model = TablesLoadedModel.find(load_date)
-        if load_date < utc_now().date():
-            tl_model.update(calls_loaded=True)
-            print("updated calls loaded")
-        tl_model.update(last_updated=utc_now())
-        tl_model.session.commit()
-        tl_model.session.remove()
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=1)
 def event_data_task(self, *args, **kwargs):
     logger.warning("Starting event data task.")
-    load_date = datetime.datetime.strptime(
-        kwargs.pop("load_date"), '%Y-%m-%dT%H:%M:%S'
-    ).date()
+    logger.warning("Received arguments [ {} ]".format(
+        ",".join(["{}: {}".format(k, v) for k, v in kwargs.items()]))
+    )
+    load_date = parse(kwargs.pop("load_date")).date()
     try:
         service_result = event_data_loader(load_date)
         if not service_result:
@@ -40,26 +34,16 @@ def event_data_task(self, *args, **kwargs):
     except Exception as err:
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
-    else:
-        # Update the system that the interval is loaded
-        tl_model = TablesLoadedModel.find(load_date)
-        if load_date < utc_now().date():
-            tl_model.update(events_loaded=True)
-            print("updated events loaded")
-        tl_model.update(last_updated=utc_now())
-        tl_model.session.commit()
-        tl_model.session.remove()
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=1)
 def report_task(self, *args, **kwargs):
     logger.warning("Starting report data task.")
-    start_time = datetime.datetime.strptime(
-        kwargs.pop("start_time"), '%Y-%m-%dT%H:%M:%S'
+    logger.warning("Received arguments [ {} ]".format(
+        ",".join(["{}: {}".format(k, v) for k, v in kwargs.items()]))
     )
-    end_time = datetime.datetime.strptime(
-        kwargs.pop("end_time"), '%Y-%m-%dT%H:%M:%S'
-    )
+    start_time = parse(kwargs.pop("start_time"))
+    end_time = parse(kwargs.pop("end_time"))
     try:
         service_result = report_loader(start_time, end_time)
         if not service_result:
@@ -67,10 +51,3 @@ def report_task(self, *args, **kwargs):
     except Exception as err:
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
-    else:
-        # Update the system that the report is complete
-        report = SlaReportModel.get(start_time, end_time)
-        report.update(last_updated=utc_now())
-        report.update(completed_on=utc_now())
-        report.session.commit()
-        report.session.remove()

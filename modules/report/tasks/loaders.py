@@ -96,6 +96,12 @@ def call_data_loader(*args):
     session = get_session(current_app)[1]()
 
     tl_model = TablesLoadedModel.worker_find(session, load_date)
+
+    if not tl_model:
+        tl_model = TablesLoadedModel(loaded_date=load_date)
+        session.add(tl_model)
+        session.commit()
+
     if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Call data for [ {} ] already loaded.".format(load_date)
@@ -119,6 +125,13 @@ def call_data_loader(*args):
         except DatabaseError:
             logger.error("Error committing call records to target database.")
             session.rollback()
+
+    # Update the system that the interval is loaded
+    if load_date < utc_now().date():
+        tl_model.calls_loaded = True
+    tl_model.last_updated = utc_now()
+    session.add(tl_model)
+    session.commit()
 
     logger.warning(
         "Completed call data loader [ {} ].".format(load_date)
@@ -153,6 +166,12 @@ def event_data_loader(*args):
     session = get_session(current_app)[1]
 
     tl_model = TablesLoadedModel.worker_find(session, load_date)
+
+    if not tl_model:
+        tl_model = TablesLoadedModel(loaded_date=load_date)
+        session.add(tl_model)
+        session.commit()
+
     if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Event data for [ {} ] already loaded.".format(load_date)
@@ -177,6 +196,13 @@ def event_data_loader(*args):
         except DatabaseError:
             logger.error("Error committing event records to target database.")
             session.rollback()
+
+    # Update the system that the interval is loaded
+    if load_date < utc_now().date():
+        tl_model.events_loaded = True
+    tl_model.last_updated = utc_now()
+    session.add(tl_model)
+    session.commit()
 
     logger.warning(
         "Completed event data loader [ {} ].".format(load_date)
@@ -252,6 +278,13 @@ def report_loader(*args):
     report.data = report_data
     session.add(report)
     session.commit()
+
+    # Update the system that the report is complete
+    report.last_updated = utc_now()
+    report.completed_on = utc_now()
+    session.add(report)
+    session.commit()
+
     logger.warning(
         "Completed: Make SLA report - {start} to {end}".format(
             start=start_time, end=end_time

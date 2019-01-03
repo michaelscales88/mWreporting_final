@@ -3,7 +3,7 @@ version: '3.6'
 services:
   # Application
   uwsgi:
-    image: amityhorror/flask_base:dev
+    image: amityhorror/flask_base:latest
     env_file: envs/prod.env
     configs:
       - source: start_uwsgi
@@ -26,7 +26,7 @@ services:
 
   # Worker Process + Scheduler
   worker:
-    image: amityhorror/flask_base:dev
+    image: amityhorror/flask_base:latest
     env_file: envs/prod.env
     networks:
       - proxy_network
@@ -43,7 +43,7 @@ services:
         constraints: [node.role == manager]
 
   flower:
-    image: amityhorror/flask_base:dev
+    image: amityhorror/flask_base:latest
     env_file: envs/prod.env
     networks:
       - proxy_network
