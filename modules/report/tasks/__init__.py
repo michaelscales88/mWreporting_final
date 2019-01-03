@@ -4,7 +4,7 @@ from .getters import *
 from .loaders import *
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=10)
 def call_data_task(self, *args, **kwargs):
     logger.warning("Starting call data task.")
     logger.warning("Received arguments [ {} ]".format(
@@ -20,7 +20,7 @@ def call_data_task(self, *args, **kwargs):
         self.retry(countdown=2 ** self.request.retries)
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=10)
 def event_data_task(self, *args, **kwargs):
     logger.warning("Starting event data task.")
     logger.warning("Received arguments [ {} ]".format(
@@ -36,7 +36,7 @@ def event_data_task(self, *args, **kwargs):
         self.retry(countdown=2 ** self.request.retries)
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=10)
 def report_task(self, *args, **kwargs):
     logger.warning("Starting report data task.")
     logger.warning("Received arguments [ {} ]".format(
