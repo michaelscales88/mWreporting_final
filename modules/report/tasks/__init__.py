@@ -42,7 +42,6 @@ def event_data_task(self, *args, **kwargs):
         self.retry(countdown=2 ** self.request.retries)
     else:
         # Update the system that the interval is loaded
-
         tl_model = TablesLoadedModel.find(load_date)
         if load_date < utc_now().date():
             tl_model.update(events_loaded=True)
@@ -52,7 +51,7 @@ def event_data_task(self, *args, **kwargs):
         tl_model.session.remove()
 
 
-@celery.task(bind=True, max_retries=1)
+@celery.task(bind=True, max_retries=5)
 def report_task(self, *args, **kwargs):
     logger.warning("Starting report data task.")
     start_time = datetime.datetime.strptime(
