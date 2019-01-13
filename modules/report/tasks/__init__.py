@@ -20,7 +20,7 @@ def call_data_task(self, *args, **kwargs):
         self.retry(countdown=2 ** self.request.retries)
 
 
-@celery.task(bind=True, max_retries=10, rate_limit='4/m')
+@celery.task(bind=True, max_retries=10, rate_limit='6/m')
 def event_data_task(self, *args, **kwargs):
     logger.warning("Starting event data task.")
     logger.warning("Received arguments [ {} ]".format(
