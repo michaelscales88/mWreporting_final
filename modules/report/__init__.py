@@ -1,4 +1,6 @@
 # security/__init__.py
+import warnings
+
 from flask import Blueprint
 from flask_restful import Api
 
@@ -14,6 +16,20 @@ sla_report_api = Api(sla_report_bp)
 with app.app_context():
     import modules.report.models
     import modules.report.views
+
+    # Register the admin views to the extension
+    # Ignore warning messages from overridden fields
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
+
+        # Report Data Views: Admin Area
+        admin.add_view(
+            views.TablesLoadedView(
+                models.TablesLoadedModel,
+                models.TablesLoadedModel.session,
+                name='Report Data', category="SLA Admin"
+            )
+        )
 
     # Report Views: All
     admin.add_view(
@@ -49,14 +65,6 @@ with app.app_context():
         )
     )
 
-    # Report Data Views: Admin Area
-    admin.add_view(
-        views.TablesLoadedView(
-            models.TablesLoadedModel,
-            models.TablesLoadedModel.session,
-            name='Report Data', category="SLA Admin"
-        )
-    )
     admin.add_view(
         views.CallDataView(
             models.CallTableModel,
