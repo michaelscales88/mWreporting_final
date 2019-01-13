@@ -35,3 +35,7 @@ class EventTableModel(BaseModel):
     def set_empty(cls, model):
         model.data = {}
         return model
+
+    @classmethod
+    def worker_find(cls, session, raw_id):
+        return session.query(cls).filter(cls.event_id == int(raw_id)).first()
