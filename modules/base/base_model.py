@@ -40,3 +40,11 @@ class BaseModel(Base, AllFeaturesMixin):
     @classmethod
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def find(cls, raw_id):
+        return cls.query.filter_by(id=int(raw_id)).first()
+
+    @classmethod
+    def worker_find(cls, session, raw_id):
+        return session.query(cls).filter(cls.id == int(raw_id)).first()

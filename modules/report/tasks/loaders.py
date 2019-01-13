@@ -24,7 +24,7 @@ def load_call_data(session, results):
                          "{dump}".format(dump=dumps(r, indent=2, default=str)))
             continue
 
-        existing_rec = CallTableModel.find(r.call_id)
+        existing_rec = CallTableModel.worker_find(session, r.call_id)
         if existing_rec:
             logger.warning("Record Exists: {rec}".format(rec=existing_rec))
             continue
@@ -50,7 +50,7 @@ def load_event_data(session, results):
                          "{dump}".format(dump=dumps(r, indent=2, default=str)))
             continue
 
-        existing_rec = EventTableModel.find(r.event_id)
+        existing_rec = EventTableModel.worker_find(session, r.event_id)
         if existing_rec:
             logger.warning("Record Exists: {rec}".format(rec=existing_rec))
             continue
@@ -86,6 +86,7 @@ def call_data_loader(*args):
             "Starting call data loader [ {} ].".format(load_date)
         )
 
+    # Get the special external read-only connection
     ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
     if not ext_uri:
         logger.error("Error: External database connection not set.\n"
@@ -97,11 +98,13 @@ def call_data_loader(*args):
 
     tl_model = TablesLoadedModel.worker_find(session, load_date)
 
+    # Create a model if necessary
     if not tl_model:
         tl_model = TablesLoadedModel(loaded_date=load_date)
         session.add(tl_model)
         session.commit()
 
+    # See if the report is finished
     if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Call data for [ {} ] already loaded.".format(load_date)
@@ -125,18 +128,20 @@ def call_data_loader(*args):
         except DatabaseError:
             logger.error("Error committing call records to target database.")
             session.rollback()
+        else:
+            # Update the system that the interval is loaded
+            # Records are only considered loaded for the day if a whole day
+            # is successfully loaded
+            if load_date < utc_now().date():
+                tl_model.calls_loaded = True
+            tl_model.last_updated = utc_now()
+            session.add(tl_model)
+            session.commit()
 
-    # Update the system that the interval is loaded
-    if load_date < utc_now().date():
-        tl_model.calls_loaded = True
-    tl_model.last_updated = utc_now()
-    session.add(tl_model)
-    session.commit()
-
-    logger.warning(
-        "Completed call data loader [ {} ].".format(load_date)
-    )
-    return True
+            logger.warning(
+                "Completed call data loader [ {} ].".format(load_date)
+            )
+            return True
 
 
 def event_data_loader(*args):
@@ -156,6 +161,7 @@ def event_data_loader(*args):
             "Starting event data loader [ {} ].".format(load_date)
         )
 
+    # Get the special external read-only connection
     ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
     if not ext_uri:
         logger.error("Error: External database connection not set.\n"
@@ -167,11 +173,13 @@ def event_data_loader(*args):
 
     tl_model = TablesLoadedModel.worker_find(session, load_date)
 
+    # Create a model is necessary
     if not tl_model:
         tl_model = TablesLoadedModel(loaded_date=load_date)
         session.add(tl_model)
         session.commit()
 
+    # See if the report is finished
     if tl_model and tl_model.calls_loaded:
         logger.warning(
             "Event data for [ {} ] already loaded.".format(load_date)
@@ -196,18 +204,20 @@ def event_data_loader(*args):
         except DatabaseError:
             logger.error("Error committing event records to target database.")
             session.rollback()
+        else:
+            # Update the system that the interval is loaded
+            # Records are only considered loaded for the day if a whole day
+            # is successfully loaded
+            if load_date < utc_now().date():
+                tl_model.events_loaded = True
+            tl_model.last_updated = utc_now()
+            session.add(tl_model)
+            session.commit()
 
-    # Update the system that the interval is loaded
-    if load_date < utc_now().date():
-        tl_model.events_loaded = True
-    tl_model.last_updated = utc_now()
-    session.add(tl_model)
-    session.commit()
-
-    logger.warning(
-        "Completed event data loader [ {} ].".format(load_date)
-    )
-    return True
+            logger.warning(
+                "Completed event data loader [ {} ].".format(load_date)
+            )
+            return True
 
 
 def report_loader(*args):
