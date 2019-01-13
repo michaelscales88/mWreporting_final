@@ -109,7 +109,7 @@ def call_data_loader(*args):
         logger.warning(
             "Call data for [ {} ] already loaded.".format(load_date)
         )
-        return
+        return True
 
     # Get the data from the source database
     ext_session = get_external_session(ext_uri)
@@ -184,7 +184,7 @@ def event_data_loader(*args):
         logger.warning(
             "Event data for [ {} ] already loaded.".format(load_date)
         )
-        return
+        return True
 
     # Get the data from the source database
     ext_session = get_external_session(ext_uri)

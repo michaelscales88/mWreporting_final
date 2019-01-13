@@ -8,6 +8,7 @@ class TablesLoadedView(BaseView):
     form_create_rules = ('loaded_date',)
     form_edit_rules = ('reload',)
     column_default_sort = ('loaded_date', True)
+    column_sortable_list = ('loaded_date', 'complete')
 
     form_extra_fields = dict(
         reload=RadioField('Reload:', choices=[('both', 'Both'), ('calls', 'Calls'), ('events', "Events")])
