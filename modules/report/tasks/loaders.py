@@ -180,7 +180,7 @@ def event_data_loader(*args):
         session.commit()
 
     # See if the report is finished
-    if tl_model and tl_model.calls_loaded:
+    if tl_model and tl_model.events_loaded:
         logger.warning(
             "Event data for [ {} ] already loaded.".format(load_date)
         )
