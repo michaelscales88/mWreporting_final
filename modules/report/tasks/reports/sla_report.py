@@ -5,42 +5,38 @@ from datetime import timedelta
 from sqlalchemy.sql import and_
 
 from modules.worker import task_logger as logger
-from modules.report.models import TablesLoadedModel, CallTableModel, SlaReportModel
+from modules.report.models import CallTableModel, EventTableModel, SlaReportModel
 
 
-def build_sla_data(start_time, end_time):
+def build_sla_data(session, start_time, end_time):
     logger.warning(
         "Started: Building SLA report data {start} to {end}".format(
             start=start_time, end=end_time
         )
     )
 
-    # Check that the data has been loaded for the report date
-    if not TablesLoadedModel.interval_is_loaded(start_time, end_time):
-        logger.warning("Data not loaded for report interval.\n"
-                       "Requesting to load data and will try again later.")
-        TablesLoadedModel.add_interval(start_time, end_time)
-        return
-
-    inbound_calls = CallTableModel.query.filter(
+    inbound_calls = session.query(CallTableModel).filter(
         and_(
             CallTableModel.start_time >= start_time,
-            CallTableModel.end_time <= end_time,
+            CallTableModel.start_time <= end_time,
             CallTableModel.call_direction == 1
         )
     ).all()
 
+    # TODO: start here
     # Collate data for interval
-    sla_data = OrderedDict()
+    col_data = {}
     for call in inbound_calls:
 
         # Index on dialed party number
         row_name = str(call.dialed_party_number)
-        row = sla_data.setdefault(row_name, OrderedDict(SlaReportModel.default_row()))
+        row = col_data.setdefault(row_name, OrderedDict(SlaReportModel.default_row()))
 
         event_dict = {}
+        events = session.query(EventTableModel).filter_by(call_id=call.call_id).all()
+
         # Caching events by type makes report comparisons easier
-        for ev in call.events:
+        for ev in events:
             event_dict[ev.event_type] = event_dict.get(ev.event_type, timedelta(seconds=0)) + ev.length
 
         # Event type 4 represents talking time with an agent
@@ -93,19 +89,19 @@ def build_sla_data(start_time, end_time):
             row['I/C Lost'] += 1
             row['Lost Wait Duration'] += call.length
 
-        sla_data[row_name] = row
+        col_data[row_name] = row
 
     # Remove empty rows
     for row_name in [
         row_name
-        for row_name in sla_data.keys()
-        if sla_data[row_name]['I/C Presented'] == 0
+        for row_name in col_data.keys()
+        if col_data[row_name]['I/C Presented'] == 0
     ]:
-        sla_data.pop(row_name)
+        col_data.pop(row_name)
 
     logger.info(
         "Completed: Building SLA report data {start} to {end}".format(
             start=start_time, end=end_time
         )
     )
-    return sla_data
+    return col_data

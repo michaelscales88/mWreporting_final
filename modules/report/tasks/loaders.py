@@ -274,7 +274,16 @@ def report_loader(*args):
         )
         return
 
-    report_data = build_sla_data(start_time, end_time)
+    # Check that the data has been loaded for the report date
+    if not TablesLoadedModel.worker_interval_is_loaded(
+        session, start_time, end_time
+    ):
+        logger.warning("Data not loaded for report interval.\n"
+                       "Requesting to load data and will try again later.")
+        # TablesLoadedModel.add_interval(start_time, end_time)
+        return
+
+    report_data = build_sla_data(session, start_time, end_time)
 
     if not report_data:
         logger.error(

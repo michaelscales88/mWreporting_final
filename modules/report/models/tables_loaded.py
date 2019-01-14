@@ -51,6 +51,14 @@ class TablesLoadedModel(BaseModel):
             return False
 
     @classmethod
+    def worker_is_loaded(cls, session, date):
+        record = cls.worker_find(session, date)
+        if record:
+            return record and record.calls_loaded and record.events_loaded
+        else:
+            return False
+
+    @classmethod
     def interval_is_loaded(cls, start_time, end_time):
         """
         Return True if the data is loaded for the interval, or False
@@ -58,6 +66,19 @@ class TablesLoadedModel(BaseModel):
         """
         while start_time < end_time:
             if not cls.is_loaded(start_time):
+                print("is not loaded", start_time)
+                return False
+            start_time += datetime.timedelta(days=1)
+        return True
+
+    @classmethod
+    def worker_interval_is_loaded(cls, session, start_time, end_time):
+        """
+        Return True if the data is loaded for the interval, or False
+        if any day is not loaded.
+        """
+        while start_time < end_time:
+            if not cls.worker_is_loaded(session, start_time):
                 print("is not loaded", start_time)
                 return False
             start_time += datetime.timedelta(days=1)

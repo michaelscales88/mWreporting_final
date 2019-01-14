@@ -36,9 +36,9 @@ class CallTableModel(BaseModel):
         model.data = {}
         return model
 
-    @hybrid_property
-    def events(self):
-        return EventTableModel.query.filter_by(call_id=self.call_id).all()
+    # @hybrid_property
+    # def events(self):
+    #     return EventTableModel.query.filter_by(call_id=self.call_id).all()
 
     @classmethod
     def worker_find(cls, session, raw_id):
