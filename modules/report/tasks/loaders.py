@@ -285,18 +285,17 @@ def report_loader(*args):
 
     report_data = build_sla_data(session, start_time, end_time)
 
-    if not report_data:
-        logger.error(
-            "Error: Could not build report for: {start} and {end}.\n".format(
-                start=start_time, end=end_time
-            )
-        )
-        return
-
     # Finish the report and commit
     report.data = report_data
+    report.last_updated = utc_now()
     session.add(report)
     session.commit()
+
+    logger.warning(
+        "Completed building report data for: {start} and {end}.\n".format(
+            start=start_time, end=end_time
+        )
+    )
 
     # Update the system that the report is complete
     report.last_updated = utc_now()
