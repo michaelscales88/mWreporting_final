@@ -1,5 +1,4 @@
 # report/services/sla_report.py
-from collections import OrderedDict
 from datetime import timedelta
 
 from sqlalchemy.sql import and_
@@ -30,14 +29,15 @@ def build_sla_data(session, start_time, end_time):
 
         # Index on dialed party number
         row_name = str(call.dialed_party_number)
-        row = col_data.setdefault(row_name, OrderedDict(SlaReportModel.default_row()))
+        row = SlaReportModel.default_row()
 
         event_dict = {}
         events = session.query(EventTableModel).filter_by(call_id=call.call_id).all()
 
         # Caching events by type makes report comparisons easier
         for ev in events:
-            event_dict[ev.event_type] = event_dict.get(ev.event_type, timedelta(seconds=0)) + ev.length
+            event_type = event_dict.get(ev.event_type, timedelta(seconds=0))
+            event_dict[ev.event_type] = event_type + ev.length
 
         # Event type 4 represents talking time with an agent
         talking_time = event_dict.get(4, timedelta(0))
