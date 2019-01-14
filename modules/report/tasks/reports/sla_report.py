@@ -1,4 +1,5 @@
 # report/services/sla_report.py
+from collections import OrderedDict
 from datetime import timedelta
 
 from sqlalchemy.sql import and_
@@ -29,7 +30,7 @@ def build_sla_data(session, start_time, end_time):
 
         # Index on dialed party number
         row_name = str(call.dialed_party_number)
-        row = SlaReportModel.default_row()
+        row = OrderedDict(SlaReportModel.default_row())
 
         event_dict = {}
         events = session.query(EventTableModel).filter_by(call_id=call.call_id).all()
