@@ -1,4 +1,5 @@
 import datetime
+from wtforms import RadioField
 
 import pytz
 from flask import Markup, flash
@@ -8,7 +9,7 @@ from pandas import DataFrame
 from wtforms.validators import DataRequired
 
 from modules.base.base_view import BaseView
-from modules.report.tasks import report_task
+from modules.report.utilities import signals as s
 
 
 def _data_formatter(view, context, model, name):
@@ -22,7 +23,8 @@ def _data_formatter(view, context, model, name):
 class SLAReportView(BaseView):
     column_searchable_list = ("start_time", "end_time", "last_updated", "completed_on")
     column_list = ('start_time', 'end_time', "last_updated", "completed_on")
-    form_columns = ('start_time', 'end_time')
+    form_create_rules = ('start_time', 'end_time')
+    form_edit_rules = ('reload',)
     column_details_list = ['data']
     column_default_sort = ('start_time', True)
     form_args = dict(
@@ -42,6 +44,9 @@ class SLAReportView(BaseView):
             ),
             validators=[DataRequired()]
         )
+    )
+    form_extra_fields = dict(
+        reload=RadioField('Reload:', choices=[('yes', 'Yes'), ('no', 'No')])
     )
     form_widget_args = dict(date_requested=dict(disabled=True))
     column_formatters = {
@@ -83,11 +88,6 @@ class SLAReportView(BaseView):
                 raise
             flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
 
-    def is_accessible(self):
-        status = super().is_accessible()
-        self.can_edit = False  # Reports can only be viewed after creation
-        return status
-
     def validate_form(self, form):
         """ Custom validation code that checks dates """
         if hasattr(form, "start_time") and form.start_time.data > form.end_time.data:
@@ -97,7 +97,16 @@ class SLAReportView(BaseView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            report_task.delay(start_time=model.start_time, end_time=model.end_time)
+            s.load_report(model.start_time, model.end_time)
+        else:
+            reload = form.reload.data
+            if reload and reload == 'yes':
+                # Invalidate the report
+                model.update(data=None, completed_on=None)
+                model.session.commit()
+
+                # Rebuild the report
+                s.load_report(model.start_time, model.end_time)
 
 
 class SLASummaryReportView(BaseView):

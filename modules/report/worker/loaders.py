@@ -6,12 +6,14 @@ from flask import current_app
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import func
 
-from modules.extensions import get_session
+from modules.database import get_session
 from modules.report.models import (
-    TablesLoadedModel, CallTableModel, EventTableModel,
-    SlaReportModel
+    WorkerCallTableModel as CallTableModel,
+    WorkerEventTableModel as EventTableModel,
+    WorkerSlaReportModel as SlaReportModel,
+    WorkerTablesLoadedModel as TablesLoadedModel
 )
-from modules.report.utilities import get_external_session
+from modules.report.utilities.helpers import get_external_session
 from modules.utilities.helpers import utc_now
 from modules.worker import task_logger as logger
 from .reports import build_sla_data
@@ -20,11 +22,10 @@ from .reports import build_sla_data
 def load_call_data(session, results):
     for r in results:
         if not r.call_id:
-            logger.error("Could not identify primary key for foreign record.\n"
-                         "{dump}".format(dump=dumps(r, indent=2, default=str)))
+            logger.error("Could not identify primary key for foreign Call record.")
             continue
 
-        existing_rec = CallTableModel.worker_find(session, r.call_id)
+        existing_rec = CallTableModel.find(session, r.call_id)
         if existing_rec:
             logger.warning("Record Exists: {rec}".format(rec=existing_rec))
             continue
@@ -46,11 +47,10 @@ def load_call_data(session, results):
 def load_event_data(session, results):
     for r in results:
         if not r.event_id:
-            logger.error("Could not identify primary key for foreign record.\n"
-                         "{dump}".format(dump=dumps(r, indent=2, default=str)))
+            logger.error("Could not identify primary key for foreign Event record.")
             continue
 
-        existing_rec = EventTableModel.worker_find(session, r.event_id)
+        existing_rec = EventTableModel.find(session, r.event_id)
         if existing_rec:
             logger.warning("Record Exists: {rec}".format(rec=existing_rec))
             continue
@@ -71,19 +71,17 @@ def load_event_data(session, results):
 
 
 def call_data_loader(*args):
-    logger.warning("Start: Call Data loader.")
-
     # Args
     load_date = args[0]
 
     if not isinstance(load_date, datetime.date):
         logger.warning(
-            "Failed to start call data loader [ {} ].".format(load_date)
+            "Failed to start Call data loader [ {} ].".format(load_date)
         )
         return
     else:
         logger.warning(
-            "Starting call data loader [ {} ].".format(load_date)
+            "Start Call data loader [ {} ].".format(load_date)
         )
 
     # Get the special external read-only connection
@@ -96,7 +94,7 @@ def call_data_loader(*args):
 
     session = get_session(current_app)[1]()
 
-    tl_model = TablesLoadedModel.worker_find(session, load_date)
+    tl_model = TablesLoadedModel.find(session, load_date)
 
     # Create a model if necessary
     if not tl_model:
@@ -145,20 +143,18 @@ def call_data_loader(*args):
 
 
 def event_data_loader(*args):
-    logger.warning("Start: Event data loader.")
-
     # Args
     load_date = args[0]
 
     # Check that load date is a date
     if not isinstance(load_date, datetime.date):
         logger.warning(
-            "Failed to start event data loader [ {} ].".format(load_date)
+            "Failed to start Event data loader [ {} ].".format(load_date)
         )
         return
     else:
         logger.warning(
-            "Starting event data loader [ {} ].".format(load_date)
+            "Start: Event data loader [ {} ].".format(load_date)
         )
 
     # Get the special external read-only connection
@@ -171,7 +167,7 @@ def event_data_loader(*args):
 
     session = get_session(current_app)[1]
 
-    tl_model = TablesLoadedModel.worker_find(session, load_date)
+    tl_model = TablesLoadedModel.find(session, load_date)
 
     # Create a model is necessary
     if not tl_model:
@@ -253,7 +249,7 @@ def report_loader(*args):
 
     session = get_session(current_app)[1]
 
-    report = SlaReportModel.worker_get(session, start_time, end_time)
+    report = SlaReportModel.find(session, start_time, end_time)
     if not report:
         report = SlaReportModel(
             start_time=start_time, end_time=end_time, last_updated=utc_now()
@@ -275,13 +271,13 @@ def report_loader(*args):
         return
 
     # Check that the data has been loaded for the report date
-    if not TablesLoadedModel.worker_interval_is_loaded(
+    if not TablesLoadedModel.interval_is_loaded(
         session, start_time, end_time
     ):
         logger.warning("Data not loaded for report interval.\n"
                        "Requesting to load data and will try again later.")
-        # TablesLoadedModel.add_interval(start_time, end_time)
-        return
+        TablesLoadedModel.add_interval(session, start_time, end_time)
+        return "delay"
 
     report_data = build_sla_data(session, start_time, end_time)
 

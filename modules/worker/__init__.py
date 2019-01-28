@@ -3,11 +3,11 @@ from flask import Blueprint
 from flask_restful import Api
 from celery.utils.log import get_task_logger
 
-from modules import app
+from modules import app, register_with_app
 from modules.extensions import admin
 
 
-worker_bp = Blueprint('worker_bp', __name__)
+worker_bp = Blueprint('worker', __name__)
 worker_api = Api(worker_bp)
 
 task_logger = get_task_logger(__name__)
@@ -23,9 +23,8 @@ with app.app_context():
         views.ScheduleDispatchItemView(
             models.ScheduleDispatchItemModel,
             models.ScheduleDispatchItemModel.session,
-            name='Scheduled Tasks'
+            name='Scheduled Events'
         )
     )
 
-
-app.register_blueprint(worker_bp)
+register_with_app(app, worker_bp, worker_api)

@@ -1,11 +1,13 @@
 # report/models.py
 import datetime
-from sqlalchemy.sql import and_
-from modules.core.encoders import JSONEncodedDict
+
 from sqlalchemy import Column, Integer, DateTime, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import and_
+
+from modules.base.base_model import BaseModel
+from modules.core.encoders import JSONEncodedDict
 from modules.utilities.helpers import utc_now
-from modules.extensions import BaseModel
 from .sla_report_model import SlaReportModel
 
 

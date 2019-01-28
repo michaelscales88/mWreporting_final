@@ -114,3 +114,8 @@ def add_client_names(frame):
     else:
         frame.insert(0, "Client", list(frame.index))
     return frame
+
+
+def print_df(df):
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(df)

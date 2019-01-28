@@ -5,7 +5,7 @@ import pandas as pd
 
 from modules.utilities.helpers import save_xls
 from modules.report.models import SlaReportModel, SummarySLAReportModel
-from modules.report.utilities import (
+from modules.report.utilities.report_functions import (
     add_client_names, compute_avgs, format_df, make_summary
 )
 from .loaders import report_loader
@@ -15,7 +15,7 @@ logger = logging.getLogger("app")
 
 def get_sla_report(start_time, end_time, clients=()):
     # Check if report model exists
-    report = SlaReportModel.get(start_time, end_time)
+    report = SlaReportModel.find(start_time, end_time)
 
     # If the report does not exist make a report.
     if not report:
@@ -35,7 +35,7 @@ def get_sla_report(start_time, end_time, clients=()):
             )
             report = SlaReportModel.set_empty(SlaReportModel())
         else:
-            report = SlaReportModel.get(start_time, end_time)
+            report = SlaReportModel.find(start_time, end_time)
     else:
         logger.info(
             "Report exists for {start} to {end}.\n".format(

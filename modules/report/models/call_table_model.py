@@ -2,10 +2,10 @@
 import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from modules.extensions import BaseModel
-from .event_table_model import EventTableModel
+from modules.base.base_model import BaseModel
 
 
 class CallTableModel(BaseModel):
@@ -25,6 +25,7 @@ class CallTableModel(BaseModel):
     system_id = Column(Integer)
     caller_id = Column(String(100))
     inbound_route = Column(String(100))
+    events = relationship("EventTableModel", back_populates="call")
 
     @hybrid_property
     def length(self):
@@ -36,10 +37,8 @@ class CallTableModel(BaseModel):
         model.data = {}
         return model
 
-    # @hybrid_property
-    # def events(self):
-    #     return EventTableModel.query.filter_by(call_id=self.call_id).all()
 
+class WorkerCallTableModel(CallTableModel):
     @classmethod
-    def worker_find(cls, session, raw_id):
+    def find(cls, session, raw_id):
         return session.query(cls).filter(cls.call_id == int(raw_id)).first()

@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 # Change for different build configuration
 ENV BUILD nginx-flask
-ENV PIP_VER 18.1
+ENV PIP_VER 19.0.1
 ENV TZ UTC
 
 # Update container datetime to localization
@@ -37,4 +37,4 @@ ADD static /var/static
 ADD frontend /var/frontend
 
 # Lowest permissions by default
-#USER nobody
+USER nobody

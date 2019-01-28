@@ -1,6 +1,6 @@
 from wtforms import RadioField
 from modules.base.base_view import BaseView
-from modules.report.tasks import call_data_task, event_data_task
+from modules.report.utilities import signals as s
 
 
 class TablesLoadedView(BaseView):
@@ -16,23 +16,37 @@ class TablesLoadedView(BaseView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            call_data_task.delay(load_date=model.loaded_date)
-            event_data_task.delay(load_date=model.loaded_date)
+            s.load_calls(model.loaded_date)
+            s.load_events(model.loaded_date)
         else:
             reload = form.reload.data
             if reload:
                 if reload == 'both':
-                    call_data_task.delay(load_date=model.loaded_date)
-                    event_data_task.delay(load_date=model.loaded_date)
+                    s.load_calls(model.loaded_date, with_events=True)
                 if reload == 'calls':
-                    call_data_task.delay(load_date=model.loaded_date)
+                    s.load_calls(model.loaded_date)
                 if reload == 'events':
-                    event_data_task.delay(load_date=model.loaded_date)
+                    s.load_events(model.loaded_date)
+
+    def after_model_delete(self, model):
+        print("scrubbing data for", model)
 
 
 class CallDataView(BaseView):
-    pass
+
+    def is_accessible(self):
+        # Use the TablesLoaded view to remove data
+        accessible = super().is_accessible()
+        self.can_edit = False
+        self.can_delete = False
+        return accessible
 
 
 class EventDataView(BaseView):
-    pass
+
+    def is_accessible(self):
+        # Use the TablesLoaded view to remove data
+        accessible = super().is_accessible()
+        self.can_edit = False
+        self.can_delete = False
+        return accessible

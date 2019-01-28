@@ -5,7 +5,7 @@ from modules.base.base_resource import BaseResource
 
 from .models import ClientModel
 from .serializers import clients_schema
-from .tasks import get_summary_sla_report, get_sla_report
+from .worker import get_summary_sla_report, get_sla_report
 
 
 class SummaryReportAPI(BaseResource):
@@ -26,7 +26,7 @@ class SLAReportAPI(BaseResource):
             end_time=self.args['end_time'],
             clients=self.args['clients']
         )
-        data = report_frame.to_dict(orient='split')['data']
+        data = report_frame.get_ordered_dict(orient='split')['data']
         columns = list(report_frame)
         return jsonify(data=data, columns=columns)
 

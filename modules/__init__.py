@@ -3,12 +3,13 @@ from flask import Flask
 from flask_assets import Bundle
 
 import frontend  # Templates directory functions as a frontend
+from .base.base_model import BaseModel
+from .database import get_session, init_db
 from .extensions import (
-    admin, bootstrap, mail, BaseModel,
-    moment, babel, init_db, get_session,
-    serializer, assets, debugger,
-    register_app_cdn,
+    admin, bootstrap, mail, moment, babel,
+    serializer, assets, debugger, register_app_cdn,
 )
+from .utilities.registration import register_with_app
 
 """ Create the app """
 app = Flask(
@@ -22,6 +23,7 @@ import modules.utilities.config_runner
 
 # DB
 engine, session = get_session(app)
+# Set the session before importing FlaskAdmin views
 BaseModel.set_session(session)
 
 """ App Security + Settings """
@@ -31,6 +33,7 @@ import modules.core
 import modules.report
 import modules.worker     # Create tasks from other subs
 
+# Create the tables once all models have been imported
 init_db(app, engine, session)
 
 """ Init + Bind extensions to app """

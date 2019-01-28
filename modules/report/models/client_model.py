@@ -1,7 +1,7 @@
 # client/models.py
 from sqlalchemy import Column, Integer, String, Boolean, Text
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 
 
 class ClientModel(BaseModel):

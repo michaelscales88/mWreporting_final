@@ -2,7 +2,7 @@
 from flask_security import RoleMixin
 from sqlalchemy import Column, Integer, String
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 
 
 class RolesModel(BaseModel, RoleMixin):
