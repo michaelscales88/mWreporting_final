@@ -4,7 +4,7 @@ from modules.utilities.helpers import get_model_by_tablename
 from sqlalchemy import Column, Integer, ForeignKey, Table, String
 from sqlalchemy.orm import relationship
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 
 from .client_model import ClientModel
 

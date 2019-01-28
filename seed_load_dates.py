@@ -1,7 +1,7 @@
 import datetime
 
 from modules import app
-from modules.report.tasks import call_data_task, event_data_task
+from modules.report.utilities import signals as s
 
 
 def add_dates():
@@ -12,8 +12,7 @@ def add_dates():
 
         while counter < days_to_load:
             loaded_date = start_dt + datetime.timedelta(days=counter)
-            call_data_task.delay(load_date=loaded_date)
-            event_data_task.delay(load_date=loaded_date)
+            s.load_calls(loaded_date, with_events=True)
             counter += 1
 
 

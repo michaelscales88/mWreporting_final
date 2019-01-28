@@ -5,13 +5,13 @@ from sqlalchemy import Column, Integer, DateTime, Boolean
 from sqlalchemy.sql import and_
 
 from modules.core.encoders import JSONEncodedDict
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 from modules.utilities.helpers import utc_now
 
 
 class SlaReportModel(BaseModel):
     __tablename__ = 'sla_report'
-    __repr_attrs__ = ['id', 'start_time', 'end_time', 'completed_on']
+    __repr_attrs__ = ['start_time', 'end_time']
 
     id = Column(Integer, primary_key=True)
     start_time = Column(DateTime, nullable=False)
@@ -93,7 +93,7 @@ class SlaReportModel(BaseModel):
         ]
 
     @classmethod
-    def get(cls, start_time, end_time):
+    def find(cls, start_time, end_time):
         return cls.query.filter(
             and_(
                 cls.start_time == start_time,
@@ -101,40 +101,14 @@ class SlaReportModel(BaseModel):
             )
         ).first()
 
+
+class WorkerSlaReportModel(SlaReportModel):
+
     @classmethod
-    def worker_get(cls, session, start_time, end_time):
+    def find(cls, session, start_time, end_time):
         return session.query(cls).filter(
             and_(
                 cls.start_time == start_time,
                 cls.end_time == end_time
             )
         ).first()
-
-    @classmethod
-    def exists(cls, start_time, end_time):
-        return cls.get(start_time, end_time) is not None
-
-    @classmethod
-    def set_empty(cls, model):
-        model.data = {}
-        return model
-
-    @classmethod
-    def interval_is_loaded(cls, start_time, end_time, interval):
-        """
-        Return True if the data is loaded for the interval, or False
-        if any day is not loaded.
-        """
-        if isinstance(interval, int):
-            interval = datetime.timedelta(seconds=interval)
-
-        if not isinstance(interval, datetime.timedelta):
-            return None
-
-        while start_time < end_time:
-            end_dt = start_time + interval
-            # Does not exist
-            if not cls.get(start_time, end_dt):
-                return False
-            start_time = end_dt
-        return True

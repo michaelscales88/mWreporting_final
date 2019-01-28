@@ -3,7 +3,7 @@ from flask_security import UserMixin
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 from .associations import users_roles_association
 from .roles import RolesModel
 

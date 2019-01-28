@@ -5,12 +5,11 @@ from flask_security import logout_user
 
 # Add security
 import modules.core.security
-from modules import app
+from modules import app, register_with_app
 from modules.extensions import admin
-from modules.utilities.route_builder import build_routes
 from .encoders import AppJSONEncoder
 
-security_bp = Blueprint('user_bp', __name__)
+security_bp = Blueprint('core', __name__)
 security_api = Api(security_bp)
 
 
@@ -31,21 +30,19 @@ with app.app_context():
         views.UsersView(
             models.UserModel,
             models.UserModel.session,
-            name='Manage Users', category='User Admin'
+            name='Manage Users', category='Admin'
         )
     )
     admin.add_view(
         views.RolesView(
             models.RolesModel,
             models.RolesModel.session,
-            name='Manage Privileges', category='User Admin'
+            name='Manage User Privileges', category='Admin'
         )
     )
 
     # Register JSON encoder
     app.json_encoder = AppJSONEncoder
 
-app.register_blueprint(security_bp)
 
-# Inject module routes
-build_routes(app, security_api, "core")
+register_with_app(app, security_bp, security_api)

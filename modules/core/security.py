@@ -8,7 +8,8 @@ from flask_admin import helpers
 from flask_security import Security, SQLAlchemyUserDatastore
 
 from modules import app
-from modules.extensions import admin, BaseModel
+from modules.base.base_model import BaseModel
+from modules.extensions import admin
 from modules.utilities.forms import ExtendedLoginForm, ExtendedRegisterForm
 from .models import UserModel, RolesModel
 

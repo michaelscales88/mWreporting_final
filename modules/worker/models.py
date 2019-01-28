@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, DateTime, String, Boolean, Text, Time
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 from modules.utilities.helpers import utc_now
 
 

@@ -4,84 +4,73 @@ import warnings
 from flask import Blueprint
 from flask_restful import Api
 
-from modules import app
+from modules import app, register_with_app
 from modules.extensions import admin
-from modules.utilities.route_builder import build_routes
 
-sla_report_bp = Blueprint('sla_report_bp', __name__)
-sla_report_api = Api(sla_report_bp)
-
+report_bp = Blueprint('report', __name__)
+report_api = Api(report_bp)
 
 """ Create models for module in dB """
 with app.app_context():
     import modules.report.models
     import modules.report.views
 
+    # Add home link by url
+    admin.add_category("Reports")
+    admin.add_sub_category("SLA Reports", "Reports")
+    admin.add_sub_category("Clients/Managers", "Reports")
+
     # Register the admin views to the extension
     # Ignore warning messages from overridden fields
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
 
-        # Report Data Views: Admin Area
-        admin.add_view(
-            views.TablesLoadedView(
-                models.TablesLoadedModel,
-                models.TablesLoadedModel.session,
-                name='Report Data', category="SLA Admin"
-            )
-        )
-
-    # Report Views: All
-    admin.add_view(
-        views.SLAReportView(
+        # Report Views: All
+        report_view = views.SLAReportView(
             models.SlaReportModel,
             models.SlaReportModel.session,
-            name='SLA Reports', category="SLA Admin"
+            name='View Reports', category="SLA Reports"
         )
-    )
-    admin.add_view(
-        views.SLASummaryReportView(
+        summary_report_view = views.SLASummaryReportView(
             models.SummarySLAReportModel,
             models.SummarySLAReportModel.session,
-            name='Summary Reports', category="SLA Admin"
+            name='Summary Reports', category="Reports"
         )
-    )
 
-    # Client Manager Views: Manager Area
-    admin.add_view(
-        views.ClientManagerView(
-            models.ClientManager,
-            models.ClientManager.session,
-            name="Client Managers", category="User Admin"
-        )
-    )
-
-    # Client Manager Views: Admin Area
-    admin.add_view(
-        views.ClientView(
+        # General: Admin Area
+        clients_view = views.ClientView(
             models.ClientModel,
             models.ClientModel.session,
-            name='Add/Remove Clients', category="SLA Admin"
+            name='Add/Remove Clients', category="Clients/Managers"
         )
-    )
+        cm_view = views.ClientManagerView(
+            models.ClientManager,
+            models.ClientManager.session,
+            name="Client Managers", category="Clients/Managers"
+        )
 
-    admin.add_view(
-        views.CallDataView(
+        # Report: Admin Area
+        report_data_view = views.TablesLoadedView(
+            models.TablesLoadedModel,
+            models.TablesLoadedModel.session,
+            name='Add/Remove Report Data', category="SLA Reports"
+        )
+        calls_view = views.CallDataView(
             models.CallTableModel,
             models.CallTableModel.session,
-            name='Raw Call Data', category="SLA Admin"
+            name='View Raw Call Data', category="SLA Reports"
         )
-    )
-    admin.add_view(
-        views.EventDataView(
+        events_view = views.EventDataView(
             models.EventTableModel,
             models.EventTableModel.session,
-            name='Raw Event Data', category="SLA Admin"
+            name='View Raw Event Data', category="SLA Reports"
         )
-    )
+
+        admin.add_views(
+            report_view, summary_report_view,
+            clients_view, cm_view, report_data_view,
+            calls_view, events_view
+        )
 
 
-app.register_blueprint(sla_report_bp)
-
-# Inject module routes
-build_routes(app, sla_report_api, "report")
+register_with_app(app, report_bp, report_api)

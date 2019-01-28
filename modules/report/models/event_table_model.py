@@ -1,10 +1,11 @@
 # data/models.py
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from modules.extensions import BaseModel
+from modules.base.base_model import BaseModel
 
 
 class EventTableModel(BaseModel):
@@ -24,7 +25,9 @@ class EventTableModel(BaseModel):
     end_time = Column(DateTime(timezone=True))
     tag = Column(String(100))
     recording_rule = Column(Integer)
-    call_id = Column(Integer)
+    # Call to which the event belongs
+    call_id = Column(Integer, ForeignKey("c_call.call_id"))
+    call = relationship("CallTableModel", back_populates="events")
 
     @hybrid_property
     def length(self):
@@ -36,6 +39,9 @@ class EventTableModel(BaseModel):
         model.data = {}
         return model
 
+
+class WorkerEventTableModel(EventTableModel):
+
     @classmethod
-    def worker_find(cls, session, raw_id):
+    def find(cls, session, raw_id):
         return session.query(cls).filter(cls.event_id == int(raw_id)).first()
