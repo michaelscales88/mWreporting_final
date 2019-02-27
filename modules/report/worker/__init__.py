@@ -11,7 +11,7 @@ def log_kwargs(kwargs):
 
 
 @celery.task(bind=True, max_retries=10)
-def call_data_task(self, *args, **kwargs):
+def load_call_data_task(self, *args, **kwargs):
     """
     rate_limit: unlimited since the limited is the source
     :param self:
@@ -22,7 +22,7 @@ def call_data_task(self, *args, **kwargs):
     logger.warning("Starting call data task.")
     log_kwargs(kwargs)
     load_date = parse(kwargs.pop("load_date")).date()
-    load_events = kwargs.pop("with_events")
+    with_events = kwargs.pop("with_events")
     try:
         service_result = call_data_loader(load_date)
         if not service_result:
@@ -31,12 +31,12 @@ def call_data_task(self, *args, **kwargs):
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
     else:
-        if load_events:
-            event_data_task.delay(load_date=load_date)
+        if with_events:
+            load_event_data_task.delay(load_date=load_date)
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='6/m')
-def event_data_task(self, *args, **kwargs):
+def load_event_data_task(self, *args, **kwargs):
     """
     rate_limit: 1 every 10 seconds to prevent duplication
     :param self:
@@ -57,7 +57,7 @@ def event_data_task(self, *args, **kwargs):
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='2/m')
-def report_task(self, *args, **kwargs):
+def load_report_task(self, *args, **kwargs):
     """
     rate_limit: 2 per minutes to prevent bottlenecking
     :param self: references to remember # retries

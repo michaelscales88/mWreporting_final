@@ -21,14 +21,16 @@ class SummaryReportAPI(BaseResource):
 class SLAReportAPI(BaseResource):
 
     def post(self):
-        report_frame = get_sla_report(
+        report_frame, msg = get_sla_report(
             start_time=self.args['start_time'],
             end_time=self.args['end_time'],
             clients=self.args['clients']
         )
-        data = report_frame.get_ordered_dict(orient='split')['data']
-        columns = list(report_frame)
-        return jsonify(data=data, columns=columns)
+        return jsonify(
+            data=report_frame.to_dict(orient='split')['data'],
+            columns=list(report_frame),
+            msg=msg
+        )
 
 
 class SLAClientAPI(BaseResource):

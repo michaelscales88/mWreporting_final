@@ -8,7 +8,9 @@ from modules.report.models import SlaReportModel, SummarySLAReportModel
 from modules.report.utilities.report_functions import (
     add_client_names, compute_avgs, format_df, make_summary
 )
-from .loaders import report_loader
+from modules.report.utilities import signals as s
+
+# from .loaders import report_loader
 
 logger = logging.getLogger("app")
 
@@ -16,6 +18,7 @@ logger = logging.getLogger("app")
 def get_sla_report(start_time, end_time, clients=()):
     # Check if report model exists
     report = SlaReportModel.find(start_time, end_time)
+    msg = None
 
     # If the report does not exist make a report.
     if not report:
@@ -25,23 +28,21 @@ def get_sla_report(start_time, end_time, clients=()):
                 start=start_time, end=end_time
             )
         )
-        report_made = report_loader(start_time, end_time)
-        if not report_made:
-            logger.error(
-                "Report could not be made for {start}"
-                "to {end}.\n".format(
-                    start=start_time, end=end_time
-                )
-            )
-            report = SlaReportModel.set_empty(SlaReportModel())
-        else:
-            report = SlaReportModel.find(start_time, end_time)
+        report = SlaReportModel.set_empty(SlaReportModel())
+        msg = {
+            'msg': "Building Report",
+            "timeout": 30
+        }
+        print("calling load report")
+        s.load_report(start_time, end_time)
+        print("called load report")
     else:
         logger.info(
             "Report exists for {start} to {end}.\n".format(
                 start=start_time, end=end_time
             )
         )
+        report = SlaReportModel.find(start_time, end_time)
 
     if report.data:
         df = pd.DataFrame.from_dict(report.data, orient='index')
@@ -66,7 +67,7 @@ def get_sla_report(start_time, end_time, clients=()):
     else:
         df = pd.DataFrame(columns=['Client'] + SlaReportModel.view_headers())
 
-    return df
+    return df, msg
 
 
 def get_summary_sla_report(start_time, end_time, clients=()):

@@ -15,6 +15,7 @@ function getTableDiv(api) {
                 '       title="Scroll left or right to see more information."><thead><tr>' +
                 '       </tr></thead></table>';
 
+            console.log("init table div");
             $tableDiv.empty();
             $tableDiv.append($table);
 
@@ -35,6 +36,14 @@ function getTableDiv(api) {
                 scrollCollapse: true,
                 data: json.data
             });
+
+            if (json.msg['msg'] === 'Building Report') {
+                toastr.warning('This report is currently being made.\n' +
+                    'Please wait and the page will reload, or refresh at any time.');
+                setTimeout(function() {
+                    $('button#refreshButton').click();
+                }, json.msg['timeout'] * 1000);
+            }
         }
     });
 }

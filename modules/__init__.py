@@ -56,7 +56,7 @@ register_app_cdn(app)
 # Add server's static files to be bundled and minified
 js = Bundle(
     'js/selectBox.js',
-    'js/gridArea.js',
+    'js/tableDiv.js',
     'js/dtSelector.js',
     filters='jsmin', output='gen/packed.js'
 )

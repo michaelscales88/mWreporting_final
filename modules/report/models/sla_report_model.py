@@ -51,6 +51,11 @@ class SlaReportModel(BaseModel):
         ]
 
     @classmethod
+    def set_empty(cls, model):
+        model.data = {}
+        return model
+
+    @classmethod
     def default_row(cls):
         return zip(cls.data_headers(), cls.default_row_vals())
 

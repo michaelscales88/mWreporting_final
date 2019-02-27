@@ -134,13 +134,13 @@ class WorkerTablesLoadedModel(TablesLoadedModel):
             if isinstance(end_time, datetime.datetime)
             else end_time
         )
-        from modules.report.utilities.signals import load_calls
+        import modules.report.utilities.signals as s
 
         while start_date <= end_date:
             if not cls.find(session, start_date):
                 new_table = cls(loaded_date=start_date)
                 session.add(new_table)
                 session.commit()
-                load_calls(start_time, with_events=True)
+                s.load_calls(start_time, with_events=True)
             start_time += datetime.timedelta(days=1)
 

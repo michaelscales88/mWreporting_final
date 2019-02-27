@@ -6,10 +6,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
             // Configure Table Area
-            let $tableArea = getTableDiv("{{ url_for("sla_report_bp.slareportapi") }}");
+            let $tableArea = getTableDiv("{{ url_for("report.slareportapi") }}");
 
             $('button#refreshButton').on('click', function () {
-                $tableArea = getTableDiv("{{ url_for("sla_report_bp.slareportapi") }}");
+                $tableArea = getTableDiv("{{ url_for("report.slareportapi") }}");
             });
         });
     </script>
