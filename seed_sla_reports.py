@@ -1,7 +1,7 @@
 import datetime
 
 from modules import app
-from modules.report.tasks import report_task
+from modules.report.worker import load_report_task
 
 
 def add_reports():
@@ -14,7 +14,7 @@ def add_reports():
             date = start_dt + datetime.timedelta(days=counter)
             start_time = date.replace(hour=0, minute=0, second=0, microsecond=0)
             end_time = date.replace(hour=23, minute=59, second=0, microsecond=0)
-            report_task.delay(start_time=start_time, end_time=end_time)
+            load_report_task.delay(start_time=start_time, end_time=end_time)
             counter += 1
 
 

@@ -56,10 +56,10 @@ def load_event_data_task(self, *args, **kwargs):
         self.retry(countdown=2 ** self.request.retries)
 
 
-@celery.task(bind=True, max_retries=10, rate_limit='2/m')
+@celery.task(bind=True, max_retries=10, rate_limit='3/m')
 def load_report_task(self, *args, **kwargs):
     """
-    rate_limit: 2 per minutes to prevent bottlenecking
+    rate_limit: 3 per minutes to prevent bottlenecking
     :param self: references to remember # retries
     :param args: None
     :param kwargs:
