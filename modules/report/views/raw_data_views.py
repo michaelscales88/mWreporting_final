@@ -33,6 +33,10 @@ class TablesLoadedView(BaseView):
 
 
 class CallDataView(BaseView):
+    column_searchable_list = (
+        'call_id', 'calling_party_number', 'dialed_party_number',
+        'start_time', 'end_time', 'caller_id'
+    )
 
     def is_accessible(self):
         # Use the TablesLoaded view to remove data
@@ -43,6 +47,10 @@ class CallDataView(BaseView):
 
 
 class EventDataView(BaseView):
+    column_searchable_list = (
+        'event_id', 'calling_party', 'receiving_party',
+        'start_time', 'end_time', 'call_id'
+    )
 
     def is_accessible(self):
         # Use the TablesLoaded view to remove data

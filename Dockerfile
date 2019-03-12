@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 # Change for different build configuration
 ENV BUILD nginx-flask
-ENV PIP_VER 19.0.1
+ENV PIP_VER 19.0.3
 ENV TZ UTC
 
 # Update container datetime to localization
