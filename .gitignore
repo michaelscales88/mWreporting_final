@@ -59,7 +59,7 @@ local_settings.py
 # Flask stuff:
 gen/
 instance/
-.webassets-cache
+.webassets-cache/
 
 # Post-gres settings
 pg_data/

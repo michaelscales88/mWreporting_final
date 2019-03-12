@@ -1,0 +1,37 @@
+version: '3.6'
+
+services:
+  # MySQL Server
+  mysql:
+    image: mariadb:latest
+    env_file: envs/mysql.env
+    volumes:
+      - mySQL:/var/lib/mysql
+    configs:
+      - source: my_cnf
+        target: /etc/mysql/my.cnf
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+        mode: ingress
+    networks:
+      - proxy_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  mySQL:
+
+networks:
+  proxy_network:
+    external: true
+
+configs:
+  my_cnf:
+    file: ./configs/mysql.cnf
