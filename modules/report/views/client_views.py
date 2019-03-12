@@ -7,3 +7,6 @@ class ClientManagerView(BaseView):
 
 class ClientView(BaseView):
     column_default_sort = 'name'
+    column_searchable_list = (
+        'name', 'ext', 'active', 'notes'
+    )

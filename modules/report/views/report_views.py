@@ -24,7 +24,6 @@ class SLAReportView(BaseView):
     column_searchable_list = ("start_time", "end_time", "last_updated", "completed_on")
     column_list = ('start_time', 'end_time', "last_updated", "completed_on")
     form_create_rules = ('start_time', 'end_time')
-    form_edit_rules = ('reload',)
     column_details_list = ['data']
     column_default_sort = ('start_time', True)
     form_args = dict(
@@ -45,9 +44,6 @@ class SLAReportView(BaseView):
             validators=[DataRequired()]
         )
     )
-    form_extra_fields = dict(
-        reload=RadioField('Reload:', choices=[('yes', 'Yes'), ('no', 'No')])
-    )
     form_widget_args = dict(date_requested=dict(disabled=True))
     column_formatters = {
         "data": lambda v, c, m, p:
@@ -66,27 +62,23 @@ class SLAReportView(BaseView):
             tz=pytz.timezone("US/Central")),
     }
 
-    @action('export_all', 'Export Selected: Individually', 'Do you want to export all these reports?')
+    @action('reload', 'Reload Selected', 'Do you want to reload these reports?')
     def action_approve(self, ids):
         try:
-            query = self.model.query.filter(self.model.id.in_(ids)).all()
-            print(query)
-            flash(ngettext('Reports were successfully downloaded.'))
-        except Exception as ex:
-            if not self.handle_view_exception(ex):
-                raise
-            flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
+            query = self.model.query.filter(self.model.id.in_(ids))
+            for model in query.all():
+                # Invalidate the report
+                model.update(data=None, completed_on=None)
+                model.session.commit()
 
-    @action('export_all_wb', 'Export Selected: As workbook', 'Export these reports into a single workbook?')
-    def action_approve(self, ids):
-        try:
-            query = self.model.query.filter(self.model.id.in_(ids)).all()
-            print(query)
-            flash(ngettext('Reports were successfully downloaded.'))
+                # Rebuild the report
+                s.load_report(model.start_time, model.end_time)
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
-            flash(gettext('Failed to get reports. %(error)s', error=str(ex)), 'error')
+            flash(gettext('Failed to reload reports. %(error)s', error=str(ex)), 'error')
+        else:
+            flash(gettext('Reports are being reloaded. Thanks for waiting :)'), 'info')
 
     def validate_form(self, form):
         """ Custom validation code that checks dates """
@@ -98,15 +90,11 @@ class SLAReportView(BaseView):
     def after_model_change(self, form, model, is_created):
         if is_created:
             s.load_report(model.start_time, model.end_time)
-        else:
-            reload = form.reload.data
-            if reload and reload == 'yes':
-                # Invalidate the report
-                model.update(data=None, completed_on=None)
-                model.session.commit()
 
-                # Rebuild the report
-                s.load_report(model.start_time, model.end_time)
+    def is_accessible(self):
+        status = super().is_accessible()
+        self.can_edit = False  # Reports can only be viewed after creation
+        return status
 
 
 class SLASummaryReportView(BaseView):

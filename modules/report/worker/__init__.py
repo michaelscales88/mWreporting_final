@@ -23,6 +23,7 @@ def load_call_data_task(self, *args, **kwargs):
     log_kwargs(kwargs)
     load_date = parse(kwargs.pop("load_date")).date()
     with_events = kwargs.pop("with_events")
+    session = get_session(current_app)[1]
     try:
         service_result = call_data_loader(load_date)
         if not service_result:
@@ -30,9 +31,14 @@ def load_call_data_task(self, *args, **kwargs):
     except Exception as err:
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
+    except DatabaseError:
+        logger.error("Error committing event records to target database.")
+        session.rollback()
     else:
         if with_events:
             load_event_data_task.delay(load_date=load_date)
+    finally:
+        session.close()
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='6/m')
@@ -47,6 +53,7 @@ def load_event_data_task(self, *args, **kwargs):
     logger.warning("Starting event data task.")
     log_kwargs(kwargs)
     load_date = parse(kwargs.pop("load_date")).date()
+    session = get_session(current_app)[1]
     try:
         service_result = event_data_loader(load_date)
         if not service_result:
@@ -54,6 +61,11 @@ def load_event_data_task(self, *args, **kwargs):
     except Exception as err:
         logger.warning(err)
         self.retry(countdown=2 ** self.request.retries)
+    except DatabaseError:
+        logger.error("Error committing event records to target database.")
+        session.rollback()
+    finally:
+        session.close()
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='3/m')
@@ -69,8 +81,9 @@ def load_report_task(self, *args, **kwargs):
     log_kwargs(kwargs)
     start_time = parse(kwargs.pop("start_time"))
     end_time = parse(kwargs.pop("end_time"))
+    session = get_session(current_app)[1]
     try:
-        service_result = report_loader(start_time, end_time)
+        service_result = report_loader(start_time, end_time, session)
         if not service_result:
             raise AssertionError("Retry")
         if service_result == "delay":
@@ -79,6 +92,11 @@ def load_report_task(self, *args, **kwargs):
         logger.warning(err)
         is_delay = isinstance(err, type(AssertionError("Delay")))
         self.retry(countdown=30 if is_delay else (2 ** self.request.retries))
+    except DatabaseError:
+        logger.error("Error committing event records to target database.")
+        session.rollback()
+    finally:
+        session.close()
 
 
 @celery.task

@@ -72,6 +72,7 @@ def load_event_data(session, results):
 def call_data_loader(*args):
     # Args
     load_date = args[0]
+    session = get_session(current_app)[1]
 
     if not isinstance(load_date, datetime.date):
         logger.warning(
@@ -90,8 +91,6 @@ def call_data_loader(*args):
                      "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
                      "the address to your database.")
         return
-
-    session = get_session(current_app)[1]()
 
     tl_model = TablesLoadedModel.find(session, load_date)
 
@@ -144,6 +143,7 @@ def call_data_loader(*args):
 def event_data_loader(*args):
     # Args
     load_date = args[0]
+    session = args[1]
 
     # Check that load date is a date
     if not isinstance(load_date, datetime.date):
@@ -163,8 +163,6 @@ def event_data_loader(*args):
                      "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
                      "the address to your database.")
         return
-
-    session = get_session(current_app)[1]
 
     tl_model = TablesLoadedModel.find(session, load_date)
 
@@ -221,6 +219,7 @@ def report_loader(*args):
     # Args
     start_time = args[0]
     end_time = args[1]
+    session = args[2]
 
     # Check that start and end times are datetime
     if (
@@ -245,8 +244,6 @@ def report_loader(*args):
                 start_time, end_time
             )
         )
-
-    session = get_session(current_app)[1]
 
     report = SlaReportModel.find(session, start_time, end_time)
     if not report:
