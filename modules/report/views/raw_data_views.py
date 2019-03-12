@@ -1,7 +1,6 @@
-from wtforms import RadioField
+from flask import flash
 from flask_admin.actions import action
-from flask_admin.babel import gettext, ngettext
-from flask import Markup, flash, current_app
+from flask_admin.babel import gettext
 
 from modules.base.base_view import BaseView
 from modules.report.utilities import signals as s
@@ -14,10 +13,6 @@ class TablesLoadedView(BaseView):
     column_default_sort = ('loaded_date', True)
     column_sortable_list = ('loaded_date',)
     column_searchable_list = ('loaded_date',)
-
-    form_extra_fields = dict(
-        reload=RadioField('Reload:', choices=[('both', 'Both'), ('calls', 'Calls'), ('events', "Events")])
-    )
 
     @action('reload', 'Reload Selected', 'Do you want to reload this data?')
     def action_approve(self, ids):

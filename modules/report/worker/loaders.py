@@ -69,238 +69,255 @@ def load_event_data(session, results):
         )
 
 
-def call_data_loader(*args):
-    # Args
-    load_date = args[0]
-    session = get_session(current_app)[1]
-
-    if not isinstance(load_date, datetime.date):
-        logger.warning(
-            "Failed to start Call data loader [ {} ].".format(load_date)
-        )
-        return
-    else:
-        logger.warning(
-            "Start Call data loader [ {} ].".format(load_date)
-        )
-
-    # Get the special external read-only connection
+def get_ext_uri():
     ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
     if not ext_uri:
         logger.error("Error: External database connection not set.\n"
                      "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
                      "the address to your database.")
-        return
-
-    tl_model = TablesLoadedModel.find(session, load_date)
-
-    # Create a model if necessary
-    if not tl_model:
-        tl_model = TablesLoadedModel(loaded_date=load_date)
-        session.add(tl_model)
-        session.commit()
-
-    # See if the report is finished
-    if tl_model and tl_model.calls_loaded:
-        logger.warning(
-            "Call data for [ {} ] already loaded.".format(load_date)
-        )
-        return True
-
-    # Get the data from the source database
-    ext_session = get_external_session(ext_uri)
-    try:
-        results = ext_session.query(CallTableModel).filter(
-            func.DATE(CallTableModel.start_time) == load_date
-        ).all()
-    except DatabaseError:
-        logger.error("Failed to get records from source database.")
-    else:
-        # Insert data into target database
-        try:
-            load_call_data(session, results)
-
-            session.commit()
-        except DatabaseError:
-            logger.error("Error committing call records to target database.")
-            session.rollback()
-        else:
-            # Update the system that the interval is loaded
-            # Records are only considered loaded for the day if a whole day
-            # is successfully loaded
-            if load_date < utc_now().date():
-                tl_model.calls_loaded = True
-            tl_model.last_updated = utc_now()
-            session.add(tl_model)
-            session.commit()
-
-            logger.warning(
-                "Completed call data loader [ {} ].".format(load_date)
-            )
-            return True
+        AssertionError("NoConnection")
+    return ext_uri
 
 
-def event_data_loader(*args):
-    # Args
-    load_date = args[0]
-    session = args[1]
-
-    # Check that load date is a date
+def check_date(msg, load_date):
     if not isinstance(load_date, datetime.date):
-        logger.warning(
-            "Failed to start Event data loader [ {} ].".format(load_date)
-        )
-        return
-    else:
-        logger.warning(
-            "Start: Event data loader [ {} ].".format(load_date)
-        )
-
-    # Get the special external read-only connection
-    ext_uri = current_app.config.get('EXTERNAL_DATABASE_URI')
-    if not ext_uri:
-        logger.error("Error: External database connection not set.\n"
-                     "Add 'EXTERNAL_DATABASE_URI' to your config with\n"
-                     "the address to your database.")
-        return
-
-    tl_model = TablesLoadedModel.find(session, load_date)
-
-    # Create a model is necessary
-    if not tl_model:
-        tl_model = TablesLoadedModel(loaded_date=load_date)
-        session.add(tl_model)
-        session.commit()
-
-    # See if the report is finished
-    if tl_model and tl_model.events_loaded:
-        logger.warning(
-            "Event data for [ {} ] already loaded.".format(load_date)
-        )
-        return True
-
-    # Get the data from the source database
-    ext_session = get_external_session(ext_uri)
-
-    try:
-        results = ext_session.query(EventTableModel).filter(
-            func.DATE(EventTableModel.start_time) == load_date
-        ).all()
-    except DatabaseError:
-        logger.error("Failed to get records from source database.")
-    else:
-        # Insert data into target database
-        try:
-            load_event_data(session, results)
-
-            session.commit()
-        except DatabaseError:
-            logger.error("Error committing event records to target database.")
-            session.rollback()
-        else:
-            # Update the system that the interval is loaded
-            # Records are only considered loaded for the day if a whole day
-            # is successfully loaded
-            if load_date < utc_now().date():
-                tl_model.events_loaded = True
-            tl_model.last_updated = utc_now()
-            session.add(tl_model)
-            session.commit()
-
-            logger.warning(
-                "Completed event data loader [ {} ].".format(load_date)
-            )
-            return True
+        logger.error(msg[0])
+        raise AssertionError("BadData")
+    logger.info(msg[1])
 
 
-def report_loader(*args):
-    logger.warning("Started: Report loader.")
-
-    # Args
-    start_time = args[0]
-    end_time = args[1]
-    session = args[2]
-
+def check_start_end(msg, start_time, end_time):
     # Check that start and end times are datetime
     if (
         not isinstance(start_time, datetime.datetime) and
         not isinstance(end_time, datetime.datetime)
     ):
-        logger.error(
+        logger.error(msg[0])
+        raise AssertionError("BadData")
+    logger.info(msg[1])
+
+
+def call_data_loader(*args):
+    """
+
+    :param args:
+    :return:
+    """
+    load_date = args[0]
+    check_date(
+        (
+            "Failed to start Call data loader [ {} ].".format(load_date),
+            "Start Call data loader [ {} ].".format(load_date)
+        ), load_date
+    )
+
+    # Get the special external read-only connection
+    ext_uri = get_ext_uri()
+
+    session = get_session(current_app)[1]
+    # Get the data from the source database
+    ext_session = get_external_session(ext_uri)
+
+    try:
+        tl_model = TablesLoadedModel.find(session, load_date)
+
+        # Create a model if necessary
+        if not tl_model:
+            tl_model = TablesLoadedModel(loaded_date=load_date)
+            session.add(tl_model)
+            session.commit()
+
+        # See if the report is finished
+        if tl_model and tl_model.calls_loaded:
+            logger.warning(
+                "Call data for [ {} ] already loaded.".format(load_date)
+            )
+            return True
+
+        results = ext_session.query(CallTableModel).filter(
+            func.DATE(CallTableModel.start_time) == load_date
+        ).all()
+
+        load_call_data(session, results)
+
+        session.commit()
+
+        # Update the system that the interval is loaded
+        # Records are only considered loaded for the day if a whole day
+        # is successfully loaded
+        if load_date < utc_now().date():
+            tl_model.calls_loaded = True
+        tl_model.last_updated = utc_now()
+        session.add(tl_model)
+        session.commit()
+
+        logger.info(
+            "Completed call data loader [ {} ].".format(load_date)
+        )
+    except DatabaseError:
+        logger.error("Error committing call records to target database.")
+        session.rollback()
+    else:
+        return True
+    finally:
+        session.close()
+        ext_session.close()
+
+
+def event_data_loader(*args):
+    """
+
+    :param args:
+    :return:
+    """
+    load_date = args[0]
+    check_date(
+        (
+            "Failed to start Event data loader [ {} ].".format(load_date),
+            "Start: Event data loader [ {} ].".format(load_date)
+        ), load_date
+    )
+
+    # Get the special external read-only connection
+    ext_uri = get_ext_uri()
+
+    session = get_session(current_app)[1]
+    # Get the data from the source database
+    ext_session = get_external_session(ext_uri)
+
+    try:
+        tl_model = TablesLoadedModel.find(session, load_date)
+
+        # Create a model if necessary
+        if not tl_model:
+            tl_model = TablesLoadedModel(loaded_date=load_date)
+            session.add(tl_model)
+            session.commit()
+
+        # See if the report is finished
+        if tl_model and tl_model.events_loaded:
+            logger.warning(
+                "Event data for [ {} ] already loaded.".format(load_date)
+            )
+            return True
+
+        results = ext_session.query(EventTableModel).filter(
+            func.DATE(EventTableModel.start_time) == load_date
+        ).all()
+
+        load_event_data(session, results)
+
+        session.commit()
+
+        # Update the system that the interval is loaded
+        # Records are only considered loaded for the day if a whole day
+        # is successfully loaded
+        if load_date < utc_now().date():
+            tl_model.events_loaded = True
+        tl_model.last_updated = utc_now()
+        session.add(tl_model)
+        session.commit()
+
+        logger.info(
+            "Completed event data loader [ {} ].".format(load_date)
+        )
+    except DatabaseError:
+        logger.error("Error committing event records to target database.")
+        session.rollback()
+    else:
+        return True
+    finally:
+        session.close()
+        ext_session.close()
+
+
+def report_loader(*args):
+    logger.info("Started: Report loader.")
+
+    # Args
+    start_time = args[0]
+    end_time = args[1]
+
+    check_start_end(
+        (
             "Error: Report times: {start} and {end} are"
             "not both provided, or they're not datetime format.\n".format(
                 start=start_time, end=end_time
+            ),
+            "Starting report data loader [ {start} - {end} ].".format(
+                start=start_time, end=end_time
             )
-        )
-        logger.error(
-            "Failed to start report data loader [ {} - {} ].".format(
-                start_time, end_time
-            )
-        )
-        return
-    else:
-        logger.warning(
-            "Starting report data loader [ {} - {} ].".format(
-                start_time, end_time
-            )
-        )
+        ), start_time, end_time
+    )
 
-    report = SlaReportModel.find(session, start_time, end_time)
-    if not report:
-        report = SlaReportModel(
-            start_time=start_time, end_time=end_time, last_updated=utc_now()
-        )
-    else:
+    session = get_session(current_app)[1]
+
+    try:
+        report = SlaReportModel.find(session, start_time, end_time)
+        if not report:
+            report = SlaReportModel(
+                start_time=start_time, end_time=end_time, last_updated=utc_now()
+            )
+        else:
+            report.last_updated = utc_now()
+
+        # Add new report, or update last_updated
+        session.add(report)
+        session.commit()
+
+        # Get the report data
+        if report.data:
+            logger.info(
+                "Report exists for {start} to {end}.\n".format(
+                    start=start_time, end=end_time
+                )
+            )
+            return True
+
+        # Check that the data has been loaded for the report date
+        if not TablesLoadedModel.interval_is_loaded(
+                session, start_time, end_time
+        ):
+            logger.warning("Data not loaded for report interval.\n"
+                           "Requesting to load data and will try again later.")
+            TablesLoadedModel.add_interval(session, start_time, end_time)
+            raise AssertionError("Delay")
+
+        report_data = build_sla_data(session, start_time, end_time)
+
+        # Get a new session since we closed the session in build_sla_data
+        session = get_session(current_app)[1]
+
+        # Finish the report and commit
+        report.data = report_data
         report.last_updated = utc_now()
+        session.add(report)
+        session.commit()
 
-    # Add new report, or update last_updated
-    session.add(report)
-    session.commit()
-
-    # Get the report data
-    if report.data:
         logger.info(
-            "Report exists for {start} to {end}.\n".format(
+            "Completed building report data for: {start} and {end}.\n".format(
                 start=start_time, end=end_time
             )
         )
-        return
 
-    # Check that the data has been loaded for the report date
-    if not TablesLoadedModel.interval_is_loaded(
-        session, start_time, end_time
-    ):
-        logger.warning("Data not loaded for report interval.\n"
-                       "Requesting to load data and will try again later.")
-        TablesLoadedModel.add_interval(session, start_time, end_time)
-        return "delay"
+        # Update the system that the report is complete
+        report.last_updated = utc_now()
+        report.completed_on = utc_now()
+        session.add(report)
+        session.commit()
 
-    report_data = build_sla_data(session, start_time, end_time)
-
-    # Finish the report and commit
-    report.data = report_data
-    report.last_updated = utc_now()
-    session.add(report)
-    session.commit()
-
-    logger.warning(
-        "Completed building report data for: {start} and {end}.\n".format(
-            start=start_time, end=end_time
+        logger.info(
+            "Completed: Make SLA report - {start} to {end}".format(
+                start=start_time, end=end_time
+            )
         )
-    )
-
-    # Update the system that the report is complete
-    report.last_updated = utc_now()
-    report.completed_on = utc_now()
-    session.add(report)
-    session.commit()
-
-    logger.warning(
-        "Completed: Make SLA report - {start} to {end}".format(
-            start=start_time, end=end_time
-        )
-    )
-    return True
+    except DatabaseError:
+        logger.error("Error committing event records to target database.")
+        session.rollback()
+    else:
+        return True
+    finally:
+        session.close()
 
 # def make_summary_sla_report(*args, start_time=None, end_time=None, frequency=None):
 #     logger.warning(

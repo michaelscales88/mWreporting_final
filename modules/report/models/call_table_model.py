@@ -25,7 +25,7 @@ class CallTableModel(BaseModel):
     system_id = Column(Integer)
     caller_id = Column(String(100))
     inbound_route = Column(String(100))
-    events = relationship("EventTableModel", back_populates="call")
+    events = relationship("EventTableModel", back_populates="call", lazy='joined')
 
     @hybrid_property
     def length(self):

@@ -1,7 +1,8 @@
-from modules.celery_worker import celery
 from dateutil.parser import parse
-from .getters import *
-from .loaders import *
+
+from modules.celery_worker import celery
+from .getters import logger, get_sla_report, get_summary_sla_report
+from .loaders import call_data_loader, event_data_loader, report_loader
 
 
 def log_kwargs(kwargs):
@@ -23,22 +24,22 @@ def load_call_data_task(self, *args, **kwargs):
     log_kwargs(kwargs)
     load_date = parse(kwargs.pop("load_date")).date()
     with_events = kwargs.pop("with_events")
-    session = get_session(current_app)[1]
     try:
         service_result = call_data_loader(load_date)
         if not service_result:
             raise AssertionError("Retry")
     except Exception as err:
         logger.warning(err)
+        is_bad_data = isinstance(err, type(AssertionError("BadData")))
+        failed_connection = isinstance(err, type(AssertionError("NoConnection")))
+        if is_bad_data:
+            return
+        if failed_connection:
+            return
         self.retry(countdown=2 ** self.request.retries)
-    except DatabaseError:
-        logger.error("Error committing event records to target database.")
-        session.rollback()
     else:
         if with_events:
             load_event_data_task.delay(load_date=load_date)
-    finally:
-        session.close()
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='6/m')
@@ -53,19 +54,18 @@ def load_event_data_task(self, *args, **kwargs):
     logger.warning("Starting event data task.")
     log_kwargs(kwargs)
     load_date = parse(kwargs.pop("load_date")).date()
-    session = get_session(current_app)[1]
     try:
         service_result = event_data_loader(load_date)
         if not service_result:
             raise AssertionError("Retry")
     except Exception as err:
         logger.warning(err)
-        self.retry(countdown=2 ** self.request.retries)
-    except DatabaseError:
-        logger.error("Error committing event records to target database.")
-        session.rollback()
-    finally:
-        session.close()
+        is_bad_data = isinstance(err, type(AssertionError("BadData")))
+        failed_connection = isinstance(err, type(AssertionError("NoConnection")))
+        if is_bad_data:
+            return
+        if failed_connection:
+            return
 
 
 @celery.task(bind=True, max_retries=10, rate_limit='3/m')
@@ -81,22 +81,14 @@ def load_report_task(self, *args, **kwargs):
     log_kwargs(kwargs)
     start_time = parse(kwargs.pop("start_time"))
     end_time = parse(kwargs.pop("end_time"))
-    session = get_session(current_app)[1]
     try:
-        service_result = report_loader(start_time, end_time, session)
+        service_result = report_loader(start_time, end_time)
         if not service_result:
             raise AssertionError("Retry")
-        if service_result == "delay":
-            raise AssertionError("Delay")
     except AssertionError as err:
         logger.warning(err)
         is_delay = isinstance(err, type(AssertionError("Delay")))
-        self.retry(countdown=30 if is_delay else (2 ** self.request.retries))
-    except DatabaseError:
-        logger.error("Error committing event records to target database.")
-        session.rollback()
-    finally:
-        session.close()
+        self.retry(countdown=60 if is_delay else (2 ** self.request.retries))
 
 
 @celery.task

@@ -214,6 +214,8 @@ def build_sla_data(session, start_time, end_time):
         )
     ).all()
 
+    session.close()
+
     # Combine all the data
     # TODO - reduce((lambda c: col_data[c[0]].add(**c[1])), list(map(sum_events, inb_calls_events)))
     combined_data = defaultdict(CallEntry)

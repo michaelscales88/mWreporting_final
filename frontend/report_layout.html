@@ -31,7 +31,7 @@
     {{ super() }}
     <script type="text/javascript">
         $(document).ready(function () {
-            let midnight = moment().hour(0).minute(0).second(0);
+            let midnight = moment().hour(0).minute(0).second(0).subtract(1, "seconds");
             let midnightYesterday = moment().hour(0).minute(0).second(0).subtract(1, "days");
 
             let pickerConfig = {

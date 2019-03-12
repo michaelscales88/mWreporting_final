@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from modules.base.base_model import BaseModel
 
@@ -10,7 +11,10 @@ logger = logging.getLogger("app.sqlalchemy")
 
 
 def get_session(app):
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
+    engine = create_engine(
+        app.config['SQLALCHEMY_DATABASE_URI'],
+        convert_unicode=True, poolclass=NullPool
+    )
     return engine, scoped_session(
         sessionmaker(
             autocommit=False,

@@ -44,7 +44,9 @@ lc_messages     = en_US
 skip-external-locking
 # Disabling symbolic-links is recommended to prevent assorted security risks
 symbolic-links=0
-innodb_autoinc_lock_mode=2
+
+# Performance killer apparently
+performance_schema = OFF
 #
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
@@ -67,7 +69,7 @@ max_heap_table_size     = 32M
 # This replaces the startup script and checks MyISAM tables if needed
 # the first time they are touched. On error, make copy and try a repair.
 myisam_recover_options = BACKUP
-key_buffer_size         = 128M
+key_buffer_size         = 10M
 #open-files-limit       = 2000
 table_open_cache        = 400
 myisam_sort_buffer_size = 512M
@@ -137,7 +139,7 @@ max_binlog_size         = 100M
 default_storage_engine  = InnoDB
 # you can't just change log file size, requires special procedure
 #innodb_log_file_size   = 50M
-innodb_buffer_pool_size = 256M
+innodb_buffer_pool_size = 2G
 innodb_log_buffer_size  = 8M
 innodb_file_per_table   = 1
 innodb_open_files       = 400

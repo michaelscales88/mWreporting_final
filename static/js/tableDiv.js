@@ -39,6 +39,7 @@ function getTableDiv(api) {
 
             if (json.msg['msg'] === 'Building Report') {
                 toastr.warning('This report is currently being made.\n' +
+                    'Note: This may take some time... I am working to improve the speed' +
                     'Please wait and the page will reload, or refresh at any time.');
                 setTimeout(function() {
                     $('button#refreshButton').click();
